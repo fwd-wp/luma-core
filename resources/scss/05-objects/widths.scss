@@ -1,0 +1,31 @@
+@use '../02-tools/mixins.scss' as mixin;
+
+/* Default containers = contentSize */
+.entry-header,
+.entry-footer,
+.comments-area,
+.page-header,
+.archive-description,
+.navigation {
+	@include mixin.align(default);
+}
+
+.single.is-wide-single, 
+.page.is-wide-page {
+
+	.entry-header,
+	.entry-footer,
+	.comments-area,
+	.page-header,
+	.archive-description,
+	.navigation {
+		@include mixin.align(wide);
+	}
+
+	// rule copied from blocks/utilities/style.scss
+	// TODO: simply in sytles.scss and fix here. will need to override 
+	.entry-content>*:not(.alignwide):not(.alignfull):not(.alignleft):not(.alignright):not(.wp-block-separator),
+	*[class*="inner-container"]>*:not(.entry-content):not(.alignwide):not(.alignfull):not(.alignleft):not(.alignright):not(.wp-block-separator) {
+		@include mixin.align(wide);
+	}
+}

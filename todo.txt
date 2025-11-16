@@ -1,0 +1,67 @@
+TODO:
+                - need to create js for reset buttons in typography
+                - remove calls to old theme json, delete model and rename new model and usage
+                - customize typography look into heading font sizes,and custom header font size options
+                - customize full list view and single view (same html)
+                - look into custom search result format (modify list archive view)
+                - add categories to archive views, also is_sticky (featured post);
+                - consider moving /content to /content-single, with conditional author bio
+                - try to make code dryer customize.php - esp font functions clean up themeJSON
+                - look into navbar breakpoint, should this be a customizer setting?
+                - add header styles - full or wide width? transparent? should it shrink on scroll? an option?
+- check comments for button - styling inconsitent with block button
+  
+
+yoast support -> logo and social icons/links (could logo be utlised somewhere? maybe not?)
+
+Verse block not displaying correctly in editor view - padding is out of whack
+Cover block could be better!
+fix up buttons, mixin?
+separator - need full width? isStyleWide? how to set?
+
+prefix all customizer settings
+
+search for: font-size-h1 - possibly replace with mixin, or new variables
+check wp theme.json api for other font settings (and other settings) that can be applied
+
+fix up color swatches for customizer - seems difficult?
+fix up fonts - not loading or previewing
+what other customizer features can be added?
+colors - primary, secondary, ternary?
+for colors pick from these three or custom? colors - heading, text, border??
+look into which block patterns and styles can be removed (due to redundancy)
+add php tests
+look into bootstrap rfs for dynamic resizing of css elements https://github.com/twbs/rfs
+
+
+
+Improvements: 
+- All procedural code moved into classes
+- Functions moved into static functions inside function classes
+- removed all IE polyfill js/css
+- removed dark mode support (to simplify this starter theme)
+- removed responsive embed js code (this can be achieved with css in modern browsers)
+- added <div class="entry-body"> to pages, and moved thumbnail inside it for easier styling
+- moved entry-header's to a TemplateTag function
+- moved page-header's to a TemplateTag function
+
+
+search and replate (case sensitive)
+
+'twentyone' -> luma-core - text domain (must do this first)
+Twenty-One -> Luma-Core - Block Category label
+Twenty-One Luma-Core - block category and js prefix
+twenty_one - php variables
+Twenty\One - php namespace
+
+
+
+post front page site title h1, posts h2
+blog page, if static front page, page title h1, posts h2
+archive page - archive heading is h1, posts h2, post subheading h3
+single post page - post heading h1, post subheading h3???
+page - page title h1, sub headings h2
+
+only issue is post subheadings are h3, page subheadings are h2. 
+what about when a post is displayed singularly? subheadings are now h3 instead of h2!!
+paginated blog front page, theres no H1 !!

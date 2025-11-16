@@ -1,0 +1,17 @@
+{
+    "name": "twenty/one",
+    "description": "Twentytwentyone set up with php namespaces",
+    "type": "wordpress-theme",
+    "autoload": {
+        "psr-4": {
+            "Twenty\\One\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Sean Emerson",
+            "email": "emerson.sean.dev@gmail.com"
+        }
+    ],
+    "require": {}
+}

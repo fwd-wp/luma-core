@@ -1,0 +1,8 @@
+@use 'style.scss';
+
+.wp-block-media-text {
+	// TODO: remove if wp core fixes this bug
+	// inheritance from theme.json not working (editor only)
+	// TODO: lodge ticket
+	color: var(--wp--preset--color--background);
+}

@@ -1,0 +1,109 @@
+// /**
+//  * Block Styles: Border
+//  * Generic border style reused across multiple blocks.
+//  */
+
+// .is-style-Luma-Core-border {
+//   border: 1px solid var(--wp--preset--color--contrast);
+//   border-radius: 0.5rem;
+//   padding: 1.5rem;
+// }
+
+// /* Image block needs special handling (inline-block + tighter padding) */
+// .wp-block-image.is-style-Luma-Core-border {
+//   display: inline-block;
+//   padding: 0.5rem;
+// }
+
+// /* Cover blocks already have internal positioning → keep padding minimal */
+// .wp-block-cover.is-style-Luma-Core-border {
+//   padding: 0;
+// }
+
+// /* Media & Text blocks often need breathing room */
+// .wp-block-media-text.is-style-Luma-Core-border {
+//   padding: 2rem;
+// }
+
+// /* Latest Posts list variation */
+// .wp-block-latest-posts.is-style-Luma-Core-border {
+//   padding: 1.5rem;
+//   li {
+//     padding: 0.5rem 0;
+//     border-bottom: 1px solid var(--wp--preset--color--contrast);
+//     &:last-child {
+//       border-bottom: 0;
+//     }
+//   }
+// }
+
+.is-style-Luma-Core-border {
+  border: 1px solid var(--wp--preset--color--contrast);
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+}
+
+/* Group inner container */
+.wp-block-group.is-style-Luma-Core-border,
+.wp-block-group.is-style-Luma-Core-border .wp-block-group__inner-container {
+  padding: 1.5rem;
+}
+
+/* Cover inner container */
+.wp-block-cover.is-style-Luma-Core-border .wp-block-cover__inner-container {
+  padding: 1.5rem;
+}
+
+/* Media & Text */
+.wp-block-media-text.is-style-Luma-Core-border,
+.wp-block-media-text.is-style-Luma-Core-border .wp-block-media-text__content {
+  padding: 2rem;
+}
+
+/* Latest Posts */
+.wp-block-latest-posts.is-style-Luma-Core-border ul.wp-block-latest-posts__list li {
+  border-bottom: 1px solid var(--wp--preset--color--contrast);
+  padding: 0.5rem 0;
+  &:last-child { border-bottom: 0; }
+}
+
+/* Image & Frame */
+.wp-block-image.is-style-Luma-Core-border img,
+.wp-block-image.is-style-twentytwentyone-image-frame img,
+.wp-block-image.is-style-twentytwentyone-image-frame picture {
+  border: 1px solid var(--wp--preset--color--contrast);
+  padding: 0.5rem;
+  display: inline-block;
+}
+
+/* Query / Post Template cards */
+.wp-block-query.is-style-Luma-Core-border,
+.wp-block-post-template.is-style-Luma-Core-border li {
+  border: 1px solid var(--wp--preset--color--contrast);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Post Terms */
+.wp-block-post-terms.is-style-Luma-Core-border {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--wp--preset--color--contrast);
+  border-radius: 0.25rem;
+}
+
+/* Navigation block */
+.wp-block-navigation.is-style-Luma-Core-border {
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--wp--preset--color--contrast);
+  border-radius: 0.5rem;
+}
+
+/* Comments block */
+.wp-block-comments.is-style-Luma-Core-border {
+  padding: 1.5rem;
+  border: 1px solid var(--wp--preset--color--contrast);
+  border-radius: 0.5rem;
+}
+

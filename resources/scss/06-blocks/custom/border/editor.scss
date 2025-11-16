@@ -1,0 +1,9 @@
+@use 'style.scss';
+
+// Editor-only: fix alignfull inside bordered group
+.wp-block-group.is-style-Luma-Core-border .wp-block-group__inner-container > .alignfull,
+.wp-block-cover.is-style-Luma-Core-border .wp-block-cover__inner-container > .alignfull {
+  max-width: calc(var(--responsive--alignfull-width) + (2 * var(--wp--preset--spacing--medium)));
+  width: calc(var(--responsive--alignfull-width) + (2 * var(--wp--preset--spacing--medium)));
+  margin-left: calc(-1 * var(--wp--preset--spacing--medium));
+}

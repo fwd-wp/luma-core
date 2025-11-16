@@ -1,0 +1,221 @@
+@use '../../02-tools/mixins.scss' as mixin;
+
+
+// TODO: =
+// add options of sticky (if theres something above it), fixed, shrink (+js)
+
+// breakpoint is var(--wp--custom--breakpoint--navbar)
+
+// toggle button
+.site-navigation {
+	.menu-toggle {
+		display: flex;
+		flex: 0 0 auto;
+		flex-direction: row;
+		align-items: center;
+		/* align icon + text vertically */
+		height: 100%;
+		margin-inline: var(--custom--spacing--nav-mobile);
+		margin-bottom: 0;
+		cursor: pointer;
+		color: #333;
+		/* SVGs inside inherit this color */
+
+		/* Remove default button styles */
+		background: none;
+		border: none;
+		padding: 0;
+		font: inherit;
+		text-align: left;
+		/* optional, so text aligns like a label */
+
+		&:hover {
+			background: unset;
+		}
+	}
+
+	.menu-toggle svg {
+		display: block;
+		/* prevents extra space under inline SVG */
+	}
+
+	.menu.is-expanded {
+		display: block;
+		/* visible when toggled */
+	}
+
+	.menu {
+		display: none; // hide by default
+		flex-direction: column;
+		flex: 0 1 auto;
+		//flex-basis: 100%; // forces to full width
+		width: 100%;
+		justify-content: center;
+		align-items: center;
+		z-index: 100;
+		list-style: none;
+		margin: 0;
+		padding: 0;
+
+
+	}
+
+	.menu-item {
+		display: block;
+		width: 100%; //mobile
+		margin: 0;
+		border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+
+		a {
+			display: flex;
+			flex-direction: column;
+			color: var(--wp--preset--color--navbar-text);
+			text-decoration: none;
+			font-size: var(--wp--custom--font--size--navbar);
+			margin: 0;
+
+			&:hover {
+				color: var(--wp--preset--color--navbar-text-hover);
+			}
+		}
+
+		&-description {
+			display: block;
+			font-size: max(calc(var(--wp--custom--font--size--navbar)* 0.6), 0.8rem);
+			line-height: 1.2;
+			//margin-top: 0.2em;
+			margin-bottom: 0.2rem;
+		}
+	}
+
+	.submenu-toggle {
+		all: unset;
+		cursor: pointer;
+		display: inline;
+		font: inherit;
+		font-size: var(--wp--custom--font--size--navbar);
+		color: inherit;
+		line-height: inherit;
+		text-align: inherit;
+	}
+
+	.submenu-toggle::after {
+		content: "\25BE";
+		/* ▾ */
+		font-size: 1.1em;
+		// needed for transform
+		display: inline-block;
+		transition: transform 0.7s ease;
+	}
+
+	.submenu-toggle[aria-expanded="true"]::after {
+		transform: rotate(180deg);
+	}
+
+	.sub-menu.is-expanded {
+		display: block; // show when toggled
+	}
+
+	.sub-menu {
+		display: none;
+		position: static;
+		padding: 0;
+		margin: 0;
+		background: transparent;
+		box-shadow: none;
+		list-style: none;
+
+		.menu-item {
+			padding: 0;
+			margin: 0;
+			margin-left: var(--custom--spacing--nav-mobile);
+			border-bottom: none;
+		}
+	}
+
+	$max-depth: 10;
+
+	@for $i from 1 through $max-depth {
+		$selector: '.site-navigation .sub-menu';
+
+		@for $j from 2 through $i {
+			$selector: '#{$selector} > .menu-item > .sub-menu';
+		}
+
+		#{$selector}>.menu-item>a,
+		#{$selector}>.menu-item>.submenu-toggle {
+			margin-left: calc(var(--custom--spacing--nav-mobile) * #{$i});
+		}
+	}
+
+
+
+	@include mixin.bp-up(navbar) {
+		.menu-toggle {
+			display: none;
+		}
+
+		.menu {
+			display: flex;
+			flex-direction: row;
+			justify-content: flex-start;
+			align-items: flex-start;
+			position: unset;
+			width: auto;
+		}
+
+		.menu-item {
+			display: flex;
+			flex-direction: column;
+			/* stack title + description */
+			justify-content: center;
+			/* vertically center the whole block */
+			line-height: 1.2;
+			/* prevents extra spacing issues */
+			width: auto;
+			margin: 0 var(--custom--spacing--nav-mobile);
+			justify-content: center;
+			border-bottom: none;
+
+			&:first-child {
+				border-top: none;
+			}
+
+
+			.menu-item-description {
+				//font-size: 0.8em;
+				opacity: 0.8;
+				margin-top: 0.1em;
+				/* small gap but keeps alignment balanced */
+			}
+		}
+
+		.menu-item-has-children {
+			position: relative; // needed so submenu is positioned relative to this item
+
+			.sub-menu {
+				display: none; // hidden by default
+				position: absolute;
+				top: 100%; // position below parent
+				left: 0; // align left edge with parent
+				z-index: 999;
+				background-color: var(--wp--preset--color--navbar-background);
+				border: 1px solid rgba(0, 0, 0, 0.2); // border darker than bg color
+				min-width: 200px;
+				max-width: 300px;
+				width: max-content;
+
+				.menu-item {
+					margin: 0 var(--custom--spacing--nav-mobile);
+				}
+			}
+
+			&:hover>.sub-menu,
+			.sub-menu.is-expanded {
+				display: block; // show submenu on hover or class
+			}
+		}
+
+
+	}
+}

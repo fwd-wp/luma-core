@@ -1,0 +1,50 @@
+{
+	"name": "twentyone",
+	"version": "0.0.1",
+	"description": "Default WP Theme, updated!",
+	"author": "The WordPress Contributors, Sean Emerson <emerson.sean.dev@gmail.com>",
+	"license": "GPL-2.0-or-later",
+	"themeMeta": {
+		"themeName": "TwentyOne",
+		"authorURI": "https://github.com/sean-au",
+		"licenseURI": "http://www.gnu.org/licenses/gpl-2.0.html",
+		"RequiresAtLeast": "6.8",
+		"TestedUpTo": "6.8",
+		"RequiresPHP": "7.4"
+	},
+	"keywords": [],
+	"bugs": {
+		"url": "https://core.trac.wordpress.org/"
+	},
+	"homepage": "https://unset.com",
+	"engines": {
+		"node": ">=20.10.0",
+		"npm": ">=10.2.3"
+	},
+	"devDependencies": {
+		"@wordpress/scripts": "^30.19.0",
+		"@wp-blocks/make-pot": "^1.6.0",
+		"del": "^8.0.0",
+		"gulp": "^5.0.1",
+		"gulp-zip": "^6.1.0",
+		"webpack": "^5.100.2",
+		"cross-env": "^10.0.0",
+		"path": "^0.12.7"
+	},
+	"scripts": {
+		"start": "npm run start:style && npm run start:webpack",
+		"start:webpack": "wp-scripts start",
+		"start:style": "gulp writeStyle",
+		"build": "npm run build:webpack && npm run build:gulp",
+		"build:webpack": "cross-env NODE_ENV=production webpack --config webpack.config.js",
+		"build:gulp": "gulp build",
+		"lint:scss": "wp-scripts lint-style resources/scss/**/*.scss",
+		"lint:js": "wp-scripts lint-js 'resources/js/*.js' 'resources/blocks/**/*.js'",
+		"format": "wp-scripts format",
+		"clean": "gulp clean",
+		"bump:patch": "npm version patch",
+		"bump:minor": "npm version minor",
+		"bump:major": "npm version major",
+		"tag": "git push origin master --follow-tags"
+	}
+}

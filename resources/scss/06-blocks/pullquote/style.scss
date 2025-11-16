@@ -1,0 +1,28 @@
+.wp-block-pullquote {
+    padding: calc(2* var(--wp--custom--spacing--vertical)) 0;
+    text-align: center;
+    border-width: 3px;
+    border-bottom-style: solid;
+    border-top-style: solid;
+
+    color: currentColor;
+    border-color: currentColor;
+    position: relative;
+    font-size: var(--wp--preset--font-size--x-large);
+    font-family: var(--wp--preset--font-family--heading);
+    font-weight: 700;
+    letter-spacing: normal;
+
+    blockquote {
+        border-left: none;
+        background-color: transparent;
+    }
+
+    cite {
+        color: currentColor;
+        font-size: var(--wp--preset--font-size--medium);
+        font-style: normal;
+        text-transform: none;
+    }
+
+}

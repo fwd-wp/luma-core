@@ -1,0 +1,195 @@
+@use '../../02-tools/mixins.scss' as mixin;
+
+.entry-title {
+
+	@include mixin.heading(2);
+
+	overflow-wrap: break-word;
+
+	a {
+		color: currentColor;
+		text-underline-offset: 0.15em;
+
+		&:hover {
+			color: var(--wp--preset--color--contrast);
+		}
+
+		&:focus {
+			color: var(--wp--preset--color--contrast);
+		}
+
+		&:active {
+			color: currentColor;
+		}
+	}
+}
+
+/**
+ * Entry Content
+ */
+
+.entry-content {
+	// see containers for alignment of child content (default, wide, full)
+
+	p {
+		word-wrap: break-word;
+	}
+
+	// Overwrite iframe embeds that have inline styles.
+	>iframe[style] {
+
+		margin: var(--wp--preset--spacing--medium) 0 !important;
+		max-width: 100% !important;
+	}
+
+}
+
+.entry-footer {
+
+	color: var(--wp--preset--color--dark);
+	clear: both;
+	float: none;
+	font-size: max(1rem, calc(var(--wp--preset--font-size--small) * 0.89));
+	display: block;
+
+	>span {
+		display: inline-block;
+	}
+
+	a {
+		// normally set to contrast
+		color: currentColor;
+
+		&:hover,
+		&:focus {
+			color: var(--wp--preset--color--contrast);
+		}
+
+		&:active {
+			color: currentColor;
+		}
+	}
+}
+
+// Extra specificity to override rules in _vertical-margins.scss
+.site-main>article>.entry-footer {
+	padding-top: var(--wp--preset--spacing--medium);
+	//padding-top: var(--wp--preset--spacing--small);
+	padding-bottom: var(--wp--preset--spacing--medium);
+	border-bottom: var(--wp--custom--separator--height) solid var(--wp--custom--separator--border-color);
+}
+
+body:not(.single) .site-main>article:last-of-type .entry-footer {
+	border-bottom: var(--wp--custom--separator--height) solid transparent;
+}
+
+.single .site-main>article>.entry-footer {
+	margin-top: calc(2 * var(--wp--preset--spacing--medium));
+	margin-bottom: calc(2 * var(--wp--preset--spacing--medium));
+	padding-bottom: 0;
+	padding-top: calc(0.8 * var(--wp--preset--spacing--medium));
+	border-top: 3px solid var(--wp--custom--separator--border-color);
+	border-bottom: var(--wp--custom--separator--height) solid transparent;
+	display: block;
+	grid-template-columns: repeat(2, 1fr);
+	column-gap: calc(2 * var(--wp--preset--spacing--medium));
+
+
+	.full-size-link {
+		display: block;
+	}
+
+	.post-taxonomies,
+	.full-size-link {
+		justify-content: flex-end;
+
+		text-align: left;
+	}
+
+	.full-size-link:first-child:last-child {
+		grid-column: span 2;
+	}
+
+	.posted-on,
+	.posted-by,
+	.cat-links,
+	.tags-links {
+		display: block;
+	}
+
+	@include mixin.bp-up(sm) {
+		display: grid;
+
+		.full-size-link {
+			display: grid;
+		}
+
+		.post-taxonomies,
+		.full-size-link {
+			text-align: right;
+		}
+	}
+}
+
+/**
+ * Post Thumbnails
+ */
+
+.post-thumbnail {
+	//@extend %responsive-aligndefault-width;
+	text-align: center;
+
+
+	.wp-post-image {
+		display: block;
+		width: auto;
+		max-width: 100%;
+		margin-left: auto;
+		margin-right: auto;
+		margin-top: calc(2 * var(--wp--preset--spacing--medium));
+	}
+}
+
+/**
+ * Author
+ */
+
+.author-bio {
+	//position: relative;
+	display: flex;
+	align-items: flex-start;
+	gap: var(--wp--preset--spacing--small);
+	font-size: var(--wp--preset--font-size--x-small);
+	max-width: var(--wp--style--global--content-size);
+
+	.site-main>article>& {
+		margin-top: calc(2 * var(--wp--preset--spacing--medium));
+	}
+
+	// Avatars are optional and can be turned off.
+	&.show-avatars {
+
+		.avatar {
+			flex: 0 0 85px; // fixed size
+			border-radius: 50%;
+			width: 85px;
+		}
+	}
+
+	.author-bio-content {
+		flex: 1; // take up the remaining space
+		max-width: 100%;
+
+		.author-title {
+			font-family: var(--wp--preset--font-family--body);
+			font-size: var(--wp--preset--font-size--medium);
+			//display: inline;
+		}
+
+		.author-description {
+			font-size: var(--wp--preset--font-size--x-small);
+			margin-top: calc(0.5 * var(--wp--preset--spacing--medium));
+			margin-bottom: calc(0.5 * var(--wp--preset--spacing--medium));
+		}
+	}
+}

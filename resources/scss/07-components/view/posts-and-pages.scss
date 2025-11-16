@@ -1,0 +1,26 @@
+.sticky {
+	// This class is required to pass ThemeCheck.
+	// TODO: look into differentiating sticky posts and adding the styles here
+}
+
+.no-results.not-found > *:first-child {
+	margin-bottom: calc(3 * var(--wp--preset--spacing--medium));
+}
+
+// Styling for wp_link_pages.
+.page-links {
+	// clear: both;
+	text-align: center;
+
+	.post-page-numbers {
+		display: inline-block;
+		padding: calc(0.5 * var(--wp--preset--spacing--small));
+		
+		// min-width: 2.8rem;
+		// min-height: 2.8rem;
+
+		// &:first-child {
+		// 	margin-left: 0;
+		// }
+	}
+}

@@ -1,0 +1,243 @@
+@use '../../02-tools/mixins.scss' as mixin;
+
+:root {
+	--custom--original-gutter: var(--wp--custom--spacing--gutter);
+	--custom--original-wide: var(--wp--style--global--wide-size);
+}
+
+// Only apply these styles to excerpt view
+.archive,
+.search,
+.blog {
+	&.is-excerpt {
+
+		.page-header,
+		.archive-description,
+		.navigation,
+		.archive-grid {
+			@include mixin.align(wide);
+		}
+
+		.archive-grid {
+			display: grid;
+			gap: var(--wp--style--block-gap); // optional spacing between items
+			grid-template-columns: 1fr;
+
+			.post {
+				border-radius: var(--wp--custom--radius--small);
+				box-shadow: var(--wp--preset--shadow--natural);
+				overflow: hidden;
+			}
+
+			// exclude these styles from .is-full
+
+			.post.is-excerpt {
+
+				& * {
+					// reset wp width settings
+					max-width: 100% !important;
+				}
+
+				transform: scale(1);
+				transition: transform 1s cubic-bezier(0.23, 1, 0.32, 1),
+				box-shadow 1s cubic-bezier(0.23, 1, 0.32, 1);
+
+				&:hover {
+					transform: scale(1.01);
+					box-shadow: var(--wp--preset--shadow--natural-hover);
+				}
+
+				.entry-body {
+					padding: var(--wp--preset--spacing--large);
+					font-size: var(--wp--preset--font-size--small);
+				}
+
+				.posted-meta {
+					text-transform: uppercase;
+					color: var(--wp--preset--color--muted);
+					font-weight: 600;
+
+					.separator {
+						padding-inline: 0.5rem;
+						font-weight: bold;
+					}
+				}
+
+				.entry-title {
+					@include mixin.heading(3);
+
+					a {
+						&:hover {
+							text-decoration: none;
+						}
+					}
+				}
+
+				.post-thumbnail {
+					// to remove at source and add where needed
+					margin: 0;
+
+					.wp-post-image {
+						margin-block: 0;
+					}
+				}
+
+				.read-more {
+					text-transform: uppercase;
+					color: var(--wp--preset--color--primary);
+					font-weight: 600;
+				}
+			}
+
+			// exclude from grid or masonry (and full)
+			&:not(.archive-grid--grid):not(.archive-grid--masonry) {
+				.post.is-excerpt {
+					@include mixin.bp-up(md) {
+						display: grid;
+						grid-template-columns: repeat(2, 1fr);
+
+						.entry-body {
+							padding-block: var(--wp--preset--spacing--medium);
+						}
+
+						.entry-header {
+							margin-top: 0;
+						}
+
+						.post-thumbnail {
+							overflow: hidden;
+
+							.wp-post-image {
+								width: 100% !important;
+								height: 100% !important;
+								object-fit: cover;
+								display: block;
+							}
+						}
+					}
+
+					@include mixin.bp-up(lg) {
+
+						--custom--half-breakpoint: calc(calc(var(--wp--custom--breakpoint--lg)/2) - var(--wp--custom--spacing--gutter));
+						grid-template-columns: minmax(0, var(--custom--half-breakpoint)) 1fr;
+						// grid-template-columns: minmax(0, 500px) 1fr;
+					}
+				}
+			}
+
+		}
+	}
+
+	// Full post view styling (in addiiton to single view)
+	&.is-full {
+		.post {
+			padding-block: 3rem;
+
+			.entry-footer {
+				padding-bottom: 3rem;
+				border-bottom: 2px solid var(--wp--preset--color--muted);
+			}
+		}
+	}
+}
+
+// Exclude grid and masonry styles from search results and full display
+.archive,
+.blog {
+	&.is-excerpt {
+		.archive-grid {
+			&--grid {
+				@include mixin.bp-up(md) {
+					grid-template-columns: repeat(2, 1fr);
+				}
+
+				@include mixin.bp-up(lg) {
+					grid-template-columns: repeat(3, 1fr);
+				}
+			}
+
+			&--masonry {
+
+				display: block;
+				--wp--custom--spacing--gutter: calc(var(--custom--original-gutter) - var(--wp--style--block-gap)/2);
+				--wp--style--global--wide-size: calc(var(--custom--original-wide) - var(--wp--style--block-gap)/2);
+
+				.post {
+					float: left;
+					width: calc(100% - var(--wp--style--block-gap)); // 1 column
+					box-sizing: border-box;
+					margin: calc(var(--wp--style--block-gap)/2); // emulate "gap"
+				}
+
+				// Optional: fix container overflow
+				&::after {
+					content: "";
+					display: table;
+					clear: both;
+				}
+
+				@include mixin.bp-up(md) {
+					.post {
+						width: calc(calc(100% / 2) - var(--wp--style--block-gap)); // 2 columns
+					}
+				}
+
+				@include mixin.bp-up(lg) {
+					.post {
+						width: calc(calc(100% / 3) - var(--wp--style--block-gap)); // 3 columns
+					}
+				}
+
+			}
+		}
+	}
+}
+
+
+// existing code
+.archive,
+.search,
+.blog {
+
+	.content-area {
+
+		.format-aside,
+		.format-status,
+		.format-link {
+
+			.entry-content {
+				font-size: var(--wp--preset--font-size--large);
+			}
+		}
+	}
+
+	.format-image,
+	.format-gallery,
+	.format-video {
+
+		.entry-content {
+			margin-top: calc(2 * var(--wp--preset--spacing--medium));
+		}
+	}
+
+
+	.entry-footer {
+
+		.cat-links,
+		.tags-links {
+			display: block;
+		}
+	}
+
+	&.logged-in {
+
+		.entry-footer {
+
+			.posted-on {
+				margin-right: var(--wp--preset--spacing--x-small);
+			}
+		}
+	}
+
+
+}

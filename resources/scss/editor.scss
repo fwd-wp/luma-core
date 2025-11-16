@@ -1,0 +1,28 @@
+/**
+ * These styles should be loaded by the Block Editor only
+ */
+@use "01-settings/fonts";
+@use "01-settings/global";
+
+@use "02-tools/mixins" as *;
+@use "02-tools/functions" as *;
+
+/* Category 03 - Reset and normalise */
+@use "03-generic/normalize";
+@use "03-generic/reset";
+@use "03-generic/clearings";
+
+@use './04-elements/editor.scss' as elementsEditor;
+
+//@use "05-blocks/blocks-editor";
+
+@use "07-components/editor" as componentsEditor;
+
+//@use "08-utilities/color-palette";
+
+
+// Add relevant styles from "04-elements/misc"
+b,
+strong {
+    font-weight: 700;
+}

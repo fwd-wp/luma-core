@@ -1,0 +1,200 @@
+@use '../../02-tools/mixins.scss' as mixin;
+
+/* Block Alignments */
+
+/**
+ * These selectors set the default max width for content appearing inside a post or page.
+ */
+ // this rule is overriden in withs.scss with a customizer setting
+.entry-content>*:not(.alignwide):not(.alignfull):not(.alignleft):not(.alignright):not(.wp-block-separator),
+*[class*="inner-container"]>*:not(.entry-content):not(.alignwide):not(.alignfull):not(.alignleft):not(.alignright):not(.wp-block-separator) {
+    @include mixin.align(default);
+}
+
+.alignleft,
+.alignright {
+    margin-top: 0;
+    margin-bottom: var(--global--spacing-vertical);
+    @include mixin.align(center);
+}
+
+@include mixin.bp-up(xs) {
+
+    .alignleft,
+    .alignright {
+        clear: unset;
+        display: unset;
+    }
+
+    .alignleft {
+        /*rtl:ignore*/
+        float: left;
+        /*rtl:ignore*/
+        margin-right: var(--wp--custom--spacing--horizontal);
+        /*rtl:ignore*/
+        margin-left: 0;
+        /*rtl:ignore*/
+        text-align: left;
+        //margin-bottom: var(--wp--custom--spacing--vertical);
+    }
+
+    .alignright {
+        /*rtl:ignore*/
+        float: right;
+        /*rtl:ignore*/
+        margin-left: var(--wp--custom--spacing--horizontal);
+        /*rtl:ignore*/
+        margin-right: 0;
+        /*rtl:ignore*/
+        text-align: right;
+    }
+}
+
+
+// Targeting the .entry-content class is necessary to ensure these styles
+// only apply when the block isn't nested.
+.entry-content>.alignleft,
+.entry-content>.alignright {
+
+    max-width: var(--wp--style--global--content-size);
+    width: 100%;
+
+    @include mixin.bp-up(sm) {
+        max-width: calc(50% - var(--wp--custom--spacing--align-left-right));
+    }
+}
+
+.entry-content>.alignleft {
+
+    /*rtl:ignore*/
+    margin-left: 0;
+
+    @include mixin.bp-up(sm) {
+        /*rtl:ignore*/
+        margin-left: var(--wp--custom--spacing--align-left-right);
+    }
+}
+
+.entry-content>.alignright {
+
+    /*rtl:ignore*/
+    margin-right: 0;
+
+    @include mixin.bp-up(sm) {
+        /*rtl:ignore*/
+        margin-right: var(--wp--custom--spacing--align-left-right);
+    }
+}
+
+// Make sure siblings of floated elements are top-aligned when nested
+[class*="inner-container"]>.alignleft+*,
+[class*="inner-container"]>.alignright+* {
+    margin-top: 0;
+}
+
+/**
+ * .aligncenter
+ */
+.aligncenter {
+    @include mixin.align(center);
+}
+
+/**
+ * .alignwide
+ */
+.alignwide {
+    clear: both;
+    @include mixin.align(wide);
+}
+
+.alignwide [class*="inner-container"]>.alignwide {
+    @include mixin.align(wide-nested);
+
+}
+
+/**
+ * .alignfull
+ */
+.alignfull {
+    clear: both;
+    @include mixin.align(full);
+}
+
+.alignfull [class*="inner-container"]>.alignwide {
+    @include mixin.align(wide-nested);
+}
+
+// Content alignment
+// not core
+// .has-left-content {
+//     justify-content: flex-start;
+// }
+
+// .has-right-content {
+//     justify-content: flex-end;
+// }
+
+// Parallax
+.has-parallax {
+    background-attachment: fixed;
+}
+
+// Drop caps
+.has-drop-cap:not(:focus)::first-letter {
+    @include mixin.heading(1);
+    //font-family: var(--heading--font-family);
+    //font-weight: var(--heading--font-weight);
+    line-height: 0.66;
+    text-transform: uppercase;
+    font-style: normal;
+    float: left;
+    margin: 0.1em 0.1em 0 0;
+    // font-size: calc(1.2 * var(--heading--font-size-h1));
+
+}
+
+.has-drop-cap:not(:focus)::after {
+    content: "";
+    display: table;
+    clear: both;
+    padding-top: 14px;
+}
+//fixes alignment on legacy shortcode
+.wp-caption {
+   // width: auto !important;
+    /* override inline width */
+    //max-width: 100% !important;
+    /* responsive inside container */
+}
+
+/* Allow inline width styles to work for aligned captions */
+.wp-caption[style*="width"] {
+   // width: unset !important;
+}
+
+// .wp-caption img[class*="wp-image-"] {
+//     display: block;
+//     margin: 0 auto;
+// }
+
+.wp-caption-text {
+    text-align: center;
+    word-wrap: break-word;
+    /* ensures long words wrap */
+    overflow-wrap: break-word;
+    /* modern syntax */
+    hyphens: auto;
+    /* enables automatic hyphenation */
+    line-height: 1.4;
+    /* better readability for wrapped text */
+    box-sizing: border-box;
+    /* includes padding in width calculation */
+    padding: 0.5em 0.25em;
+    /* small padding for better readability */
+}
+
+/* Ensure caption text wraps within the figure's width */
+.wp-caption[style*="width"] .wp-caption-text {
+   // width: 100%;
+   // max-width: 100%;
+}
