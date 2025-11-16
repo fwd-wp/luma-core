@@ -6,10 +6,10 @@
  * Restricts heading levels and can be extended for other editor customizations.
  *
  * @package Luma-Core
- * @since Twenty Luma-Core 1.0
+ * @since Luma-Core 1.0
  */
 
-namespace Twenty\One\Setup;
+namespace Luma\Core\Setup;
 
 /**
  * Class Gutenburg
@@ -17,7 +17,7 @@ namespace Twenty\One\Setup;
  * Handles Gutenberg block editor customizations for the theme.
  *
  * @package Luma-Core\Setup
- * @since Twenty Luma-Core 1.0
+ * @since Luma-Core 1.0
  */
 class Gutenburg
 {
@@ -26,7 +26,7 @@ class Gutenburg
 	 *
 	 * Hooks filters for Gutenberg blocks.
 	 *
-	 * @since Twenty Luma-Core 1.0
+	 * @since Luma-Core 1.0
 	 *
 	 * @return void
 	 */
@@ -41,7 +41,7 @@ class Gutenburg
 	 * This ensures that H1 and H2 are not selectable, 
 	 * so headings in archive/blog views can maintain proper hierarchy.
 	 *
-	 * @since Twenty Luma-Core 1.0
+	 * @since Luma-Core 1.0
 	 *
 	 * @param array  $args       Array of arguments for registering a block type.
 	 * @param string $block_type The block type name including namespace (e.g., 'core/heading').

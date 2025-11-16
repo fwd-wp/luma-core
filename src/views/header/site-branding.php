@@ -5,14 +5,14 @@
  *
  * @package Luma-Core
  *  
- * @since Twenty Luma-Core 1.0
+ * @since Luma-Core 1.0
  */
 
-use Twenty\One\Models\ThemeMod;
+use Luma\Core\Models\ThemeModModel;
 
 $name    = get_bloginfo('name');
 $description  = get_bloginfo('description', 'display');
-$show_title   = ThemeMod::get('twenty_one_display_title_and_tagline');
+$show_title   = ThemeMod::get('luma_core_display_title_and_tagline');
 $header_class = $show_title ? 'site-title' : 'screen-reader-text';
 ?>
 

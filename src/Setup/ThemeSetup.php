@@ -1,17 +1,19 @@
 <?php
 
-namespace Twenty\One\Setup;
+namespace Luma\Core\Setup;
 
-/**
+use Luma\Core\Services\I18nService;
+
+/**s
  * Class Setup
  *
  * Handles the initialization of theme features and widget areas.
  * Hooks into WordPress actions to set up theme defaults and register sidebars.
  *
- * @package Luma-Core\Setup
- * @since Twenty Luma-Core 1.0
+ * @package Twenty-One\Setup
+ * @since Twenty Twenty-One 1.0
  */
-class Setup
+class ThemeSetup
 {
     /**
      * Invoke method to initialize theme setup.
@@ -20,15 +22,18 @@ class Setup
      * - after_setup_theme → theme_support()
      * - widgets_init → widgets_init()
      *
-     * @since Twenty Luma-Core 1.0
+     * @since Twenty Twenty-One 1.0
      *
      * @return void
      */
     public function __invoke(): void
     {
-        add_action('after_setup_theme', array($this, 'theme_support'));
-        add_action('widgets_init', array($this, 'widgets_init'));
+        add_action('after_setup_theme', [$this, 'theme_support']);
+        add_action('after_setup_theme', [$this, 'woo_commerce']);
+        add_action('after_setup_theme', [$this, 'register_nav_menus']);
+        add_action('widgets_init',      [$this, 'register_sidebars']);
     }
+
 
     /**
      * Sets up theme defaults and registers support for various WordPress features.
@@ -36,7 +41,7 @@ class Setup
      * Hooked into after_setup_theme, which runs before init.
      * This ensures features like thumbnails and title-tag are properly registered.
      *
-     * @since Twenty Luma-Core 1.0
+     * @since Twenty Twenty-One 1.0
      *
      * @return void
      */
@@ -80,16 +85,6 @@ class Setup
          */
         add_theme_support('post-thumbnails');
         // set_post_thumbnail_size(1568, 9999);
-
-        /**
-         * Register nav menu locations.
-         */
-        register_nav_menus(
-            array(
-                'main'   => esc_html__('Main menu', 'twentyone'),
-                'footer' => esc_html__('Footer menu', 'twentyone'),
-            )
-        );
 
         /*
          * Switch default core markup for search form, comment form, and comments
@@ -163,7 +158,10 @@ class Setup
 
         // Remove feed icon link from legacy RSS widget (WP 6.5+).
         add_filter('rss_widget_feed_link', '__return_empty_string');
+    }
 
+    public function woo_commerce()
+    {
         // WooCommerce support.
         add_theme_support('woocommerce');
         add_theme_support('wc-product-gallery-zoom');
@@ -171,22 +169,35 @@ class Setup
         add_theme_support('wc-product-gallery-slider');
     }
 
+    public function register_nav_menus()
+    {
+        /**
+         * Register nav menu locations.
+         */
+        register_nav_menus(
+            array(
+                'main'   => esc_html__('Main menu', I18nService::getDomain()),
+                'footer' => esc_html__('Footer menu', I18nService::getDomain()),
+            )
+        );
+    }
+
     /**
      * Registers widget areas (sidebars).
      *
      * Four footer widget areas are registered by default.
      *
-     * @since Twenty Luma-Core 1.0
+     * @since Twenty Twenty-One 1.0
      *
      * @link https://developer.wordpress.org/themes/functionality/sidebars/#registering-a-sidebar
      *
      * @return void
      */
-    public function widgets_init(): void
+    public function register_sidebars(): void
     {
         for ($i = 1; $i <= 4; $i++) {
             register_sidebar(array(
-                'name'          => sprintf(__('Footer %d', 'twentyone'), $i),
+                'name'          => sprintf(__('Footer %d', I18nService::getDomain()), $i),
                 'id'            => 'footer-' . $i,
                 'before_widget' => '<section id="%1$s" class="widget %2$s">',
                 'after_widget'  => '</section>',

@@ -1,26 +1,26 @@
 <?php
 
-namespace Twenty\One\Models;
+namespace Luma\Core\Models;
 
-use Twenty\One\Helpers\Functions;
+use Luma\Core\Helpers\Functions;
 use \WP_Theme_JSON_Resolver;
 
 if (! defined('ABSPATH')) {
     exit;
 }
 
-class ThemeJSONnew
+class ThemeJsonService
 {
     /**
-     * Central cache for all data
+     * Central cache for all data, shared across instances
      *
      * Keys:
      * 'json:{origin}' => decoded theme.json
      * 'color:{slug}:{stripHash}' => cached color values
      */
-    private array $cache = [];
+    private static array $cache = [];
 
-
+    private static string $origin = 'theme';
     /**
      * stores data for chaining
      */
@@ -31,19 +31,23 @@ class ThemeJSONnew
      */
     protected array $original_path = [];
 
-    /**
-     * Load theme.json settings for a given path.
-     *
-     * @param array $path Example: ['color', 'palette']
-     * @param string $origin 'theme', 'block', 'custom', or 'default'
-     */
-    public function load(array $path = [], string $origin = 'theme', bool $snake_case = false): self
+    public function __construct(string $origin = 'theme')
     {
-        // Map snake_case to camelCase if needed
+        $this->origin = $origin;
+        $this->load_theme_json($this->origin); // will populate static cache
+        $this->data = self::$cache["json:{$this->origin}"] ?? [];
+    }
+
+    /**
+     * Filter / drill down into data using a path array
+     */
+    public function filter(array $path, bool $snake_case = false): self
+    {
         $path = $snake_case ? array_map(fn($p) => Functions::snake_to_camel($p), $path) : $path;
 
-        $this->data = $this->fetch_data($path, $origin);
+        $this->data = $this->filter_data($path, $this->origin);
         $this->original_path = $path;
+
         return $this;
     }
 
@@ -168,40 +172,38 @@ class ThemeJSONnew
         return '';
     }
 
-    /**
-     * private helper to fetch theme.json settings
-     *
-     * $source - default (wp default), theme, custom (custom only used with FSE)
-     *
-     * @return array camelCase WP theme.json array
-     */
-    private function fetch_data(array $path, string $origin): array|string
+
+    private function load_theme_json(string $origin): array
     {
-        // Build cache key
-        $cache_key = implode(':', $path) . ":$origin";
-
-        // Return cached data if available
-        if (isset($this->cache[$cache_key])) {
-            return $this->cache[$cache_key];
-        }
-
         $json_cache_key = "json:$origin";
-        if (isset($this->cache[$json_cache_key])) {
-            $data = $this->cache[$json_cache_key];
-        } else {
-            $this->cache[$json_cache_key] = $data = WP_Theme_JSON_Resolver::get_merged_data($origin)->get_data();
+
+        if (!isset(self::$cache[$json_cache_key])) {
+            self::$cache[$json_cache_key] = WP_Theme_JSON_Resolver::get_merged_data($origin)->get_data();
         }
+
+        return self::$cache[$json_cache_key];
+    }
+
+    private function filter_data(array $path): array|string|null
+    {
+        $cache_key = 'json:' . $this->origin . ':' . implode(':', $path);
+
+        if (isset(self::$cache[$cache_key])) {
+            return self::$cache[$cache_key];
+        }
+
+        $data = $this->data;
 
         foreach ($path as $key) {
             if (isset($data[$key])) {
                 $data = $data[$key];
             } else {
-                // doesn't go any deeper if no match is found
+                $data = null;
                 break;
             }
         }
 
-        return $this->cache[$cache_key] = $data;
+        return self::$cache[$cache_key] = $data;
     }
 
     /**

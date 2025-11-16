@@ -5,14 +5,14 @@
  *
  * @package Luma-Core
  *  
- * @since Twenty Luma-Core 1.0
+ * @since Luma-Core 1.0
  */
 
-use Twenty\One\Models\ThemeMod;
+use Luma\Core\Models\ThemeModModel;
 
 $header_classes = 'site-header';
-$header_classes .= ThemeMod::get('twenty_one_header_sticky') ? ' is-sticky' : '';
-$header_classes .= ThemeMod::get('twenty_one_header_transparent') ? ' is-transparent' : '';
+$header_classes .= ThemeMod::get('luma_core_header_sticky') ? ' is-sticky' : '';
+$header_classes .= ThemeMod::get('luma_core_header_transparent') ? ' is-transparent' : '';
 ?>
 
 <header id="masthead" class="<?php echo esc_attr($header_classes); ?>">

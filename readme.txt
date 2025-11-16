@@ -1,4 +1,4 @@
-=== Twenty Luma-Core ===
+=== Luma-Core ===
 Contributors: wordpressdotorg
 Requires at least: 5.3
 Tested up to: 6.8
@@ -9,22 +9,22 @@ License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 == Description ==
 
-Twenty Luma-Core is a blank canvas for your ideas and it makes the block editor your best brush.
+Luma-Core is a blank canvas for your ideas and it makes the block editor your best brush.
 
 With new block patterns, which allow you to create a beautiful layout in a matter of seconds, this theme’s soft colors and eye-catching — yet timeless — design will let your work shine.
 
-Take it for a spin! See how Twenty Luma-Core elevates your portfolio, business website, or personal blog.
+Take it for a spin! See how Luma-Core elevates your portfolio, business website, or personal blog.
 
 == Installation ==
 
 1. In your admin panel, go to Appearance -> Themes and click the 'Add' button.
-2. Type in Twenty Luma-Core in the search form and press the 'Enter' key on your keyboard.
+2. Type in Luma-Core in the search form and press the 'Enter' key on your keyboard.
 3. Click on the 'Activate' button to use your new theme right away.
 4. Go to INSERT ABOUT PAGE for a guide on how to customize this theme.
 5. Navigate to Appearance > Customize in your admin panel and customize to your taste.
 
 == Privacy ==
-Twenty Luma-Core uses LocalStorage to save the setting when Dark Mode support is turned on or off.
+Luma-Core uses LocalStorage to save the setting when Dark Mode support is turned on or off.
 LocalStorage is necessary for the setting to work and is only used when a user clicks on the Dark Mode button.
 No data is saved in the database or transferred.
 
@@ -112,8 +112,8 @@ https://wordpress.org/documentation/article/twenty-Luma-Core-changelog/#Version_
 
 == Copyright ==
 
-Twenty Luma-Core WordPress Theme, 2020-2025 WordPress.org and contributors.
-Twenty Luma-Core is distributed under the terms of the GNU GPL.
+Luma-Core WordPress Theme, 2020-2025 WordPress.org and contributors.
+Luma-Core is distributed under the terms of the GNU GPL.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -126,9 +126,9 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 GNU General Public License for more details.
 
 
-Twenty Luma-Core is derived from Seedlet, (C) 2020 Automattic, Inc.
+Luma-Core is derived from Seedlet, (C) 2020 Automattic, Inc.
 
-Twenty Luma-Core is also based on:
+Luma-Core is also based on:
 
 Twenty Nineteen. 2018-2025 WordPress.org
 Twenty Nineteen is distributed under the terms of the GNU GPL v2 or later.

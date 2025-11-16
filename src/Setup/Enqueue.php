@@ -1,9 +1,9 @@
 <?php
 
-namespace Twenty\One\Setup;
+namespace Luma\Core\Setup;
 
-use Twenty\One\Helpers\TemplateFunctions;
-use Twenty\One\Models\ThemeMod;
+use Luma\Core\Helpers\TemplateFunctions;
+use Luma\Core\Models\ThemeModModel;
 
 /**
  * Handles the enqueueing of theme scripts and styles.
@@ -12,7 +12,7 @@ use Twenty\One\Models\ThemeMod;
  * and non-latin language styles.
  *
  * @package Luma-Core
- * @since Twenty Luma-Core 1.0
+ * @since Luma-Core 1.0
  */
 class Enqueue
 {
@@ -21,7 +21,7 @@ class Enqueue
      *
      * Hooks all necessary scripts and styles to WordPress actions.
      *
-     * @since Twenty Luma-Core 1.0
+     * @since Luma-Core 1.0
      *
      * @return void
      */
@@ -40,7 +40,7 @@ class Enqueue
      * Includes comment reply, main navigation scripts, header shrink scripts,
      * and archive masonry scripts based on Customizer settings.
      *
-     * @since Twenty Luma-Core 1.0
+     * @since Luma-Core 1.0
      *
      * @global bool       $is_IE
      * @global WP_Scripts $wp_scripts
@@ -55,7 +55,7 @@ class Enqueue
 
         if (has_nav_menu('main')) {
             wp_enqueue_script(
-                'Luma-Core-menu-main-script',
+                'luma-core-menu-main-script',
                 get_template_directory_uri() . '/assets/js/menu-main.js',
                 array(),
                 wp_get_theme()->get('Version'),
@@ -66,9 +66,9 @@ class Enqueue
             );
         }
 
-        if (ThemeMod::get('twenty_one_post__archive_format') === 'masonry') {
+        if (ThemeMod::get('luma_core_post__archive_format') === 'masonry') {
             wp_enqueue_script(
-                'Luma-Core-archive-masonry',
+                'luma-core-archive-masonry',
                 get_template_directory_uri() . '/assets/js/archive-masonry.js',
                 ['masonry'],
                 null,
@@ -82,30 +82,30 @@ class Enqueue
      *
      * Includes font faces, main CSS, RTL styles, and print styles.
      *
-     * @since Twenty Luma-Core 1.0
+     * @since Luma-Core 1.0
      *
      * @return void
      */
     public function styles(): void
     {
         wp_enqueue_style(
-            'Luma-Core-fonts',
+            'luma-core-fonts',
             get_template_directory_uri() . '/assets/fonts/font-face.css',
             array(),
             wp_get_theme()->get('Version')
         );
 
         wp_enqueue_style(
-            'Luma-Core-style',
+            'luma-core-style',
             get_template_directory_uri() . '/build/css/main.css',
             array(),
             wp_get_theme()->get('Version')
         );
 
-        wp_style_add_data('Luma-Core-style', 'rtl', 'replace');
+        wp_style_add_data('luma-core-style', 'rtl', 'replace');
 
         wp_enqueue_style(
-            'Luma-Core-print-style',
+            'luma-core-print-style',
             get_template_directory_uri() . '/build/css/print.css',
             array(),
             wp_get_theme()->get('Version'),
@@ -118,14 +118,14 @@ class Enqueue
      *
      * Adds editor-specific JavaScript.
      *
-     * @since Twenty Luma-Core 1.0
+     * @since Luma-Core 1.0
      *
      * @return void
      */
     public function block_editor_script(): void
     {
         wp_enqueue_script(
-            'Luma-Core-editor',
+            'luma-core-editor',
             get_theme_file_uri('/assets/js/editor.js'),
             array('wp-blocks', 'wp-dom'),
             wp_get_theme()->get('Version'),
@@ -139,7 +139,7 @@ class Enqueue
      * Pulls CSS from TemplateFunctions::get_non_latin_css and appends it
      * to the main theme style.
      *
-     * @since Twenty Luma-Core 1.0
+     * @since Luma-Core 1.0
      *
      * @return void
      */
@@ -148,7 +148,7 @@ class Enqueue
         $custom_css = TemplateFunctions::get_non_latin_css('front-end');
 
         if ($custom_css) {
-            wp_add_inline_style('Luma-Core-style', $custom_css);
+            wp_add_inline_style('luma-core-style', $custom_css);
         }
     }
 }

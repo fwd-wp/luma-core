@@ -17,7 +17,7 @@ if ( ! empty( $social ) && is_array( $social ) ) {
         }
 
         // Check if TT1 has this icon
-        $svg = twenty_twenty_one_get_social_link_svg( $icon );
+        $svg = luma_core_get_social_link_svg( $icon );
         if ( empty( $svg ) ) {
             continue; // Skip if no matching icon
         }

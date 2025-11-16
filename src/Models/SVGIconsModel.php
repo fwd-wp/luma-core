@@ -1,13 +1,13 @@
 <?php
 
-namespace Twenty\One\Models;
+namespace Luma\Core\Models;
 
 /**
  * SVG Icons class
  *
  * @package Luma-Core
  *  
- * @since Twenty Luma-Core 1.0
+ * @since Luma-Core 1.0
  */
 
 /**
@@ -20,14 +20,14 @@ namespace Twenty\One\Models;
  * All icons are assumed to have equal width and height, hence the option
  * to only specify a `$size` parameter in the svg methods.
  *
- * @since Twenty Luma-Core 1.0
+ * @since Luma-Core 1.0
  */
 class SVGIconsModel {
 
 	/**
 	 * User Interface icons – svg sources.
 	 *
-	 * @since Twenty Luma-Core 1.0
+	 * @since Luma-Core 1.0
 	 *
 	 * @var array
 	 */
@@ -43,7 +43,7 @@ class SVGIconsModel {
 	/**
 	 * Social Icons – svg sources.
 	 *
-	 * @since Twenty Luma-Core 1.0
+	 * @since Luma-Core 1.0
 	 *
 	 * @var array
 	 */
@@ -94,7 +94,7 @@ class SVGIconsModel {
 	 * By default, each Icon ID is matched against a .com TLD. To override this behavior,
 	 * specify all the domains it covers (including the .com TLD too, if applicable).
 	 *
-	 * @since Twenty Luma-Core 1.0
+	 * @since Luma-Core 1.0
 	 *
 	 * @var array
 	 */
@@ -159,7 +159,7 @@ class SVGIconsModel {
 	 *
 	 * @static
 	 *
-	 * @since Twenty Luma-Core 1.0
+	 * @since Luma-Core 1.0
 	 *
 	 * @param string $group The icon group.
 	 * @param string $icon  The icon.
@@ -177,12 +177,12 @@ class SVGIconsModel {
 		}
 
 		/**
-		 * Filters Twenty Luma-Cores's array of icons.
+		 * Filters Luma-Cores's array of icons.
 		 *
 		 * The dynamic portion of the hook name, `$group`, refers to
 		 * the name of the group of icons, either "ui" or "social".
 		 *
-		 * @since Twenty Luma-Core 1.0
+		 * @since Luma-Core 1.0
 		 *
 		 * @param array $arr Array of icons.
 		 */
@@ -204,7 +204,7 @@ class SVGIconsModel {
 	 *
 	 * @static
 	 *
-	 * @since Twenty Luma-Core 1.0
+	 * @since Luma-Core 1.0
 	 *
 	 * @param string $uri  Social link.
 	 * @param int    $size The icon-size in pixels.
@@ -217,21 +217,21 @@ class SVGIconsModel {
 			$regex_map = array();
 
 			/**
-			 * Filters Twenty Luma-Cores's array of domain mappings for social icons.
+			 * Filters Luma-Cores's array of domain mappings for social icons.
 			 *
 			 * By default, each Icon ID is matched against a .com TLD. To override this behavior,
 			 * specify all the domains it covers (including the .com TLD too, if applicable).
 			 *
-			 * @since Twenty Luma-Core 1.0
+			 * @since Luma-Core 1.0
 			 *
 			 * @param array $social_icons_map Array of default social icons.
 			 */
-			$map = apply_filters( 'twenty_twenty_one_social_icons_map', self::$social_icons_map );
+			$map = apply_filters( 'luma_core_social_icons_map', self::$social_icons_map );
 
 			/**
-			 * Filters Twenty Luma-Core's array of social icons.
+			 * Filters Luma-Core's array of social icons.
 			 *
-			 * @since Twenty Luma-Core 1.0
+			 * @since Luma-Core 1.0
 			 *
 			 * @param array $social_icons Array of default social icons.
 			 */

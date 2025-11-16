@@ -7,11 +7,11 @@
  *
  * @package Luma-Core
  *  
- * @since Twenty Luma-Core 1.0
+ * @since Luma-Core 1.0
  */
 
-use Twenty\One\Helpers\TemplateFunctions;
-use Twenty\One\Helpers\TemplateTags;
+use Luma\Core\Helpers\TemplateFunctions;
+use Luma\Core\Helpers\TemplateTags;
 ?>
 
 <article id="post-<?php the_ID(); ?>" <?php post_class('is-excerpt'); ?>>

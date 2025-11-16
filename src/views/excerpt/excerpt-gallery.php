@@ -6,10 +6,10 @@
  *
  * @package Luma-Core
  *  
- * @since Twenty Luma-Core 1.0
+ * @since Luma-Core 1.0
  */
 
-use Twenty\One\Helpers\TemplateFunctions;
+use Luma\Core\Helpers\TemplateFunctions;
 
 // Print the 1st gallery found.
 if ( has_block( 'core/gallery', get_the_content() ) ) {

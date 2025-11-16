@@ -52,7 +52,7 @@ if (typeof wp === 'undefined' || typeof wp.customize === 'undefined') {
  * Bind to setting changes
  */
 if (typeof wp !== 'undefined' && wp.customize) {
-    wp.customize('twenty_one_post__archive_format', (setting) => {
+    wp.customize('luma_core_post__archive_format', (setting) => {
         applyArchiveLayout(setting.get()); // init current
         setting.bind((value) => {
             applyArchiveLayout(value); // update on change

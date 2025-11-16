@@ -1,4 +1,5 @@
 TODO:
+**REMOVE CUSTOM BLOCKS AND STYLES TO SIMPLIFY**
                 - need to create js for reset buttons in typography
                 - remove calls to old theme json, delete model and rename new model and usage
                 - customize typography look into heading font sizes,and custom header font size options
@@ -48,11 +49,13 @@ Improvements:
 
 search and replate (case sensitive)
 
-'twentyone' -> luma-core - text domain (must do this first)
+'luma-core'-> 'luma-core' - text domain (must do this first)
+            -> 'luma-core-   - js and block namespaces
 Twenty-One -> Luma-Core - Block Category label
-Twenty-One Luma-Core - block category and js prefix
-twenty_one - php variables
-Twenty\One - php namespace
+
+twenty_one -> luma_core_ - php variables
+Twenty\One -> Luma\Core - php namespace
+twentytwentyone - lumaCore - js function namespace
 
 
 

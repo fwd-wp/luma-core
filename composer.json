@@ -1,10 +1,10 @@
 {
-    "name": "twenty/one",
-    "description": "Twentytwentyone set up with php namespaces",
+    "name": "luma/core",
+    "description": "Core files for luma wordpress themes",
     "type": "wordpress-theme",
     "autoload": {
         "psr-4": {
-            "Twenty\\One\\": "src/"
+            "Luma\\Core\\": "src/"
         }
     },
     "authors": [

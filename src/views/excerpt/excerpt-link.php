@@ -6,10 +6,10 @@
  *
  * @package Luma-Core
  *  
- * @since Twenty Luma-Core 1.0
+ * @since Luma-Core 1.0
  */
 
-use Twenty\One\Helpers\TemplateFunctions;
+use Luma\Core\Helpers\TemplateFunctions;
 
 // Print the 1st instance of a paragraph block. If none is found, print the content.
 if ( has_block( 'core/paragraph', get_the_content() ) ) {

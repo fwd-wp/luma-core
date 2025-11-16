@@ -7,11 +7,11 @@
  *
  * @package Luma-Core
  *  
- * @since Twenty Luma-Core 1.0
+ * @since Luma-Core 1.0
  */
 
-use Twenty\One\Helpers\TemplateFunctions;
-use Twenty\One\Helpers\TemplateTags;
+use Luma\Core\Helpers\TemplateFunctions;
+use Luma\Core\Helpers\TemplateTags;
 
 // Early exit if not a post.
 if ('post' !== get_post_type()) {
@@ -25,7 +25,7 @@ if (! is_single()) {
         echo '<p>' . esc_html_x(
             'Featured post',
             'Label for sticky posts',
-            'twentyone'
+            'luma-core'
         ) . '</p>';
     }
 

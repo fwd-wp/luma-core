@@ -1,6 +1,6 @@
 <?php
 
-namespace Twenty\One\Controllers;
+namespace Luma\Core\Controllers;
 
 use \WP_Customize_Control;
 
@@ -14,7 +14,7 @@ if (! defined('ABSPATH')) {
  * Adds a simple heading label for grouping sections or controls in the Customizer.
  *
  * @package Luma-Core
- * @since Twenty Luma-Core 1.0
+ * @since Luma-Core 1.0
  */
 final class CustomizerButtonControl extends WP_Customize_Control
 {
@@ -24,7 +24,7 @@ final class CustomizerButtonControl extends WP_Customize_Control
      * This identifies the control type as "customize_category" so the Customizer
      * can handle it appropriately.
      *
-     * @since Twenty Luma-Core 1.0
+     * @since Luma-Core 1.0
      * @var string
      */
     public $type = 'font_reset_button';
@@ -34,7 +34,7 @@ final class CustomizerButtonControl extends WP_Customize_Control
      *
      * Outputs the label wrapped in an `<h4>` tag. Escapes the label for safe output.
      *
-     * @since Twenty Luma-Core 1.0
+     * @since Luma-Core 1.0
      * @return void
      */
     public function render_content()

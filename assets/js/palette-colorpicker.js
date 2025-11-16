@@ -6,9 +6,9 @@
  * 		Removed the hue picker script because we don't use it here
  * 		Added the "palettes" argument in wpColorPicker().
  *
- * @since Twenty Luma-Core 1.0
+ * @since Luma-Core 1.0
  */
-wp.customize.controlConstructor['Luma-Core-color'] = wp.customize.Control.extend( {
+wp.customize.controlConstructor['luma-core-color'] = wp.customize.Control.extend( {
 	ready: function() {
 		var control = this,
 			updating = false,

@@ -5,15 +5,15 @@
  *
  * @package Luma-Core
  *  
- * @since Twenty Luma-Core 1.0
+ * @since Luma-Core 1.0
  */
 
-use Twenty\One\Models\ThemeMod;
+use Luma\Core\Models\ThemeModModel;
 
 // don't show on attachment post type
 if (is_singular('attachment')) return;
 // don't show if disabled in customizer
-if (! ThemeMod::get('twenty_one_post_display_author_bio')) return;
+if (! ThemeMod::get('luma_core_post_display_author_bio')) return;
 ?>
 <?php if ((bool) get_the_author_meta('description') && post_type_supports(get_post_type(), 'author')) : ?>
 	<div class="author-bio <?php echo get_option('show_avatars') ? 'show-avatars' : ''; ?>">
@@ -26,7 +26,7 @@ if (! ThemeMod::get('twenty_one_post_display_author_bio')) return;
 					esc_url(get_author_posts_url(get_the_author_meta('ID'))),
 					sprintf(
 						/* translators: %s: Author name. */
-						esc_html__('By %s', 'twentyone'),
+						esc_html__('By %s', 'luma-core'),
 						get_the_author()
 					)
 				); ?>

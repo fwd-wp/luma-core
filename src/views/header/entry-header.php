@@ -6,17 +6,17 @@
  *
  * @package Luma-Core
  *  
- * @since Twenty Luma-Core 1.0
+ * @since Luma-Core 1.0
  */
 
 // dont show header on static front page
 if (is_front_page() && !is_home()) return;
 
-use Twenty\One\Helpers\TemplateFunctions;
-use Twenty\One\Helpers\TemplateTags;
-use Twenty\One\Models\ThemeMod;
+use Luma\Core\Helpers\TemplateFunctions;
+use Luma\Core\Helpers\TemplateTags;
+use Luma\Core\Models\ThemeModModel;
 
-$is_excerpt = (ThemeMod::get('twenty_one_post_archive_display') === 'excerpt');
+$is_excerpt = (ThemeMod::get('luma_core_post_archive_display') === 'excerpt');
 
 if ($is_excerpt && TemplateFunctions::is_excerpt_micro_post()) {
     return;

@@ -5,7 +5,7 @@
  *
  * @package Luma-Core
  *  
- * @since Twenty Luma-Core 1.0
+ * @since Luma-Core 1.0
  */
 
 // page header is only used on archive pages, and index.html if its a blog page

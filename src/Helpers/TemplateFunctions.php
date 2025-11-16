@@ -1,24 +1,32 @@
 <?php
 
-namespace Twenty\One\Helpers;
+namespace Luma\Core\Helpers;
 
-use Twenty\One\Models\SVGIconsModel;
-use Twenty\One\Models\ThemeMod;
+use Luma\Core\Models\SVGIconsModel;
+use Luma\Core\Models\ThemeModModel;
 
 /**
  * Functions which enhance the theme by hooking into WordPress
  *
  * @package Luma-Core
  *  
- * @since Twenty Luma-Core 1.0
+ * @since Luma-Core 1.0
  */
-final class TemplateFunctions
+class TemplateFunctions
 {
+
+	// must be updated via setTextDomain() with add_action('after_theme_setup' ..... 
+	protected static string $text_domain = 'luma-core';
+
+	public static function set_text_domain(string $domain): void
+	{
+		self::$text_domain = $domain;
+	}
 
 	/**
 	 * Gets the SVG code for a given icon.
 	 *
-	 * @since Twenty Luma-Core 1.0
+	 * @since Luma-Core 1.0
 	 *
 	 * @param string $group The icon group.
 	 * @param string $icon  The icon.
@@ -35,7 +43,7 @@ final class TemplateFunctions
 	 *
 	 * Return CSS for non-latin language, if available, or null
 	 *
-	 * @since Twenty Luma-Core 1.0
+	 * @since Luma-Core 1.0
 	 *
 	 * @param string $type Whether to return CSS for the "front-end", "block-editor", or "classic-editor".
 	 * @return string
@@ -49,7 +57,7 @@ final class TemplateFunctions
 		/**
 		 * Filters the fallback fonts for non-latin languages.
 		 *
-		 * @since Twenty Luma-Core 1.0
+		 * @since Luma-Core 1.0
 		 *
 		 * @param array $font_family An array of locales and font families.
 		 */
@@ -125,7 +133,7 @@ final class TemplateFunctions
 		/**
 		 * Filters the elements to apply fallback fonts to.
 		 *
-		 * @since Twenty Luma-Core 1.0
+		 * @since Luma-Core 1.0
 		 *
 		 * @param array $elements An array of elements for "front-end", "block-editor", or "classic-editor".
 		 */
@@ -162,7 +170,7 @@ final class TemplateFunctions
 	/**
 	 * Print the first instance of a block in the content, and then break away.
 	 *
-	 * @since Twenty Luma-Core 1.0
+	 * @since Luma-Core 1.0
 	 *
 	 * @param string      $block_name The full block type name, or a partial match.
 	 *                                Example: `core/image`, `core-embed/*`.
@@ -226,7 +234,7 @@ final class TemplateFunctions
 	/**
 	 * Detects the social network from a URL and returns the SVG code for its icon.
 	 *
-	 * @since Twenty Luma-Core 1.0
+	 * @since Luma-Core 1.0
 	 *
 	 * @param string $uri  Social link.
 	 * @param int    $size The icon size in pixels.
@@ -241,7 +249,7 @@ final class TemplateFunctions
 	/**
 	 * Generate CSS.
 	 *
-	 * @since Twenty Luma-Core 1.0
+	 * @since Luma-Core 1.0
 	 *
 	 * @param string $selector The CSS selector.
 	 * @param string $style    The CSS style.
@@ -276,7 +284,7 @@ final class TemplateFunctions
 	/**
 	 * Calculates classes for the main <html> element.
 	 *
-	 * @since Twenty Luma-Core 1.0
+	 * @since Luma-Core 1.0
 	 *
 	 * @return void
 	 */
@@ -285,18 +293,18 @@ final class TemplateFunctions
 		/**
 		 * Filters the classes for the main <html> element.
 		 *
-		 * @since Twenty Luma-Core 1.0
+		 * @since Luma-Core 1.0
 		 *
 		 * @param string The list of classes. Default empty string.
 		 */
-		$classes = apply_filters('twenty_one_html_classes', '');
+		$classes = apply_filters('luma_core_html_classes', '');
 		if (! $classes) {
 			return;
 		}
 		echo 'class="' . esc_attr($classes) . '"';
 
 		// USAGE:
-		// add_filter('twenty_one_html_classes', function () {
+		// add_filter('luma_core_html_classes', function () {
 		// 	return 'dark-mode custom-layout';
 		// });
 	}
@@ -305,7 +313,7 @@ final class TemplateFunctions
 	/**
 	 * Determines if post thumbnail can be displayed.
 	 *
-	 * @since Twenty Luma-Core 1.0
+	 * @since Luma-Core 1.0
 	 *
 	 * @return bool
 	 */
@@ -314,7 +322,7 @@ final class TemplateFunctions
 		/**
 		 * Filters whether post thumbnail can be displayed.
 		 *
-		 * @since Twenty Luma-Core 1.0
+		 * @since Luma-Core 1.0
 		 *
 		 * @param bool $show_post_thumbnail Whether to show post thumbnail.
 		 */
@@ -327,17 +335,17 @@ final class TemplateFunctions
 	/**
 	 * Creates continue reading text.
 	 *
-	 * @since Twenty Luma-Core 1.0
+	 * @since Luma-Core 1.0
 	 */
 	public static function continue_reading_text($echo = true)
 	{
 		$continue_reading = sprintf(
 			/* translators: %s: Post title. Only visible to screen readers. */
-			__('Continue reading %s', 'twentyone'),
+			__('Continue reading %s', self::$text_domain),
 			get_the_title('<span class="screen-reader-text">', '</span>')
 		);
 
-		$continue_reading = apply_filters('twenty_one_continue_reading_text', $continue_reading);
+		$continue_reading = apply_filters('luma_core_continue_reading_text', $continue_reading);
 
 		if ($echo) {
 			echo esc_html($continue_reading);
@@ -351,13 +359,13 @@ final class TemplateFunctions
 	 * Micro formats: aside, status.
 	 * Only true on non-single views when theme is set to display excerpts.
 	 *
-	 * @since Twenty Luma-Core 1.0
+	 * @since Luma-Core 1.0
 	 *
 	 * @return bool
 	 */
 	public static function is_excerpt_micro_post(): bool
 	{
-		$excerpt_setting = ThemeMod::get('twenty_one_post_archive_display');
+		$excerpt_setting = ThemeMod::get('luma_core_post_archive_display');
 		$is_excerpt = ($excerpt_setting === 'excerpt');
 
 		if (! $is_excerpt || is_single()) {

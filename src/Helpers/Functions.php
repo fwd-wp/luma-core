@@ -1,6 +1,6 @@
 <?php
 
-namespace Twenty\One\Helpers;
+namespace Luma\Core\Helpers;
 
 
 /**
@@ -8,9 +8,9 @@ namespace Twenty\One\Helpers;
  *
  * @package Luma-Core
  *  
- * @since Twenty Luma-Core 1.0
+ * @since Luma-Core 1.0
  */
-final class Functions
+class Functions
 {
 
     /**

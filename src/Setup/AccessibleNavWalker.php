@@ -1,6 +1,6 @@
 <?php
 
-namespace Twenty\One\Setup;
+namespace Luma\Core\Setup;
 
 /**
  * Accessible navigation walker for WordPress menus.
@@ -8,7 +8,7 @@ namespace Twenty\One\Setup;
  * Adds accessible toggle buttons for submenus and outputs descriptions for menu items.
  *
  * @package Luma-Core
- * @since Twenty Luma-Core 1.0
+ * @since Luma-Core 1.0
  */
 class AccessibleNavWalker extends \Walker_Nav_Menu
 {

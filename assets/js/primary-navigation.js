@@ -7,27 +7,27 @@
 /**
  * Toggle an attribute's value
  *
- * @since Twenty Luma-Core 1.0
+ * @since Luma-Core 1.0
  *
  * @param {Element} el - The element.
  * @param {boolean} withListeners - Whether we want to add/remove listeners or not.
  */
-function twentytwentyoneToggleAriaExpanded(el, withListeners) {
+function lumaCoreToggleAriaExpanded(el, withListeners) {
 	if ('true' !== el.getAttribute('aria-expanded')) {
 		el.setAttribute('aria-expanded', 'true');
-		twentytwentyoneSubmenuPosition(el.parentElement);
+		lumaCoreSubmenuPosition(el.parentElement);
 		if (withListeners) {
-			document.addEventListener('click', twentytwentyoneCollapseMenuOnClickOutside);
+			document.addEventListener('click', lumaCoreCollapseMenuOnClickOutside);
 		}
 	} else {
 		el.setAttribute('aria-expanded', 'false');
 		if (withListeners) {
-			document.removeEventListener('click', twentytwentyoneCollapseMenuOnClickOutside);
+			document.removeEventListener('click', lumaCoreCollapseMenuOnClickOutside);
 		}
 	}
 }
 
-function twentytwentyoneCollapseMenuOnClickOutside(event) {
+function lumaCoreCollapseMenuOnClickOutside(event) {
 	if (!document.getElementById('site-navigation').contains(event.target)) {
 		document.getElementById('site-navigation').querySelectorAll('.sub-menu-toggle').forEach(function (button) {
 			button.setAttribute('aria-expanded', 'false');
@@ -38,11 +38,11 @@ function twentytwentyoneCollapseMenuOnClickOutside(event) {
 /**
  * Changes the position of submenus so they always fit the screen horizontally.
  *
- * @since Twenty Luma-Core 1.0
+ * @since Luma-Core 1.0
  *
  * @param {Element} li - The li element.
  */
-function twentytwentyoneSubmenuPosition(li) {
+function lumaCoreSubmenuPosition(li) {
 	var subMenu = li.querySelector('ul.sub-menu'),
 		rect,
 		right,
@@ -68,11 +68,11 @@ function twentytwentyoneSubmenuPosition(li) {
 /**
  * Handle clicks on submenu toggles.
  *
- * @since Twenty Luma-Core 1.0
+ * @since Luma-Core 1.0
  *
  * @param {Element} el - The element.
  */
-function twentytwentyoneExpandSubMenu(el) { // jshint ignore:line
+function lumaCoreExpandSubMenu(el) { // jshint ignore:line
 	// Close other expanded items.
 	el.closest('nav').querySelectorAll('.sub-menu-toggle').forEach(function (button) {
 		if (button !== el) {
@@ -81,7 +81,7 @@ function twentytwentyoneExpandSubMenu(el) { // jshint ignore:line
 	});
 
 	// Toggle aria-expanded on the button.
-	twentytwentyoneToggleAriaExpanded(el, true);
+	lumaCoreToggleAriaExpanded(el, true);
 
 	// On tab-away collapse the menu.
 	el.parentNode.querySelectorAll('ul > li:last-child > a').forEach(function (linkEl) {
@@ -97,7 +97,7 @@ function twentytwentyoneExpandSubMenu(el) { // jshint ignore:line
 	/**
 	 * Menu Toggle Behaviors
 	 *
-	 * @since Twenty Luma-Core 1.0
+	 * @since Luma-Core 1.0
 	 *
 	 * @param {string} id - The ID.
 	 */
@@ -115,7 +115,7 @@ function twentytwentyoneExpandSubMenu(el) { // jshint ignore:line
 			mobileButton.onclick = function () {
 				wrapper.classList.toggle(id + '-navigation-open');
 				wrapper.classList.toggle('lock-scrolling');
-				twentytwentyoneToggleAriaExpanded(mobileButton);
+				lumaCoreToggleAriaExpanded(mobileButton);
 				mobileButton.focus();
 			};
 		}
@@ -137,7 +137,7 @@ function twentytwentyoneExpandSubMenu(el) { // jshint ignore:line
 		 * Trap keyboard navigation in the menu modal.
 		 * Adapted from Twenty Twenty.
 		 *
-		 * @since Twenty Luma-Core 1.0
+		 * @since Luma-Core 1.0
 		 */
 		document.addEventListener('keydown', function (event) {
 			var modal, elements, selectors, lastEl, firstEl, activeEl, tabKey, shiftKey, escKey;
@@ -159,7 +159,7 @@ function twentytwentyoneExpandSubMenu(el) { // jshint ignore:line
 			if (escKey) {
 				event.preventDefault();
 				wrapper.classList.remove(id + '-navigation-open', 'lock-scrolling');
-				twentytwentyoneToggleAriaExpanded(mobileButton);
+				lumaCoreToggleAriaExpanded(mobileButton);
 				mobileButton.focus();
 			}
 
@@ -183,13 +183,13 @@ function twentytwentyoneExpandSubMenu(el) { // jshint ignore:line
 		 * Close menu and scroll to anchor when an anchor link is clicked.
 		 * Adapted from Twenty Twenty.
 		 *
-		 * @since Twenty Luma-Core 1.1
+		 * @since Luma-Core 1.1
 		 */
 		document.getElementById('site-navigation').addEventListener('click', function (event) {
 			// If target onclick is <a> with # within the href attribute
 			if (event.target.hash) {
 				wrapper.classList.remove(id + '-navigation-open', 'lock-scrolling');
-				twentytwentyoneToggleAriaExpanded(mobileButton);
+				lumaCoreToggleAriaExpanded(mobileButton);
 				// Wait 550 and scroll to the anchor.
 				setTimeout(function () {
 					var anchor = document.getElementById(event.target.hash.slice(1));
@@ -203,7 +203,7 @@ function twentytwentyoneExpandSubMenu(el) { // jshint ignore:line
 		navMenuEl.querySelectorAll('.menu-wrapper > .menu-item-has-children').forEach(function (li) {
 			li.addEventListener('mouseenter', function () {
 				this.querySelector('.sub-menu-toggle').setAttribute('aria-expanded', 'true');
-				twentytwentyoneSubmenuPosition(li);
+				lumaCoreSubmenuPosition(li);
 			});
 			li.addEventListener('mouseleave', function () {
 				this.querySelector('.sub-menu-toggle').setAttribute('aria-expanded', 'false');

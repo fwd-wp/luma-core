@@ -1,12 +1,16 @@
 <?php
 
-namespace Twenty\One\Setup;
+namespace Luma\Core\Setup;
 
-use Twenty\One\Helpers\Functions;
-use Twenty\One\Models\ThemeJSON;
-use Twenty\One\Models\ThemeJSONnew;
-use Twenty\One\Controllers\CustomizerSectionHeadingControl;
-use Twenty\One\Controllers\CustomizerButtonControl;
+use Luma\Core\Services\I18nService;
+use Luma\Core\Helpers\Functions;
+use Luma\Core\Services\ThemeJsonService;
+use Luma\Core\Controllers\{
+	CustomizerSectionHeadingControl,
+	CustomizerButtonControl
+};
+
+use \WP_Customize_Manager;
 
 if (! defined('ABSPATH')) {
 	exit;
@@ -17,16 +21,18 @@ if (! defined('ABSPATH')) {
  *
  * @package Luma-Core
  *  
- * @since Twenty Luma-Core 1.0
+ * @since Luma-Core 1.0
  */
-final class Customize
+class Customize
 {
+
+	protected $theme_json;
 
 	/**
 	 * Instantiate the object.
 	 * Attach hooks
 	 *
-	 * @since Twenty Luma-Core 1.0
+	 * @since Luma-Core 1.0
 	 */
 	public function __invoke(): void
 	{
@@ -56,15 +62,19 @@ final class Customize
 		// remove_theme_mods();
 	}
 
+	public function __construct() {
+		$this->theme_json = new ThemeJsonService;
+	}
+
 	/**
 	 * Register site identity settings in the Customizer.
 	 *
-	 * @since Twenty Luma-Core 1.0
+	 * @since Luma-Core 1.0
 	 *
 	 * @param WP_Customize_Manager $wp_customize Theme Customizer object.
 	 * @return void
 	 */
-	public function site_identity($wp_customize): void
+	public function site_identity(WP_Customize_Manager $wp_customize): void
 	{
 
 		// Change site-title & description to postMessage 
@@ -77,12 +87,12 @@ final class Customize
 
 		// Rename the existing logo control
 		if ($control = $wp_customize->get_control('custom_logo')) {
-			$control->description = __('Upload your logo file for the navbar. Should be at least should be at least 300px x 130px', 'twentyone');
+			$control->description = __('Upload your logo file for the navbar. Should be at least should be at least 300px x 130px', I18nService::getDomain());
 		}
 
 		// Displaying the site-title in navbar
 		$wp_customize->add_setting(
-			'twenty_one_display_title_and_tagline',
+			'luma_core_display_title_and_tagline',
 			array(
 				'capability'        => 'edit_theme_options',
 				'default'           => true,
@@ -91,11 +101,11 @@ final class Customize
 			)
 		);
 		$wp_customize->add_control(
-			'twenty_one_display_title_and_tagline',
+			'luma_core_display_title_and_tagline',
 			array(
 				'type'    => 'checkbox',
 				'section' => 'title_tagline',
-				'label'   => esc_html__('Display Site Title in Navbar', 'twentyone'),
+				'label'   => esc_html__('Display Site Title in Navbar', I18nService::getDomain()),
 			)
 		);
 	}
@@ -103,44 +113,44 @@ final class Customize
 	/**
 	 * Register Header section options in the Customizer.
 	 *
-	 * @since Twenty Luma-Core 1.0
+	 * @since Luma-Core 1.0
 	 *
 	 * @param WP_Customize_Manager $wp_customize Theme Customizer object.
 	 * @return void
 	 */
-	public function header($wp_customize): void
+	public function header(WP_Customize_Manager $wp_customize): void
 	{
-		$wp_customize->add_section('twenty_one_header_section', [
-			'title'    => __('Header', 'twentyone'),
+		$wp_customize->add_section('luma_core_header_section', [
+			'title'    => __('Header', I18nService::getDomain()),
 			'priority' => 30,
 		]);
 
 		// Subheading - Navbar
-		$wp_customize->add_setting('twenty_one_header_navbar_heading', [
+		$wp_customize->add_setting('luma_core_header_navbar_heading', [
 			'sanitize_callback' => 'sanitize_text_field',
 		]);
 		$wp_customize->add_control(new CustomizerSectionHeadingControl(
 			$wp_customize,
-			'twenty_one_header_navbar_heading',
+			'luma_core_header_navbar_heading',
 			[
 				'label'    => 'Navbar',
-				'section'  => 'twenty_one_header_section',
+				'section'  => 'luma_core_header_section',
 				'priority' => 5,
 			]
 		));
 
 		// Sticky Navbar
-		$wp_customize->add_setting('twenty_one_header_sticky', [
+		$wp_customize->add_setting('luma_core_header_sticky', [
 			'default'           => false,
 			'sanitize_callback' => 'rest_sanitize_boolean',
 			'transport'         => 'postMessage',
 		]);
 
-		$wp_customize->add_control('twenty_one_header_sticky', [
+		$wp_customize->add_control('luma_core_header_sticky', [
 			'type'     => 'checkbox',
-			'section'  => 'twenty_one_header_section',
-			'label'    => __('Enable sticky navbar', 'twentyone'),
-			'settings' => 'twenty_one_header_sticky',
+			'section'  => 'luma_core_header_section',
+			'label'    => __('Enable sticky navbar', I18nService::getDomain()),
+			'settings' => 'luma_core_header_sticky',
 			'priority' => 10,
 		]);
 
@@ -148,48 +158,48 @@ final class Customize
 		// depends on sticky navbar, enabled by js automatically
 		// shrink disabled by js is sticky is disabled
 		// sticky class is appllied if this setting is enabled
-		$wp_customize->add_setting('twenty_one_header_shrink', [
+		$wp_customize->add_setting('luma_core_header_shrink', [
 			'default'           => false,
 			'sanitize_callback' => 'rest_sanitize_boolean',
 			'transport'         => 'postMessage',
 		]);
 
-		$wp_customize->add_control('twenty_one_header_shrink', [
+		$wp_customize->add_control('luma_core_header_shrink', [
 			'type'     => 'checkbox',
-			'section'  => 'twenty_one_header_section',
-			'label'    => __('Shrink sticky navbar on scroll', 'twentyone'),
-			'description'    => __('Requires sticky navbar', 'twentyone'),
-			'settings' => 'twenty_one_header_shrink',
+			'section'  => 'luma_core_header_section',
+			'label'    => __('Shrink sticky navbar on scroll', I18nService::getDomain()),
+			'description'    => __('Requires sticky navbar', I18nService::getDomain()),
+			'settings' => 'luma_core_header_shrink',
 			'priority' => 15,
 		]);
 
 		// Transparent Navbar
-		$wp_customize->add_setting('twenty_one_header_transparent', [
+		$wp_customize->add_setting('luma_core_header_transparent', [
 			'default'           => false,
 			'sanitize_callback' => 'rest_sanitize_boolean',
 			'transport'         => 'postMessage',
 		]);
 
-		$wp_customize->add_control('twenty_one_header_transparent', [
+		$wp_customize->add_control('luma_core_header_transparent', [
 			'type'     => 'checkbox',
-			'section'  => 'twenty_one_header_section',
-			'label'    => __('Enable transparent navbar', 'twentyone'),
-			'settings' => 'twenty_one_header_transparent',
+			'section'  => 'luma_core_header_section',
+			'label'    => __('Enable transparent navbar', I18nService::getDomain()),
+			'settings' => 'luma_core_header_transparent',
 			'priority' => 20,
 		]);
 
 		// Full width navbar
-		$wp_customize->add_setting('twenty_one_header_nav_full', [
+		$wp_customize->add_setting('luma_core_header_nav_full', [
 			'default'           => false,
 			'sanitize_callback' => 'rest_sanitize_boolean',
 			'transport'         => 'postMessage',
 		]);
 
-		$wp_customize->add_control('twenty_one_header_nav_full', [
+		$wp_customize->add_control('luma_core_header_nav_full', [
 			'type'     => 'checkbox',
-			'section'  => 'twenty_one_header_section',
-			'label'    => __('Enable full width navbar', 'twentyone'),
-			'settings' => 'twenty_one_header_nav_full',
+			'section'  => 'luma_core_header_section',
+			'label'    => __('Enable full width navbar', I18nService::getDomain()),
+			'settings' => 'luma_core_header_nav_full',
 			'priority' => 25,
 		]);
 
@@ -202,7 +212,7 @@ final class Customize
 			'header_custom_heading',
 			[
 				'label'    => 'Custom Image Header',
-				'section'  => 'twenty_one_header_section',
+				'section'  => 'luma_core_header_section',
 				'priority' => 35,
 				'settings' => 'header_custom_heading',
 			]
@@ -210,14 +220,14 @@ final class Customize
 
 		// Title and desc
 		if ($control = $wp_customize->get_control('display_header_text')) {
-			$control->section = 'twenty_one_header_section';
-			$control->label = __('Display Site Title & Tagline (over header image)', 'twentyone');
+			$control->section = 'luma_core_header_section';
+			$control->label = __('Display Site Title & Tagline (over header image)', I18nService::getDomain());
 			$control->priority = 40;
 		}
 
 		// Custom header text
 		if ($control = $wp_customize->get_control('header_image')) {
-			$control->section = 'twenty_one_header_section';
+			$control->section = 'luma_core_header_section';
 			$control->priority = 45;
 		}
 	}
@@ -225,27 +235,27 @@ final class Customize
 	/**
 	 * Register Post section options in the Customizer.
 	 *
-	 * @since Twenty Luma-Core 1.0
+	 * @since Luma-Core 1.0
 	 *
 	 * @param WP_Customize_Manager $wp_customize Theme Customizer object.
 	 * @return void
 	 */
-	public function post($wp_customize): void
+	public function post(WP_Customize_Manager $wp_customize): void
 	{
 		/**
 		 * Add excerpt or full text selector to customizer
 		 */
 		$wp_customize->add_section(
-			'twenty_one_post_section',
+			'luma_core_post_section',
 			array(
-				'title'    => esc_html__('Post and Page Display', 'twentyone'),
+				'title'    => esc_html__('Post and Page Display', I18nService::getDomain()),
 				'priority' => 35,
 			)
 		);
 
 		// Post display width
 		$wp_customize->add_setting(
-			'twenty_one_post_width',
+			'luma_core_post_width',
 			array(
 				'capability'        => 'edit_theme_options',
 				'default'           => 'default',
@@ -256,15 +266,15 @@ final class Customize
 			)
 		);
 		$wp_customize->add_control(
-			'twenty_one_post_width',
+			'luma_core_post_width',
 			array(
 				'type'     => 'radio',
-				'section'  => 'twenty_one_post_section',
-				'label'    => esc_html__('Display width for posts:', 'twentyone'),
-				'settings' => 'twenty_one_post_width',
+				'section'  => 'luma_core_post_section',
+				'label'    => esc_html__('Display width for posts:', I18nService::getDomain()),
+				'settings' => 'luma_core_post_width',
 				'choices'  => array(
-					'default' => esc_html__('Default', 'twentyone'),
-					'wide'    => esc_html__('Wide', 'twentyone'),
+					'default' => esc_html__('Default', I18nService::getDomain()),
+					'wide'    => esc_html__('Wide', I18nService::getDomain()),
 				),
 				'priority' => 5,
 			)
@@ -272,7 +282,7 @@ final class Customize
 
 		// Page display width
 		$wp_customize->add_setting(
-			'twenty_one_post_page_width',
+			'luma_core_post_page_width',
 			array(
 				'capability'        => 'edit_theme_options',
 				'default'           => 'default',
@@ -283,15 +293,15 @@ final class Customize
 			)
 		);
 		$wp_customize->add_control(
-			'twenty_one_post_page_width',
+			'luma_core_post_page_width',
 			array(
 				'type'     => 'radio',
-				'section'  => 'twenty_one_post_section',
-				'label'    => esc_html__('Display width for pages:', 'twentyone'),
-				'settings' => 'twenty_one_post_page_width',
+				'section'  => 'luma_core_post_section',
+				'label'    => esc_html__('Display width for pages:', I18nService::getDomain()),
+				'settings' => 'luma_core_post_page_width',
 				'choices'  => array(
-					'default' => esc_html__('Default', 'twentyone'),
-					'wide'    => esc_html__('Wide', 'twentyone'),
+					'default' => esc_html__('Default', I18nService::getDomain()),
+					'wide'    => esc_html__('Wide', I18nService::getDomain()),
 				),
 				'priority' => 5,
 			)
@@ -301,7 +311,7 @@ final class Customize
 		// full display requires list format, conditinally controlled in customizer by js
 		// enforced by css due to .is-excerpt or .is-full classes on .archive-grid
 		$wp_customize->add_setting(
-			'twenty_one_post_archive_display',
+			'luma_core_post_archive_display',
 			array(
 				'capability'        => 'edit_theme_options',
 				'default'           => 'excerpt',
@@ -312,22 +322,22 @@ final class Customize
 			)
 		);
 		$wp_customize->add_control(
-			'twenty_one_post_archive_display',
+			'luma_core_post_archive_display',
 			array(
 				'type'     => 'radio',
-				'section'  => 'twenty_one_post_section',
-				'label'    => esc_html__('On Archive Pages, posts show:', 'twentyone'),
-				'description'    => esc_html__('Full requires list view below', 'twentyone'),
-				'settings' => 'twenty_one_post_archive_display',
+				'section'  => 'luma_core_post_section',
+				'label'    => esc_html__('On Archive Pages, posts show:', I18nService::getDomain()),
+				'description'    => esc_html__('Full requires list view below', I18nService::getDomain()),
+				'settings' => 'luma_core_post_archive_display',
 				'choices'  => array(
-					'excerpt' => esc_html__('Summary', 'twentyone'),
-					'full'    => esc_html__('Full text', 'twentyone'),
+					'excerpt' => esc_html__('Summary', I18nService::getDomain()),
+					'full'    => esc_html__('Full text', I18nService::getDomain()),
 				),
 				'priority' => 15,
 			)
 		);
 		$wp_customize->selective_refresh->add_partial(
-			'twenty_one_post_archive_display',
+			'luma_core_post_archive_display',
 			[
 				'selector'        => '.archive-loop',
 				'render_callback' => function () {
@@ -338,7 +348,7 @@ final class Customize
 
 		// Archive display format
 		$wp_customize->add_setting(
-			'twenty_one_post__archive_format',
+			'luma_core_post__archive_format',
 			array(
 				'capability'        => 'edit_theme_options',
 				'default'           => 'list',
@@ -349,16 +359,16 @@ final class Customize
 			)
 		);
 		$wp_customize->add_control(
-			'twenty_one_post__archive_format',
+			'luma_core_post__archive_format',
 			array(
 				'type'     => 'radio',
-				'section'  => 'twenty_one_post_section',
-				'label'    => esc_html__('On Archive Pages, display posts excerpts in:', 'twentyone'),
-				'settings' => 'twenty_one_post__archive_format',
+				'section'  => 'luma_core_post_section',
+				'label'    => esc_html__('On Archive Pages, display posts excerpts in:', I18nService::getDomain()),
+				'settings' => 'luma_core_post__archive_format',
 				'choices'  => array(
-					'list' => esc_html__('List', 'twentyone'),
-					'grid'    => esc_html__('Grid', 'twentyone'),
-					'masonry'    => esc_html__('Masonry', 'twentyone'),
+					'list' => esc_html__('List', I18nService::getDomain()),
+					'grid'    => esc_html__('Grid', I18nService::getDomain()),
+					'masonry'    => esc_html__('Masonry', I18nService::getDomain()),
 				),
 				'priority' => 20,
 			)
@@ -366,7 +376,7 @@ final class Customize
 
 		// Author bio on single post
 		$wp_customize->add_setting(
-			'twenty_one_post_display_author_bio',
+			'luma_core_post_display_author_bio',
 			array(
 				'capability'        => 'edit_theme_options',
 				'default'           => false,
@@ -375,17 +385,17 @@ final class Customize
 			)
 		);
 		$wp_customize->add_control(
-			'twenty_one_post_display_author_bio',
+			'luma_core_post_display_author_bio',
 			array(
 				'type'     => 'checkbox',
-				'section'  => 'twenty_one_post_section',
-				'label'    => esc_html__('On single post pages, show author bio in the footer (if set up)', 'twentyone'),
-				'settings' => 'twenty_one_post_display_author_bio',
+				'section'  => 'luma_core_post_section',
+				'label'    => esc_html__('On single post pages, show author bio in the footer (if set up)', I18nService::getDomain()),
+				'settings' => 'luma_core_post_display_author_bio',
 				'priority' => 25,
 			)
 		);
 		$wp_customize->selective_refresh->add_partial(
-			'twenty_one_post_display_author_bio',
+			'luma_core_post_display_author_bio',
 			array(
 				'selector'        => '.author-bio', // wrapper element in template
 				'container_inclusive' => true,
@@ -399,14 +409,15 @@ final class Customize
 	/**
 	 * Register color-related Customizer settings and controls.
 	 *	 
-	 * @since Twenty Luma-Core 1.0
+	 * @since Luma-Core 1.0
 	 *
 	 * @param WP_Customize_Manager $wp_customize Theme Customizer object.
 	 * @return void
 	 */
-	public function colors($wp_customize): void
+	public function colors(WP_Customize_Manager $wp_customize): void
 	{
-		$colors = ThemeJSON::get_settings(['color', 'palette']);
+		//$colors = ThemeJSON::get_settings(['color', 'palette']);
+		$colors = $this->theme_json->filter(['settings', 'color', 'palette'])->raw();
 		$priority = 5;
 
 		if (! empty($colors)) {
@@ -433,12 +444,12 @@ final class Customize
 		}
 
 		// Subheading - Typography
-		$wp_customize->add_setting('twenty_one_colors_typography_heading', [
+		$wp_customize->add_setting('luma_core_colors_typography_heading', [
 			'sanitize_callback' => 'sanitize_text_field',
 		]);
 		$wp_customize->add_control(new CustomizerSectionHeadingControl(
 			$wp_customize,
-			'twenty_one_colors_typography_heading',
+			'luma_core_colors_typography_heading',
 			[
 				'label'    => 'Typography',
 				'section'  => 'colors', // core section no name spacing
@@ -447,12 +458,12 @@ final class Customize
 		));
 
 		// Subheading - Typography
-		$wp_customize->add_setting('twenty_one_colors_general_heading', [
+		$wp_customize->add_setting('luma_core_colors_general_heading', [
 			'sanitize_callback' => 'sanitize_text_field',
 		]);
 		$wp_customize->add_control(new CustomizerSectionHeadingControl(
 			$wp_customize,
-			'twenty_one_colors_general_heading',
+			'luma_core_colors_general_heading',
 			[
 				'label'    => 'General',
 				'section'  => 'colors', // core section no name spacing
@@ -461,12 +472,12 @@ final class Customize
 		));
 
 		// Subheading - Backgrounds
-		$wp_customize->add_setting('twenty_one_colors_background_heading', [
+		$wp_customize->add_setting('luma_core_colors_background_heading', [
 			'sanitize_callback' => 'sanitize_text_field',
 		]);
 		$wp_customize->add_control(new CustomizerSectionHeadingControl(
 			$wp_customize,
-			'twenty_one_colors_background_heading',
+			'luma_core_colors_background_heading',
 			[
 				'label'    => 'Background',
 				'section'  => 'colors', // core section no name spacing
@@ -483,7 +494,7 @@ final class Customize
 	/**
 	 * Get all font categories and their properties.
 	 *
-	 * @since Twenty Luma-Core 1.0
+	 * @since Luma-Core 1.0
 	 *
 	 * @return array<string, array<string, mixed>> Array of font categories and their properties.
 	 */
@@ -523,17 +534,15 @@ final class Customize
 	/**
 	 * Register all font-related Customizer settings and controls.
 	 *
-	 * @since Twenty Luma-Core 1.0
+	 * @since Luma-Core 1.0
 	 *
 	 * @param WP_Customize_Manager $wp_customize Theme Customizer object.
 	 * @return void
 	 */
-	public static function register_fonts($wp_customize): void
+	public function register_fonts(WP_Customize_Manager $wp_customize): void
 	{
-		$themeJSON = new ThemeJSONnew;
-
 		$wp_customize->add_section('fonts_section', [
-			'title'    => __('Fonts', 'twentyone'),
+			'title'    => __('Fonts', I18nService::getDomain()),
 			'priority' => 50,
 		]);
 
@@ -559,10 +568,10 @@ final class Customize
 
 			// Font family
 			if ($props['family'] ?? false) {
-				$choices = $themeJSON->load(['settings', 'typography', 'fontFamilies'])->choices();
+				$choices = $this->theme_json->filter(['settings', 'typography', 'fontFamilies'])->choices();
 
 				if (!empty($choices)) {
-					$default = $themeJSON->load(['settings', 'custom', 'font', 'family', $category])->slug_from_css_var();
+					$default = $this->theme_json->filter(['settings', 'custom', 'font', 'family', $category])->slug_from_css_var();
 					$wp_customize->add_setting("font_family_{$category}", [
 						'default'           => $default,
 						'sanitize_callback' => static function ($value) use ($choices) {
@@ -571,7 +580,7 @@ final class Customize
 						'transport'         => 'postMessage',
 					]);
 					$wp_customize->add_control("font_family_{$category}_control", [
-						'label'    => __('Font', 'twentyone'),
+						'label'    => __('Font', I18nService::getDomain()),
 						'section'  => 'fonts_section',
 						'settings' => "font_family_{$category}",
 						'type'     => 'select',
@@ -584,7 +593,7 @@ final class Customize
 
 			// Font weight
 			if ($props['weight'] ?? false) {
-				$default = $themeJSON->load(['settings', 'custom', 'font', 'weight', $category])->raw_string();
+				$default = $this->theme_json->filter(['settings', 'custom', 'font', 'weight', $category])->raw_string();
 				$wp_customize->add_setting("font_weight_{$category}", [
 					'default'           => $default,
 					'sanitize_callback' => function ($value) {
@@ -593,7 +602,7 @@ final class Customize
 					'transport'         => 'postMessage',
 				]);
 				$wp_customize->add_control("font_weight_{$category}_control", [
-					'label'       => __('Font Weight', 'twentyone'),
+					'label'       => __('Font Weight', I18nService::getDomain()),
 					'section'     => 'fonts_section',
 					'settings'    => "font_weight_{$category}",
 					'type'        => 'number',
@@ -609,7 +618,7 @@ final class Customize
 
 			// Line height
 			if ($props['line_height'] ?? false) {
-				$default = $themeJSON->load(['settings', 'custom', 'font', 'lineHeight', $category])->raw_string();
+				$default = $this->theme_json->filter(['settings', 'custom', 'font', 'lineHeight', $category])->raw_string();
 				$wp_customize->add_setting("font_line_height_{$category}", [
 					'default'           => $default,
 					'sanitize_callback' => function ($value) {
@@ -618,7 +627,7 @@ final class Customize
 					'transport'         => 'postMessage',
 				]);
 				$wp_customize->add_control("font_line_height_{$category}_control", [
-					'label'       => __('Line Height', 'twentyone'),
+					'label'       => __('Line Height', I18nService::getDomain()),
 					'section'     => 'fonts_section',
 					'settings'    => "font_line_height_{$category}",
 					'type'        => 'number',
@@ -634,17 +643,17 @@ final class Customize
 
 			// Font size (if applicable)
 			if (!empty($props['size'])) {
-				$choices = $themeJSON->load(['settings', 'typography', 'fontSizes'])->choices();
+				$choices = $this->theme_json->filter(['settings', 'typography', 'fontSizes'])->choices();
 
 				if (!empty($choices)) {
-					$default = $themeJSON->load(['settings', 'custom', 'font', 'size', $category])->slug_from_css_var();
+					$default = $this->theme_json->filter(['settings', 'custom', 'font', 'size', $category])->slug_from_css_var();
 					$wp_customize->add_setting("font_size_{$category}", [
 						'default'           => $default,
 						'sanitize_callback' => 'sanitize_text_field',
 						'transport'         => 'postMessage',
 					]);
 					$wp_customize->add_control("font_size_{$category}_control", [
-						'label'    => __('Font Size', 'twentyone'),
+						'label'    => __('Font Size', I18nService::getDomain()),
 						'section'  => 'fonts_section',
 						'settings' => "font_size_{$category}",
 						'type'     => 'select',
@@ -674,13 +683,12 @@ final class Customize
 		}
 	}
 
-	public function modify_theme_json_user(\WP_Theme_JSON_Data $theme_json)
+	public function modify_theme_json_user(\WP_Theme_JSON_Data $wp_theme_json_data)
 	{
-		$json_theme = new ThemeJSONnew();
-		$json_user_new = [];
+		$user_json = [];
 
 		// COLOR
-		$colors = $json_theme->load(['settings', 'color', 'palette'])->raw();
+		$colors = $this->theme_json->filter(['settings', 'color', 'palette'])->raw();
 		foreach ($colors as $color) {
 			// check if theme_mod exists and compare against defaut
 			$slug = $color['slug'] ?? null;
@@ -689,7 +697,7 @@ final class Customize
 			$default = $color['color'];
 			if ($theme_mod && $default && $theme_mod !== $default) {
 				$color['color'] = $theme_mod;
-				$json_user_new['color']['palette'][] = $color;
+				$user_json['color']['palette'][] = $color;
 			}
 		}
 
@@ -699,15 +707,15 @@ final class Customize
 			foreach ($props as $prop => $entries) {
 				if (empty($entries)) break;
 
-				$default = $json_theme->load(['settings', 'custom', 'font', $prop, $category])->slug_from_css_var();
+				$default = $this->theme_json->filter(['settings', 'custom', 'font', $prop, $category])->slug_from_css_var();
 				$theme_mod = get_theme_mod("font_{$prop}_{$category}", null);
 
 				if (isset($theme_mod) && isset($default) && $theme_mod !== $default) {
 					if ($prop === 'weight' || $prop === 'line_height') {
-						$json_user_new['custom']['font'][$prop][$category] = $theme_mod;
+						$user_json['custom']['font'][$prop][$category] = $theme_mod;
 					} else if ($prop === 'family' || $prop === 'size') {
-						$value = $json_theme->load(['settings', 'typography', $entries['choices']])->filter_by_slug($theme_mod)->css_var();
-						$json_user_new['custom']['font'][$prop][$category] = "var({$value})";
+						$value = $this->theme_json->filter(['settings', 'typography', $entries['choices']])->filter_by_slug($theme_mod)->css_var();
+						$user_json['custom']['font'][$prop][$category] = "var({$value})";
 					}
 				}
 			}
@@ -720,19 +728,19 @@ final class Customize
 		];
 
 		foreach (['color', 'custom'] as $key) {
-			if (!empty($json_user_new[$key])) {
-				$new_data['settings'][$key] = $json_user_new[$key];
+			if (!empty($user_json[$key])) {
+				$new_data['settings'][$key] = $user_json[$key];
 			}
 		}
 
-		return $theme_json->update_with($new_data);
+		return $wp_theme_json_data->update_with($new_data);
 	}
 
 
 	/**
 	 * Enqueue scripts for the Customizer live preview.
 	 *
-	 * @since Twenty Luma-Core 1.0
+	 * @since Luma-Core 1.0
 	 *
 	 * @return void
 	 */
@@ -740,27 +748,29 @@ final class Customize
 	{
 		// customize live preview script
 		wp_enqueue_script(
-			'Luma-Core-customize-preview',
+			'luma-core-customize-preview',
 			get_template_directory_uri() . '/assets/js/customize-preview.js',
 			['customize-preview'],
 			null,
 			true
 		);
 
+		$typography = $this->theme_json->filter(['settings', 'typography'])->raw();
+
 		// add data from theme.json to script, for lookups
-		$fonts_families = ThemeJSON::get_settings(['typography', 'font_families']);
+		$fonts_families = $typography['font_families'];
 		if (!empty($fonts_families)) {
-			wp_localize_script('Luma-Core-customize-preview', 'fontFamilies', $fonts_families);
+			wp_localize_script('luma-core-customize-preview', 'fontFamilies', $fonts_families);
 		}
 
-		$font_sizes = ThemeJSON::get_settings(['typography', 'font_sizes']);
+		$font_sizes = $typography['font_sizes'];
 		if (!empty($font_sizes)) {
-			wp_localize_script('Luma-Core-customize-preview', 'fontSizes', $font_sizes);
+			wp_localize_script('luma-core-customize-preview', 'fontSizes', $font_sizes);
 		}
 
-		$colors = ThemeJSON::get_settings(['color', 'palette']);
+		$colors = $this->theme_json->filter(['settings','color', 'palette'])->raw();
 		if (! empty($colors)) {
-			wp_localize_script('Luma-Core-customize-preview', 'colorPalette', $colors);
+			wp_localize_script('luma-core-customize-preview', 'colorPalette', $colors);
 		}
 	}
 
@@ -768,7 +778,7 @@ final class Customize
 	/**
 	 * Enqueues customize control (left settings pane) styles and scripts
 	 *
-	 * @since Twenty Luma-Core 1.0
+	 * @since Luma-Core 1.0
 	 *
 	 * @return void
 	 */
@@ -776,7 +786,7 @@ final class Customize
 	{
 		// customize admin css enqueue
 		wp_enqueue_style(
-			'Luma-Core-style',
+			'luma-core-style',
 			get_template_directory_uri() . '/assets/css/customize-controls.css',
 			array(),
 			wp_get_theme()->get('Version')
@@ -784,7 +794,7 @@ final class Customize
 
 		// customize admin js enqueue
 		wp_enqueue_script(
-			'Luma-Core-customize-controls',
+			'luma-core-customize-controls',
 			get_template_directory_uri() . '/assets/js/customize-controls.js',
 			['customize-controls'], // depend on controls API
 			filemtime(get_template_directory() . '/assets/js/customize-controls.js'),
@@ -792,7 +802,7 @@ final class Customize
 		);
 
 		// Localize only the keys (category slugs), not the full config (to keep JS light)
-		wp_localize_script('Luma-Core-customize-controls', 'fontReset', [
+		wp_localize_script('luma-core-customize-controls', 'fontReset', [
 			'categories' => self::get_font_categories(),
 			'ajax'  => admin_url('admin-ajax.php'),
 			'nonce' => wp_create_nonce('font_reset_nonce'),

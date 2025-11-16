@@ -67,23 +67,23 @@
     bindTextSetting('blogname', '.site-title a'); // other pages
     bindTextSetting('blogname', '.site-title'); // home page
     //bindTextSetting('blogdescription', '.site-description');
-    bindVisibilitySetting('twenty_one_display_title_and_tagline', '.site-branding-text');
+    bindVisibilitySetting('luma_core_display_title_and_tagline', '.site-branding-text');
 
     // ---- Header options ----
-    bindClassToggle('twenty_one_header_sticky', '.site-header-container', 'is-sticky');
-    bindClassToggle('twenty_one_header_transparent', '.site-header-container', 'is-transparent');
-    bindClassToggle('twenty_one_header_nav_full', '.site-header', 'is-full-width');
-    // see end of file for twenty_one_header_shrink
+    bindClassToggle('luma_core_header_sticky', '.site-header-container', 'is-sticky');
+    bindClassToggle('luma_core_header_transparent', '.site-header-container', 'is-transparent');
+    bindClassToggle('luma_core_header_nav_full', '.site-header', 'is-full-width');
+    // see end of file for luma_core_header_shrink
     bindTextSetting('blogname', '.site-title--custom-header'); // home page
     bindTextSetting('blogdescription', '.site-description--custom-header');
     bindVisibilitySetting('display_header_text', '.custom-header-image-inner');
 
     // ---- Display options ----
-    bindClassToggle('twenty_one_post_width', 'body', 'is-wide-single');
-    bindClassToggle('twenty_one_post_page_width', 'body', 'is-wide-page');
-    // 'twenty_one_post_archive_display' -> selective refresh partial
-    // 'twenty_one_post__archive_format' handled in archive-masonry.js (enqueued by customize, also conditionally on front end)
-    // 'twenty_one_post_display_author_bio' -> selective refresh partial
+    bindClassToggle('luma_core_post_width', 'body', 'is-wide-single');
+    bindClassToggle('luma_core_post_page_width', 'body', 'is-wide-page');
+    // 'luma_core_post_archive_display' -> selective refresh partial
+    // 'luma_core_post__archive_format' handled in archive-masonry.js (enqueued by customize, also conditionally on front end)
+    // 'luma_core_post_display_author_bio' -> selective refresh partial
 
 
     // ---- Color palette  ----
@@ -141,7 +141,7 @@
 
 
     // init navbar shrink script
-    wp.customize('twenty_one_header_shrink', function (value) {
+    wp.customize('luma_core_header_shrink', function (value) {
         value.bind(function (enabled) {
             const header = document.querySelector('.site-header');
 

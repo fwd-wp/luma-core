@@ -6,7 +6,7 @@
  *
  * @package Luma-Core
  *  
- * @since Twenty Luma-Core 1.0
+ * @since Luma-Core 1.0
  */
 
 ?>
@@ -18,13 +18,13 @@
 				<?php
 				printf(
 					/* translators: %s: Search term. */
-					esc_html__( 'Results for "%s"', 'twentyone' ),
+					esc_html__( 'Results for "%s"', 'luma-core' ),
 					'<span class="page-description search-term">' . esc_html( get_search_query() ) . '</span>'
 				);
 				?>
 			</h2>
 		<?php else : ?>
-			<h2 class="page-title"><?php esc_html_e( 'Nothing here', 'twentyone' ); ?></h2>
+			<h2 class="page-title"><?php esc_html_e( 'Nothing here', 'luma-core' ); ?></h2>
 		<?php endif; ?>
 	</header><!-- .page-header -->
 
@@ -36,7 +36,7 @@
 			printf(
 				'<p>' . wp_kses(
 					/* translators: %s: Link to WP admin new post page. */
-					__( 'Ready to publish your first post? <a href="%s">Get started here</a>.', 'twentyone' ),
+					__( 'Ready to publish your first post? <a href="%s">Get started here</a>.', 'luma-core' ),
 					array(
 						'a' => array(
 							'href' => array(),
@@ -49,12 +49,12 @@
 
 		<?php elseif ( is_search() ) : ?>
 
-			<p><?php esc_html_e( 'Sorry, but nothing matched your search terms. Please try again with some different keywords.', 'twentyone' ); ?></p>
+			<p><?php esc_html_e( 'Sorry, but nothing matched your search terms. Please try again with some different keywords.', 'luma-core' ); ?></p>
 			<?php get_search_form(); ?>
 
 		<?php else : ?>
 
-			<p><?php esc_html_e( 'It seems we can&rsquo;t find what you&rsquo;re looking for. Perhaps searching can help.', 'twentyone' ); ?></p>
+			<p><?php esc_html_e( 'It seems we can&rsquo;t find what you&rsquo;re looking for. Perhaps searching can help.', 'luma-core' ); ?></p>
 			<?php get_search_form(); ?>
 
 		<?php endif; ?>

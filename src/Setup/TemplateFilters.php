@@ -1,8 +1,9 @@
 <?php
 
-namespace Twenty\One\Setup;
+namespace Luma\Core\Setup;
 
-use Twenty\One\Helpers\TemplateFunctions;
+use Luma\Core\Helpers\TemplateFunctions;
+use Luma\Core\Services\I18nService;
 
 /**
  * Filter Functions which enhance the theme by hooking into WordPress
@@ -10,7 +11,7 @@ use Twenty\One\Helpers\TemplateFunctions;
  *
  * @package Luma-Core
  *  
- * @since Twenty Luma-Core 1.0
+ * @since Luma-Core 1.0
  */
 
 class TemplateFilters
@@ -31,7 +32,7 @@ class TemplateFilters
 	/**
 	 * Adds custom classes to the array of body classes.
 	 *
-	 * @since Twenty Luma-Core 1.0
+	 * @since Luma-Core 1.0
 	 *
 	 * @param array $classes Classes for the body element.
 	 * @return array
@@ -56,7 +57,7 @@ class TemplateFilters
 	/**
 	 * Changes comment form default fields.
 	 *
-	 * @since Twenty Luma-Core 1.0
+	 * @since Luma-Core 1.0
 	 *
 	 * @param array $defaults The form defaults.
 	 * @return array
@@ -79,7 +80,7 @@ class TemplateFilters
 	 * @param int $length
 	 * @return int
 	 *
-	 * @since Twenty Luma-Core 1.0
+	 * @since Luma-Core 1.0
 	 */
 	public function excerpt_length(int $length): int
 	{
@@ -92,7 +93,7 @@ class TemplateFilters
 	 * @param string $more Default excerpt more string '[...]'.
 	 * @return string
 	 *
-	 * @since Twenty Luma-Core 1.0
+	 * @since Luma-Core 1.0
 	 */
 	public function continue_reading_link_excerpt(string $more): string
 	{
@@ -111,7 +112,7 @@ class TemplateFilters
 	 * @param string $text Default link text.
 	 * @return string
 	 *
-	 * @since Twenty Luma-Core 1.0
+	 * @since Luma-Core 1.0
 	 */
 	public function continue_reading_link(string $link, string $text): string
 	{
@@ -125,20 +126,20 @@ class TemplateFilters
 	/**
 	 * Adds a title to posts and pages that are missing titles.
 	 *
-	 * @since Twenty Luma-Core 1.0
+	 * @since Luma-Core 1.0
 	 *
 	 * @param string $title The title.
 	 * @return string
 	 */
 	public function post_title($title): string
 	{
-		return '' === $title ? esc_html_x('Untitled', 'Added to posts and pages that are missing titles', 'twentyone') : $title;
+		return '' === $title ? esc_html_x('Untitled', 'Added to posts and pages that are missing titles', I18nService::getDomain()) : $title;
 	}
 
 	/**
 	 * Changes the default navigation arrows to svg icons
 	 *
-	 * @since Twenty Luma-Core 1.0
+	 * @since Luma-Core 1.0
 	 *
 	 * @param string $calendar_output The generated HTML of the calendar.
 	 * @return string
@@ -153,8 +154,8 @@ class TemplateFilters
 	/**
 	 * Retrieve protected post password form content.
 	 *
-	 * @since Twenty Luma-Core 1.0
-	 * @since Twenty Luma-Core 1.4 Corrected parameter name for `$output`,
+	 * @since Luma-Core 1.0
+	 * @since Luma-Core 1.4 Corrected parameter name for `$output`,
 	 *                              added the `$post` parameter.
 	 *
 	 * @param string      $output The password form HTML output.
@@ -165,9 +166,9 @@ class TemplateFilters
 	{
 		$post   = get_post($post);
 		$label  = 'pwbox-' . (empty($post->ID) ? wp_rand() : $post->ID);
-		$output = '<p class="post-password-message">' . esc_html__('This content is password protected. Please enter a password to view.', 'twentyone') . '</p>
+		$output = '<p class="post-password-message">' . esc_html__('This content is password protected. Please enter a password to view.', I18nService::getDomain()) . '</p>
 	<form action="' . esc_url(site_url('wp-login.php?action=postpass', 'login_post')) . '" class="post-password-form" method="post">
-	<label class="post-password-form__label" for="' . esc_attr($label) . '">' . esc_html_x('Password', 'Post password form', 'twentyone') . '</label><input class="post-password-form__input" name="post_password" id="' . esc_attr($label) . '" type="password" spellcheck="false" size="20" /><input type="submit" class="post-password-form__submit" name="' . esc_attr_x('Submit', 'Post password form', 'twentyone') . '" value="' . esc_attr_x('Enter', 'Post password form', 'twentyone') . '" /></form>
+	<label class="post-password-form__label" for="' . esc_attr($label) . '">' . esc_html_x('Password', 'Post password form', I18nService::getDomain()) . '</label><input class="post-password-form__input" name="post_password" id="' . esc_attr($label) . '" type="password" spellcheck="false" size="20" /><input type="submit" class="post-password-form__submit" name="' . esc_attr_x('Submit', 'Post password form', I18nService::getDomain()) . '" value="' . esc_attr_x('Enter', 'Post password form', I18nService::getDomain()) . '" /></form>
 	';
 		return $output;
 	}
