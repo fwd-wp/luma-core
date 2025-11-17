@@ -11,60 +11,50 @@ if (! defined('ABSPATH')) {
 
 class ThemeJsonService
 {
-    /**
-     * Central cache for all data, shared across instances
-     *
-     * Keys:
-     * 'json:{origin}' => decoded theme.json
-     * 'color:{slug}:{stripHash}' => cached color values
-     */
     private static array $cache = [];
-
-    private static string $origin = 'theme';
-    /**
-     * stores data for chaining
-     */
+    private string $origin = 'theme';
     protected array|string $data = [];
-
-    /**
-     * original path - used for css var generation
-     */
     protected array $original_path = [];
 
     public function __construct(string $origin = 'theme')
     {
-        self::$origin = $origin;
-        $this->load_theme_json(); // will populate static cache
-        $this->data = self::$cache["json:{self::$origin}"] ?? [];
+        $this->origin = $origin;
+        // No data load here; only set origin
     }
 
     /**
-     * Filter / drill down into data using a path array
+     * Explicitly load and get data (lazy load)
      */
-    public function filter(array $path, bool $snake_case = false): self
+    public function get(array $path = [], bool $snake_case = false): self
     {
-        $path = $snake_case ? array_map(fn($p) => Functions::snake_to_camel($p), $path) : $path;
+        // Lazy-load theme.json only on first get
+        if (!isset(self::$cache["json:{$this->origin}"])) {
+            self::$cache["json:{$this->origin}"] = WP_Theme_JSON_Resolver::get_merged_data($this->origin)->get_data();
+        }
 
-        $this->data = $this->filter_data($path, self::$origin);
+        // Apply snake_case normalization to full dataset first
+        $dataToUse = self::$cache["json:{$this->origin}"];
+        if ($snake_case && is_array($dataToUse)) {
+            $dataToUse = Functions::normalize_camel_keys_recursive($dataToUse);
+        }
+
+        // Drill down into path if provided
+        $this->data = $this->drill_down($path, $dataToUse);
         $this->original_path = $path;
 
         return $this;
     }
 
     /**
-     * filter output by slug for built in values (not custom)
-     *
-     * @param string $slug e.g. 'primary'
-     * @return object (single flat array)
+     * Optional: get a single item by slug
      */
-    public function filter_by_slug(string $slug): self
+    public function get_by_slug(string $slug): self
     {
         if (!is_array($this->data)) return $this;
 
         foreach ($this->data as $item) {
             if (isset($item['slug']) && $item['slug'] === $slug) {
-                $this->data = $item; // single flat array
-            } else {
+                $this->data = $item;
                 break;
             }
         }
@@ -72,128 +62,64 @@ class ThemeJsonService
         return $this;
     }
 
-    /**
-     * Terminal method: return data in original format
-     */
-    public function raw(): array|string
-    {
-        return $this->data;
-    }
+    /** Raw accessors */
+    public function raw(): array|string { return $this->data; }
+    public function raw_array(): array { return is_array($this->data) ? $this->data : []; }
+    public function raw_string(): string { return is_string($this->data) ? $this->data : ''; }
 
-    /**
-     * Terminal method: only outputs a string
-     */
-    public function raw_string(): string
-    {
-        if (is_string($this->data)) {
-            return $this->data;
-        } else {
-            return '';
-        }
-    }
-    /**
-     * Terminal method: only outputs an array
-     */
-    public function raw_array(): array
-    {
-        if (is_array($this->data)) {
-            return $this->data;
-        } else {
-            return [];
-        }
-    }
-
-    /**
-     * Terminal method: return full data array in snake case format
-     *
-     * //TODO: not normalizing camelCase keys to snake_case
-     *
-     */
+    /** Helpers */
     public function snake_case(): array|string
     {
         return Functions::normalize_camel_keys_recursive($this->data);
     }
 
-    /**
-     * Terminal method: return choices array (slug => name)
-     */
     public function choices(): array
     {
-        if (!is_array($this->data)) return [];
-
-        return $this->convert_to_choices($this->data);
+        return is_array($this->data) ? $this->convert_to_choices($this->data) : [];
     }
 
-    /**
-     * Terminal method: return with value if not present in preset, also snake_case if set
-     */
     public function normalized(bool $snake_case = false): array
     {
         if (!is_array($this->data)) return [];
 
-        $data = $this->normalize_data($this->data); // fills value keys
-
-        if ($snake_case) {
-            return Functions::normalize_camel_keys_recursive($data);
-        }
-
-        return $data; // original camelCase
+        $data = $this->normalize_data($this->data);
+        return $snake_case ? Functions::normalize_camel_keys_recursive($data) : $data;
     }
 
-    /**
-     * Terminal method: converts slug string to associated css var based on path passed in to load()
-     * 
-     * $this->data can be a string (slug) or an associative array with a slug key and value
-     */
     public function css_var(): string
     {
         if (is_array($this->data) && isset($this->data['slug'])) {
             return $this->generate_css_var($this->data['slug']);
         }
-
         if (is_string($this->data)) {
             return $this->generate_css_var($this->data);
         }
-
         return '';
     }
 
-    /**
-     * Terminal method: converts css var to slug string
-     * 
-     * $this->data must be a css var (string) can be wrapped in var()
-     */
     public function slug_from_css_var(): string
     {
         if (is_string($this->data)) {
             return Functions::get_slug_from_css_var($this->data);
         }
-
         return '';
     }
 
+    /** --- Internal helpers --- */
 
-    private function load_theme_json(): array
+    private function drill_down(array $path, array|string $data = null): array|string|null
     {
-        $origin = self::$origin;
-        $json_cache_key = "json:{$origin}";
+        $data = $data ?? self::$cache["json:{$this->origin}"];
 
-        if (!isset(self::$cache[$json_cache_key])) {
-            self::$cache[$json_cache_key] = WP_Theme_JSON_Resolver::get_merged_data($origin)->get_data();
+        if (empty($path)) {
+            return $data;
         }
 
-        return self::$cache[$json_cache_key];
-    }
-
-    private function filter_data(array $path): array|string|null
-    {
-        $cache_key = 'json:' . self::$origin . ':' . implode(':', $path);
+        $cache_key = 'json:' . $this->origin . ':' . implode(':', $path);
 
         if (isset(self::$cache[$cache_key])) {
             return self::$cache[$cache_key];
         }
-
-        $data = $this->data;
 
         foreach ($path as $key) {
             if (isset($data[$key])) {
@@ -207,141 +133,71 @@ class ThemeJsonService
         return self::$cache[$cache_key] = $data;
     }
 
-    /**
-     * Private helper
-     * Generate CSS variable name from theme.json preset path
-     * Supports all theme.json v3 preset groups.
-     */
     private function generate_css_var(string $slug): string
     {
-        if (!is_string($slug) || $slug === '') {
-            return '';
-        }
-
+        if (!is_string($slug) || $slug === '') return '';
         $path = $this->original_path;
-        if (!is_array($path) || empty($path)) {
-            return '';
-        }
+        if (!is_array($path) || empty($path)) return '';
 
-        // Strip leading 'settings'
-        if ($path[0] === 'settings') {
-            array_shift($path);
-        }
+        if ($path[0] === 'settings') array_shift($path);
 
         $segments = [];
-
-        // Custom tokens → `--wp--custom--...`
         if ($path[0] === 'custom') {
             $segments[] = 'custom';
-            // Keep exact structure: custom > group > key
             if (isset($path[1])) $segments[] = Functions::to_kebab($path[1]);
             if (isset($path[2])) $segments[] = Functions::to_kebab($path[2]);
         } else {
-            // All presets use `preset` prefix
             $segments[] = 'preset';
-
-            // Map preset group → WP variable prefix
             $map = [
-                'color' => [
-                    'palette' => 'color',
-                    'gradients' => 'gradient',
-                    'duotone' => 'duotone',
-                ],
-                'typography' => [
-                    'fontFamilies' => 'font-family',
-                    'fontSizes' => 'font-size',
-                ],
-                'spacing' => [
-                    'spacingSizes' => 'spacing',
-                    'spacing_scale' => 'spacing',
-                ],
-                'border' => [
-                    'radius' => 'border-radius',
-                    'width' => 'border-width',
-                ],
-                'shadow' => [
-                    // Shadow presets do not have subgroups
-                    '*' => 'shadow',
-                ],
+                'color' => ['palette'=>'color','gradients'=>'gradient','duotone'=>'duotone'],
+                'typography' => ['fontFamilies'=>'font-family','fontSizes'=>'font-size'],
+                'spacing' => ['spacingSizes'=>'spacing','spacing_scale'=>'spacing'],
+                'border' => ['radius'=>'border-radius','width'=>'border-width'],
+                'shadow' => ['*'=>'shadow'],
             ];
 
             $group = $path[0] ?? null;
             $sub = $path[1] ?? null;
-
-            if (isset($map[$group])) {
-                if (isset($map[$group][$sub])) {
-                    $segments[] = $map[$group][$sub];
-                } elseif (isset($map[$group]['*'])) {
-                    $segments[] = $map[$group]['*'];
-                }
-            }
+            $segments[] = $map[$group][$sub] ?? $map[$group]['*'] ?? '';
         }
 
-        // Append normalized slug
         $segments[] = Functions::to_kebab($slug);
-
         return '--wp--' . implode('--', $segments);
     }
 
-    /**
-     * Private helper: convert internal data to slug => name
-     */
     private function convert_to_choices(array $path): array
     {
-        // Check that this is a list of entries with slugs
-        if (!empty($path) && isset($path[0]) && is_array($path[0]) && array_key_exists('slug', $path[0])) {
-            $choices = [];
-
+        $choices = [];
+        if (!empty($path) && isset($path[0]) && is_array($path[0]) && isset($path[0]['slug'])) {
             foreach ($path as $entry) {
-                // Must have slug AND name — otherwise skip
-                if (!isset($entry['slug']) || !isset($entry['name'])) {
-                    continue;
+                if (isset($entry['slug'], $entry['name'])) {
+                    $choices[$entry['slug']] = $entry['name'];
                 }
-
-                $choices[$entry['slug']] = $entry['name'];
             }
-
-            return $choices;
         }
-
-        return [];
+        return $choices;
     }
 
-    /**
-     * Private helper
-     * normalizes data so all ararys contain 'value'
-     * works on top level (array of arrays )
-     */
     private function normalize_data($data): array
     {
-        if (!is_array($data)) {
-            return [];
-        }
-
+        if (!is_array($data)) return [];
         $formatted = [];
+        $presetValueKeys = ['size','fontFamily','color','gradient','shadow','colors'];
 
-        // Preset property names that map to 'value'
-        $presetValueKeys = ['size', 'fontFamily', 'color', 'gradient', 'shadow', 'colors'];
-
-        // Numeric array → multiple preset items
         if (array_values($data) === $data) {
             foreach ($data as $item) {
                 if (!is_array($item)) continue;
-
-                // Only add 'value' if not already present (some entries already have it)
                 if (!isset($item['value'])) {
                     foreach ($presetValueKeys as $prop) {
                         if (isset($item[$prop])) {
                             $item['value'] = $item[$prop];
-                            break; // first match wins
+                            break;
                         }
                     }
                 }
-
                 $formatted[] = $item;
             }
         } else {
-            // Single associative array (custom entry), or too deep
             $formatted = $data;
         }
 
