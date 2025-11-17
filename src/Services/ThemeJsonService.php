@@ -1,6 +1,6 @@
 <?php
 
-namespace Luma\Core\Models;
+namespace Luma\Core\Services;
 
 use Luma\Core\Helpers\Functions;
 use \WP_Theme_JSON_Resolver;
@@ -33,9 +33,9 @@ class ThemeJsonService
 
     public function __construct(string $origin = 'theme')
     {
-        $this->origin = $origin;
-        $this->load_theme_json($this->origin); // will populate static cache
-        $this->data = self::$cache["json:{$this->origin}"] ?? [];
+        self::$origin = $origin;
+        $this->load_theme_json(); // will populate static cache
+        $this->data = self::$cache["json:{self::$origin}"] ?? [];
     }
 
     /**
@@ -45,7 +45,7 @@ class ThemeJsonService
     {
         $path = $snake_case ? array_map(fn($p) => Functions::snake_to_camel($p), $path) : $path;
 
-        $this->data = $this->filter_data($path, $this->origin);
+        $this->data = $this->filter_data($path, self::$origin);
         $this->original_path = $path;
 
         return $this;
@@ -173,9 +173,10 @@ class ThemeJsonService
     }
 
 
-    private function load_theme_json(string $origin): array
+    private function load_theme_json(): array
     {
-        $json_cache_key = "json:$origin";
+        $origin = self::$origin;
+        $json_cache_key = "json:{$origin}";
 
         if (!isset(self::$cache[$json_cache_key])) {
             self::$cache[$json_cache_key] = WP_Theme_JSON_Resolver::get_merged_data($origin)->get_data();
@@ -186,7 +187,7 @@ class ThemeJsonService
 
     private function filter_data(array $path): array|string|null
     {
-        $cache_key = 'json:' . $this->origin . ':' . implode(':', $path);
+        $cache_key = 'json:' . self::$origin . ':' . implode(':', $path);
 
         if (isset(self::$cache[$cache_key])) {
             return self::$cache[$cache_key];
