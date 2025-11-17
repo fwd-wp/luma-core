@@ -365,7 +365,7 @@ class TemplateFunctions
 	 */
 	public static function is_excerpt_micro_post(): bool
 	{
-		$excerpt_setting = ThemeMod::get('luma_core_post_archive_display');
+		$excerpt_setting = ThemeModModel::get('luma_core_post_archive_display');
 		$is_excerpt = ($excerpt_setting === 'excerpt');
 
 		if (! $is_excerpt || is_single()) {

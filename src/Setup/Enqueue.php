@@ -66,7 +66,7 @@ class Enqueue
             );
         }
 
-        if (ThemeMod::get('luma_core_post__archive_format') === 'masonry') {
+        if (ThemeModModel::get('luma_core_post__archive_format') === 'masonry') {
             wp_enqueue_script(
                 'luma-core-archive-masonry',
                 get_template_directory_uri() . '/assets/js/archive-masonry.js',
