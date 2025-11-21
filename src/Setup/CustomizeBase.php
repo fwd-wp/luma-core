@@ -20,8 +20,13 @@ class CustomizeBase
     public function __construct(string $prefix = 'luma_core')
     {
         $this->prefix = $prefix;
-        $this->theme_json = new ThemeJsonService();
+        $this->theme_json = new ThemeJsonService($this->prefix);
+        ThemeSettingsSchema::set_prefix($this->prefix);
     }
+
+    // public static function get_prefix(): string {
+    //     return self::$prefix;
+    // }
 
 
     protected function register_settings(\WP_Customize_Manager $wp_customize, string $group, ?string $section_id = null)

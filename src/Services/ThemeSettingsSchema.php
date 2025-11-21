@@ -6,18 +6,23 @@ class ThemeSettingsSchema
 {
     private static bool $cache_set = false;
     private static array $cache = [];
+    private static string $prefix = 'luma-core';
+
+    public static function set_prefix($prefix): void {
+        self::$prefix = $prefix;
+    }
 
     public static function get_settings_list($prefix = false): array
     {
         // prefixed with sagewood if true
         $schema =  self::get();
-        $prefix = PREFIX;
         $list = [];
+        $self_prefix = self::$prefix;
         foreach ($schema as $group => $values) {
             foreach ($values['settings'] as $id => $items) {
                 if ($items['type'] !== 'subheading' || $items['type'] !== 'button') {
                     if ($prefix) {
-                        $list["{$prefix}{$group}_{$id}"] = $items['label'];
+                        $list["{$self_prefix}{$group}_{$id}"] = $items['label'];
                     } else {
                         $list["{$group}_{$id}"] = $items['label'];
                     }
@@ -168,8 +173,8 @@ class ThemeSettingsSchema
 
         [$group_name, $sub_key] = $parts;
 
-        $prefix = PREFIX;
-        $prefixed_key = "{$prefix}_{$full_key}";
+        $self_prefix = self::$prefix;
+        $prefixed_key = "{$self_prefix}_{$full_key}";
 
         // utlize default from settings list, if it exists
         if (isset(self::$cache[$group_name]['settings'][$sub_key])) {
