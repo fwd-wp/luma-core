@@ -176,8 +176,8 @@ class ThemeSetup
          */
         register_nav_menus(
             array(
-                'main'   => esc_html__('Main menu', I18nService::getDomain()),
-                'footer' => esc_html__('Footer menu', I18nService::getDomain()),
+                'main'   => esc_html__('Main menu', I18nService::get_domain()),
+                'footer' => esc_html__('Footer menu', I18nService::get_domain()),
             )
         );
     }
@@ -197,7 +197,7 @@ class ThemeSetup
     {
         for ($i = 1; $i <= 4; $i++) {
             register_sidebar(array(
-                'name'          => sprintf(__('Footer %d', I18nService::getDomain()), $i),
+                'name'          => sprintf(__('Footer %d', I18nService::get_domain()), $i),
                 'id'            => 'footer-' . $i,
                 'before_widget' => '<section id="%1$s" class="widget %2$s">',
                 'after_widget'  => '</section>',

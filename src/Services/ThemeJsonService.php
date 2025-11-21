@@ -20,6 +20,7 @@ class ThemeJsonService
     {
         $this->origin = $origin;
         // No data load here; only set origin
+        $this->data = []; // always start with empty array
     }
 
     /**
@@ -42,6 +43,11 @@ class ThemeJsonService
         $this->data = $this->drill_down($path, $dataToUse);
         $this->original_path = $path;
 
+        // Ensure $this->data is never null
+        if ($this->data === null) {
+            $this->data = [];
+        }
+
         return $this;
     }
 
@@ -59,18 +65,40 @@ class ThemeJsonService
             }
         }
 
+        if (!is_array($this->data)) {
+            $this->data = [];
+        }
+
         return $this;
     }
 
     /** Raw accessors */
-    public function raw(): array|string { return $this->data; }
-    public function raw_array(): array { return is_array($this->data) ? $this->data : []; }
-    public function raw_string(): string { return is_string($this->data) ? $this->data : ''; }
+    public function raw(): array|string
+    {
+        if (is_array($this->data) || is_string($this->data)) {
+            return $this->data;
+        }
+        return [];
+    }
+
+    public function raw_array(): array
+    {
+        return is_array($this->data) ? $this->data : [];
+    }
+
+    public function raw_string(): string
+    {
+        return is_string($this->data) ? $this->data : '';
+    }
 
     /** Helpers */
     public function snake_case(): array|string
     {
-        return Functions::normalize_camel_keys_recursive($this->data);
+        // changes camelCase keys to snake_case
+        if (is_array($this->data)) {
+            return Functions::normalize_camel_keys_recursive($this->data);
+        }
+        return $this->data;
     }
 
     public function choices(): array
@@ -99,10 +127,7 @@ class ThemeJsonService
 
     public function slug_from_css_var(): string
     {
-        if (is_string($this->data)) {
-            return Functions::get_slug_from_css_var($this->data);
-        }
-        return '';
+        return is_string($this->data) ? Functions::get_slug_from_css_var($this->data) : '';
     }
 
     /** --- Internal helpers --- */
@@ -125,7 +150,7 @@ class ThemeJsonService
             if (isset($data[$key])) {
                 $data = $data[$key];
             } else {
-                $data = null;
+                $data = [];
                 break;
             }
         }
