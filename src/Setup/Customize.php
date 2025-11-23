@@ -26,22 +26,21 @@ if (!defined('ABSPATH')) {
 class Customize extends CustomizeBase
 {
 
-
-
     /**
      * Initialize hooks
      */
     public function __invoke(): void
     {
+        add_action('customize_register', [$this, 'generate_settings'], 5); // early priority to generate settings in time
         // Register sections & settings
         add_action('customize_register', [$this, 'site_identity']); // 20
-        add_action('customize_register', [$this, 'header']);        // 30
-        add_action('customize_register', [$this, 'post']);          // 35
-        add_action('customize_register', [$this, 'colors']);        // 40
+        add_action('customize_register', [$this, 'register_customizer_settings']);
+
+        //add_action('customize_register', [$this, 'colors']);        // 40
         add_action('customize_register', [$this, 'register_fonts']); // 50
 
-        // Modify theme.json data before CSS vars generation
-        add_filter('wp_theme_json_data_user', [$this, 'modify_theme_json_user']);
+        // // Modify theme.json data before CSS vars generation
+        //add_filter('wp_theme_json_data_user', [$this, 'modify_theme_json_user']);
 
         // Enqueue Customizer assets
         add_action('customize_preview_init', [$this, 'enqueue_customize_preview']);
@@ -51,6 +50,55 @@ class Customize extends CustomizeBase
         // Custom logo handling
         add_filter('wp_generate_attachment_metadata', [$this, 'generate_logo_sizes'], 10, 2);
         add_filter('get_custom_logo', [$this, 'custom_logo_output'], 10, 2);
+
+        //remove_theme_mods();
+    }
+
+    /**
+     * Generate settings from theme.json
+     */
+    public function generate_settings()
+    {
+        $colors = $this->theme_json->get(['settings', 'color', 'palette'])->raw();
+        // TODO add this to a class property so it can be easily overriden if color palette changes
+        $settings = [
+            'color' => [
+                'title' => 'Colors',
+                'priority' => 35,
+                'settings' => [
+                    'typography_heading' => [
+                        'label'     => 'Typography',
+                        'type'      => 'subheading',
+                        'priority'  => 1,
+                    ],
+                    'general_heading' => [
+                        'label'     => 'General',
+                        'type'      => 'subheading',
+                        'priority'  => 31,
+                    ],
+                    'background_heading' => [
+                        'label'     => 'Background',
+                        'type'      => 'subheading',
+                        'priority'  => 71,
+                    ],
+                ],
+            ]
+        ];
+        $priority = 5;
+
+        if (! empty($colors)) {
+            foreach ($colors as $color) {
+                $settings['color']['settings'][$color['slug']] = [
+                    'default'   => $color['color'],
+                    'label'     => $color['name'] . ' Color',
+                    'type'      => 'color',
+                    'priority'  => $priority,
+                ];
+                $priority += 5;
+            }
+        }
+
+        ThemeSettingsSchema::merge_with_defaults($settings);
     }
 
 
@@ -80,15 +128,16 @@ class Customize extends CustomizeBase
         // print('<pre>');
         // print_r(ThemeSettingsSchema::get_settings_list());
         // print('</pre>');
+
+
+        // Remove the built-in Colors section
+        $wp_customize->remove_section('colors');
+
+        // Optionally remove specific default settings too
+        $wp_customize->remove_setting('background_color');
+        $wp_customize->remove_setting('header_textcolor');
     }
 
-    /**
-     * Register header section
-     */
-    public function header(WP_Customize_Manager $wp_customize): void
-    {
-        $this->register_settings($wp_customize, 'header');
-    }
 
     /**
      * Register Post section options in the Customizer.
@@ -98,11 +147,11 @@ class Customize extends CustomizeBase
      * @param WP_Customize_Manager $wp_customize Theme Customizer object.
      * @return void
      */
-    public function post(WP_Customize_Manager $wp_customize): void
+    public function register_customizer_settings(WP_Customize_Manager $wp_customize): void
     {
+        $this->register_settings($wp_customize, 'header');
         $this->register_settings($wp_customize, 'display');
-
-    
+        $this->register_settings($wp_customize, 'color');
     }
 
     /**

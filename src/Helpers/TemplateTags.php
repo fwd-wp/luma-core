@@ -2,7 +2,7 @@
 
 namespace Luma\Core\Helpers;
 
-use Luma\Core\Models\ThemeModModel;
+use Luma\Core\Services\ThemeSettingsSchema;
 
 /**
  * Custom template tags for this theme
@@ -105,7 +105,7 @@ class TemplateTags
 	{ ?>
 		<div class="posted-meta">
 			<?php self::posted_on(); ?>
-			<?php if (!(ThemeMod::get('luma_core_post_display_author_bio'))): ?>
+			<?php if (!ThemeSettingsSchema::theme_mod_with_default('display_post_author_bio')): ?>
 				<?php self::posted_by(); ?>
 			<?php endif; ?>
 			<?php self::edit_post_link(); ?>

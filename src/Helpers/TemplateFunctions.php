@@ -3,7 +3,7 @@
 namespace Luma\Core\Helpers;
 
 use Luma\Core\Models\SVGIconsModel;
-use Luma\Core\Models\ThemeModModel;
+use Luma\Core\Services\ThemeSettingsSchema;
 
 /**
  * Functions which enhance the theme by hooking into WordPress
@@ -365,8 +365,25 @@ class TemplateFunctions
 	 */
 	public static function is_excerpt_micro_post(): bool
 	{
-		$excerpt_setting = ThemeModModel::get('luma_core_post_archive_display');
-		$is_excerpt = ($excerpt_setting === 'excerpt');
+		if (! self::is_excerpt()) {
+			return false;
+		}
+
+		$post_format = get_post_format();
+		return in_array($post_format, array('aside', 'status'), true);
+	}
+
+	/**
+	 * Determine if current context is excerpt view 
+	 * Only true on non-single views when theme is set to display excerpts.
+	 *
+	 * @since Luma-Core 1.0
+	 *
+	 * @return bool
+	 */
+	public static function is_excerpt(): bool
+	{
+		$is_excerpt = (ThemeSettingsSchema::theme_mod_with_default('display_archive_view') === 'excerpt');
 
 		if (! $is_excerpt || is_single()) {
 			return false;

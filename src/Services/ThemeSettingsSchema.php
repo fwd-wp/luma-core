@@ -8,7 +8,8 @@ class ThemeSettingsSchema
     private static array $cache = [];
     private static string $prefix = 'luma-core';
 
-    public static function set_prefix($prefix): void {
+    public static function set_prefix($prefix): void
+    {
         self::$prefix = $prefix;
     }
 
@@ -158,6 +159,22 @@ class ThemeSettingsSchema
         return self::$cache;
     }
 
+    /**
+     * merge settings with build in defaults
+     * ensure you are using the correct action for timing if getting 
+     * data from a dynamic source
+     */
+    public static function merge_with_defaults(array $settings): void
+    {
+        if (!self::$cache_set) {
+            self::set_cache();
+        }
+        self::$cache = array_merge(self::$cache, $settings);
+    }
+
+    /**
+     * dont pass in theme prefix only 'group_setting_name'
+     */
     public static function theme_mod_with_default(string $full_key): mixed
     {
         if (!self::$cache_set) {

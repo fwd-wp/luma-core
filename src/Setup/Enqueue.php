@@ -3,7 +3,7 @@
 namespace Luma\Core\Setup;
 
 use Luma\Core\Helpers\TemplateFunctions;
-use Luma\Core\Models\ThemeModModel;
+use Luma\Core\Services\ThemeSettingsSchema;
 
 /**
  * Handles the enqueueing of theme scripts and styles.
@@ -66,7 +66,7 @@ class Enqueue
             );
         }
 
-        if (ThemeModModel::get('luma_core_post__archive_format') === 'masonry') {
+        if (ThemeSettingsSchema::theme_mod_with_default('display_archive_excerpt_format') === 'masonry') {
             wp_enqueue_script(
                 'luma-core-archive-masonry',
                 get_template_directory_uri() . '/assets/js/archive-masonry.js',
@@ -95,22 +95,22 @@ class Enqueue
             wp_get_theme()->get('Version')
         );
 
-        wp_enqueue_style(
-            'luma-core-style',
-            get_template_directory_uri() . '/build/css/main.css',
-            array(),
-            wp_get_theme()->get('Version')
-        );
+        // wp_enqueue_style(
+        //     'luma-core-style',
+        //     get_template_directory_uri() . '/build/css/main.css',
+        //     array(),
+        //     wp_get_theme()->get('Version')
+        // );
 
-        wp_style_add_data('luma-core-style', 'rtl', 'replace');
+        // wp_style_add_data('luma-core-style', 'rtl', 'replace');
 
-        wp_enqueue_style(
-            'luma-core-print-style',
-            get_template_directory_uri() . '/build/css/print.css',
-            array(),
-            wp_get_theme()->get('Version'),
-            'print'
-        );
+        // wp_enqueue_style(
+        //     'luma-core-print-style',
+        //     get_template_directory_uri() . '/build/css/print.css',
+        //     array(),
+        //     wp_get_theme()->get('Version'),
+        //     'print'
+        // );
     }
 
     /**

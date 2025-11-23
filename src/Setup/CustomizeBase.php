@@ -24,16 +24,8 @@ class CustomizeBase
         ThemeSettingsSchema::set_prefix($this->prefix);
     }
 
-    // public static function get_prefix(): string {
-    //     return self::$prefix;
-    // }
-
-
     protected function register_settings(\WP_Customize_Manager $wp_customize, string $group, ?string $section_id = null)
     {
-        // print('<pre>');
-        // print_r(ThemeSettingsSchema::get_settings_list(true));
-        // print('</pre>');
         // $section_id needs to be passed in for built in sections as they are not namespaced or prefixed
         // e.g. 'title_tagline' vs 'luma_sagewood_display_page_width'
         if (!$section_id) {
@@ -51,7 +43,7 @@ class CustomizeBase
             $this->add_section(
                 $wp_customize,
                 $section_id,
-                $data['title'] ?? '',
+                $data['title'],
                 $data['priority'] ?? null,
             );
         }
@@ -93,23 +85,20 @@ class CustomizeBase
                 $normalized['partial']
             );
         }
-
-        // print('<pre>');
-        // print_r($setting_id);
-        // print('</pre>');
     }
 
     private function normalize_config(array $item, string $section_id): array
     {
         $translated_choices = [];
-        foreach ($item['choices'] as $key => $value) {
-            $translated_choices[$key] = __($value, I18nService::get_domain());
+        if (isset($item['choices']) && is_array($item['choices'])) {
+            foreach ($item['choices'] as $key => $value) {
+                $translated_choices[$key] = __($value, I18nService::get_domain());
+            }
         }
 
         $setting = [
             'default' => $this->get_default($item),
             'sanitize_callback' => $this->get_sanitizer($item),
-            'santitize_callback' => '',
             'transport' => $item['transport'] ?? 'postMessage',
         ];
 
@@ -144,16 +133,40 @@ class CustomizeBase
         switch ($item['type']) {
             case 'checkbox':
                 return 'rest_sanitize_boolean';
+
             case 'radio':
+            case 'select':
                 $valid_keys = array_keys($item['choices'] ?? []);
                 return static function ($val) use ($valid_keys) {
                     return in_array($val, $valid_keys, true) ? $val : ($valid_keys[0] ?? '');
                 };
+
+            case 'color':
+                return 'sanitize_hex_color';
+
+            case 'number':
+            case 'range':
+                return 'absint'; // ensures integer value
+
+            case 'url':
+                return 'esc_url_raw';
+
+            case 'email':
+                return 'sanitize_email';
+
+            case 'textarea':
+                return 'sanitize_textarea_field';
+
+            case 'image':
+            case 'media':
+            case 'upload':
+            case 'cropped_image':
+                return 'absint'; // assuming WP attachment ID; or 'esc_url_raw' if URL
+
             default:
                 return 'sanitize_text_field';
         }
     }
-
     private function get_default(array $item)
     {
         // explicit default always wins
@@ -206,16 +219,11 @@ class CustomizeBase
         ][$type] ?? null;
     }
 
-
-
     /**
      * Returns a namespaced setting key.
      */
     protected function namespaced(string $setting,): string
     {
-        print('<pre>');
-        print_r($this->prefix);
-        print('</pre>');
         return "{$this->prefix}_{$setting}";
     }
 
@@ -234,24 +242,24 @@ class CustomizeBase
         ]);
     }
 
-    protected function add_subheading(
-        \WP_Customize_Manager $wp_customize,
-        string $id,
-        string $label,
-        string $section,
-        ?int $priority = null,
-    ) {
-        $wp_customize->add_setting($id, [
-            'sanitize_callback' => 'sanitize_text_field'
-        ]);
-        $wp_customize->add_control(new CustomizerSubheadingControl(
-            $wp_customize,
-            $id,
-            [
-                'label' => __($label, I18nService::get_domain()),
-                'section' => $section,
-                'priority' => $priority
-            ]
-        ));
-    }
+    // protected function add_subheading(
+    //     \WP_Customize_Manager $wp_customize,
+    //     string $id,
+    //     string $label,
+    //     string $section,
+    //     ?int $priority = null,
+    // ) {
+    //     $wp_customize->add_setting($id, [
+    //         'sanitize_callback' => 'sanitize_text_field'
+    //     ]);
+    //     $wp_customize->add_control(new CustomizerSubheadingControl(
+    //         $wp_customize,
+    //         $id,
+    //         [
+    //             'label' => __($label, I18nService::get_domain()),
+    //             'section' => $section,
+    //             'priority' => $priority
+    //         ]
+    //     ));
+    // }
 }
