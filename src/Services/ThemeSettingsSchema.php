@@ -2,18 +2,23 @@
 
 namespace Luma\Core\Services;
 
+use Luma\Core\Setup\CustomizeBase;
+
 class ThemeSettingsSchema
 {
     private static bool $cache_set = false;
     private static array $cache = [];
     private static string $prefix = 'luma-core';
 
+    /**
+     * prefix must be set early e.g. 'customize_register' hook
+     */
     public static function set_prefix($prefix): void
     {
         self::$prefix = $prefix;
     }
 
-    public static function get_settings_list($prefix = false): array
+    public static function get_settings_list($prefix = false, $default_and_value = false): array
     {
         // prefixed with sagewood if true
         $schema =  self::get();
@@ -22,10 +27,16 @@ class ThemeSettingsSchema
         foreach ($schema as $group => $values) {
             foreach ($values['settings'] as $id => $items) {
                 if ($items['type'] !== 'subheading' || $items['type'] !== 'button') {
-                    if ($prefix) {
-                        $list["{$self_prefix}{$group}_{$id}"] = $items['label'];
+                    if ($default_and_value) {
+                        $value = self::theme_mod_with_default("{$group}_{$id}",true);
                     } else {
-                        $list["{$group}_{$id}"] = $items['label'];
+                        $value = $items['label'];
+                    }
+
+                    if ($prefix) {
+                        $list["{$self_prefix}{$group}_{$id}"] = $value;
+                    } else {
+                        $list["{$group}_{$id}"] = $value;
                     }
                 }
             }
@@ -106,7 +117,7 @@ class ThemeSettingsSchema
                     'archive_view' => [ // was post_archive_display
                         'default'   => 'excerpt',
                         'label'     => 'On Archive Pages, posts show:',
-                        'description' => 'Full requires list view below',
+                        // 'description' => 'Full requires list view below',
                         'type'      => 'radio',
                         'priority'  => 15,
                         'choices'   =>  [
@@ -123,7 +134,7 @@ class ThemeSettingsSchema
                     'archive_excerpt_format' => [
                         'default'   => 'list',
                         'label'     => 'On Archive Pages, display posts excerpts in:',
-                        'description' => 'Full requires list view below',
+                        'description' => 'Grid and Masonry require Summary view above.',
                         'type'      => 'radio',
                         'priority'  => 20,
                         'choices'   =>  [
@@ -160,22 +171,28 @@ class ThemeSettingsSchema
     }
 
     /**
-     * merge settings with build in defaults
+     * Set the ThemeSettingsSchema.
+     * Merges with defaults, by default
      * ensure you are using the correct action for timing if getting 
      * data from a dynamic source
      */
-    public static function merge_with_defaults(array $settings): void
+    public static function set(array $settings, bool $merge = true): void
     {
         if (!self::$cache_set) {
             self::set_cache();
         }
-        self::$cache = array_merge(self::$cache, $settings);
+        if ($merge) {
+            self::$cache = array_merge(self::$cache, $settings);
+        } else {
+            self::$cache = $settings;
+        }
     }
 
     /**
      * dont pass in theme prefix only 'group_setting_name'
+     * must be called later e.g. from within template to ensure settings are set up
      */
-    public static function theme_mod_with_default(string $full_key): mixed
+    public static function theme_mod_with_default(string $full_key, ?bool $default_and_value = false): mixed
     {
         if (!self::$cache_set) {
             self::set_cache();
@@ -194,10 +211,26 @@ class ThemeSettingsSchema
         $prefixed_key = "{$self_prefix}_{$full_key}";
 
         // utlize default from settings list, if it exists
-        if (isset(self::$cache[$group_name]['settings'][$sub_key])) {
-            $default = self::$cache[$group_name]['settings'][$sub_key]['default'] ?? null;
-            return get_theme_mod($prefixed_key, $default);
+        $item = self::$cache[$group_name]['settings'][$sub_key] ?? null;
+        if (isset($item)) {
+            $default = $item['default'] ?? null;
+            $type = $item['type'] ?? null;
+            $choices = $item['choices'] ?? [];
+            $default_fallback = CustomizeBase::get_default($default, $type, $choices) ?? null;
+
+            $default = $default ?? $default_fallback;
+            if ($default_and_value) {
+                return [
+                    'default' => $default ?? null,
+                    'value' => get_theme_mod($prefixed_key, $default),
+                ];
+            }
+
+            if ($default) {
+                return get_theme_mod($prefixed_key, $default);
+            }
         }
+
 
         return get_theme_mod($prefixed_key);
     }

@@ -3,6 +3,7 @@
 namespace Luma\Core\Helpers;
 
 use Luma\Core\Models\SVGIconsModel;
+use Luma\Core\Services\I18nService;
 use Luma\Core\Services\ThemeSettingsSchema;
 
 /**
@@ -14,14 +15,6 @@ use Luma\Core\Services\ThemeSettingsSchema;
  */
 class TemplateFunctions
 {
-
-	// must be updated via setTextDomain() with add_action('after_theme_setup' ..... 
-	protected static string $text_domain = 'luma-core';
-
-	public static function set_text_domain(string $domain): void
-	{
-		self::$text_domain = $domain;
-	}
 
 	/**
 	 * Gets the SVG code for a given icon.
@@ -288,7 +281,7 @@ class TemplateFunctions
 	 *
 	 * @return void
 	 */
-	public static function the_html_classes(): void
+	public static function html_classes(): string
 	{
 		/**
 		 * Filters the classes for the main <html> element.
@@ -299,14 +292,35 @@ class TemplateFunctions
 		 */
 		$classes = apply_filters('luma_core_html_classes', '');
 		if (! $classes) {
-			return;
+			return '';
 		}
-		echo 'class="' . esc_attr($classes) . '"';
+		return 'class="' . esc_attr($classes) . '"';
 
 		// USAGE:
 		// add_filter('luma_core_html_classes', function () {
 		// 	return 'dark-mode custom-layout';
 		// });
+	}
+
+	public static function body_classes(): array
+	{
+		$body_classes = [];
+		$body_classes[] = TemplateFunctions::is_excerpt() ? ' is-excerpt' : ' is-full';
+		if (is_single()) {
+			$body_classes[] = ThemeSettingsSchema::theme_mod_with_default('display_post_width') === 'wide' ? ' is-wide-single' : '';
+		}
+		if (is_page()) {
+			$body_classes[] = ThemeSettingsSchema::theme_mod_with_default('display_page_width') === 'wide' ? ' is-wide-page' : '';
+		}
+		return $body_classes;
+	}
+
+	public static function grid_classes(): string
+	{
+		$grid_classes  = 'archive-grid';
+		$grid_classes .= ' archive-grid--' . ThemeSettingsSchema::theme_mod_with_default('display_archive_excerpt_format');
+		
+		return $grid_classes;
 	}
 
 
@@ -341,7 +355,7 @@ class TemplateFunctions
 	{
 		$continue_reading = sprintf(
 			/* translators: %s: Post title. Only visible to screen readers. */
-			__('Continue reading %s', self::$text_domain),
+			__('Continue reading %s', I18nService::get_domain()),
 			get_the_title('<span class="screen-reader-text">', '</span>')
 		);
 
@@ -390,6 +404,6 @@ class TemplateFunctions
 		}
 
 		$post_format = get_post_format();
-		return in_array($post_format, array('aside', 'status'), true);
+		return !in_array($post_format, array('aside', 'status'), true);
 	}
 }

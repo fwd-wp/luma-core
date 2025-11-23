@@ -1,5 +1,7 @@
 (function (wp) {
     if (typeof wp === 'undefined' || !wp.customize) return;
+    const prefix = wpData.prefix;
+    console.log(wpData.prefix);
 
     // Helper: Update text content live
     function bindTextSetting(settingId, selector) {
@@ -67,28 +69,28 @@
     bindTextSetting('blogname', '.site-title a'); // other pages
     bindTextSetting('blogname', '.site-title'); // home page
     //bindTextSetting('blogdescription', '.site-description');
-    bindVisibilitySetting('luma_core_display_title_and_tagline', '.site-branding-text');
+    bindVisibilitySetting('display_title_and_tagline', '.site-branding-text');
 
     // ---- Header options ----
-    bindClassToggle('luma_core_header_sticky', '.site-header-container', 'is-sticky');
-    bindClassToggle('luma_core_header_transparent', '.site-header-container', 'is-transparent');
-    bindClassToggle('luma_core_header_nav_full', '.site-header', 'is-full-width');
+    bindClassToggle(`${prefix}_header_navbar_sticky`, '.site-header-container', 'is-sticky');
+    bindClassToggle(`${prefix}_header_navbar_transparent`, '.site-header-container', 'is-transparent');
+    bindClassToggle(`${prefix}_header_navbar_full_width`, '.site-header', 'is-full-width');
     // see end of file for luma_core_header_shrink
     bindTextSetting('blogname', '.site-title--custom-header'); // home page
     bindTextSetting('blogdescription', '.site-description--custom-header');
     bindVisibilitySetting('display_header_text', '.custom-header-image-inner');
 
     // ---- Display options ----
-    bindClassToggle('luma_core_post_width', 'body', 'is-wide-single');
-    bindClassToggle('luma_core_post_page_width', 'body', 'is-wide-page');
+    bindClassToggle(`${prefix}display_post_width`, 'body', 'is-wide-single');
+    bindClassToggle(`${prefix}display_page_width`, 'body', 'is-wide-page');
     // 'luma_core_post_archive_display' -> selective refresh partial
     // 'luma_core_post__archive_format' handled in archive-masonry.js (enqueued by customize, also conditionally on front end)
     // 'luma_core_post_display_author_bio' -> selective refresh partial
 
 
     // ---- Color palette  ----
-    if (Array.isArray(colorPalette)) {
-        colorPalette.forEach(function (item) {
+    if (Array.isArray(wpData.colorPalette)) {
+        wpData.colorPalette.forEach(function (item) {
             if (!item.slug || !item.color) return;
             bindCssVariable(
                 `color_${item.slug}`,
@@ -104,9 +106,9 @@
 
         // Font Family
         if (category === 'body' || category === 'heading') {
-            const settingId = `font_family_${category}`;
+            const settingId = `${prefix}_font_family_${category}`;
             const variableName = `--wp--custom--font--family--${category}`;
-            const fontArray = window[`$fontFamilies`];
+            const fontArray = wpData.fontFamilies;
 
             if (fontArray) {
                 bindSettingWithLookup(settingId, variableName, fontArray);
@@ -115,20 +117,20 @@
 
         // Font Weight - all categories
         bindCssVariable(
-            `font_weight_${category}`,
+            `${prefix}_font_weight_${category}`,
             `--wp--custom--font--weight--${snakeToKebab(category)}`
         );
 
         // Line Height
         if (category === 'body' || category === 'heading') {
             bindCssVariable(
-                `font_line_height_${category}`,
+                `${prefix}_font_line_height_${category}`,
                 `--wp--custom--font--line-height--${snakeToKebab(category)}`
             );
         }
         // Font Family
         if (category === 'body') {
-            const settingId = `font_size_${category}`;
+            const settingId = `${prefix}_font_size_${category}`;
             const variableName = `--wp--custom--font--size--${snakeToKebab(category)}`;
             const fontArray = window[`fontSizes`];
 
@@ -141,7 +143,7 @@
 
 
     // init navbar shrink script
-    wp.customize('luma_core_header_shrink', function (value) {
+    wp.customize(`${prefix}_header_navbar_shrink`, function (value) {
         value.bind(function (enabled) {
             const header = document.querySelector('.site-header');
 

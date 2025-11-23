@@ -9,6 +9,10 @@ if (! defined('ABSPATH')) {
     exit;
 }
 
+/**
+ * Class for accessing data from theme.json
+ * 
+ */
 class ThemeJsonService
 {
     private static array $cache = [];

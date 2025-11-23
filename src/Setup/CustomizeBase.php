@@ -12,15 +12,13 @@ use Luma\Core\Services\I18nService;
 
 class CustomizeBase
 {
-
-
     protected string $prefix;
     protected ThemeJsonService $theme_json;
 
     public function __construct(string $prefix = 'luma_core')
     {
         $this->prefix = $prefix;
-        $this->theme_json = new ThemeJsonService($this->prefix);
+        $this->theme_json = new ThemeJsonService();
         ThemeSettingsSchema::set_prefix($this->prefix);
     }
 
@@ -95,9 +93,15 @@ class CustomizeBase
                 $translated_choices[$key] = __($value, I18nService::get_domain());
             }
         }
+        $input_attrs = [];
+        if ( isset($item['input_attrs']) && is_array($item['input_attrs']) ) {
+            $input_attrs['min'] = $item['input_attrs']['min'] ?? null;
+            $input_attrs['max'] = $item['input_attrs']['max'] ?? null;
+            $input_attrs['step'] = $item['input_attrs']['step'] ?? null;
+        }
 
         $setting = [
-            'default' => $this->get_default($item),
+            'default' => $this::get_default($item['default'] ?? null, $item['type'], $item['choices'] ?? []),
             'sanitize_callback' => $this->get_sanitizer($item),
             'transport' => $item['transport'] ?? 'postMessage',
         ];
@@ -109,6 +113,7 @@ class CustomizeBase
             'priority' => $item['priority'] ?? 10,
             'type' => $item['type'] ?? 'text',
             'choices' => $translated_choices,
+            'input_attrs' => $input_attrs,
         ];
 
         if (isset($item['partial']) && is_array($item['partial'])) {
@@ -167,7 +172,7 @@ class CustomizeBase
                 return 'sanitize_text_field';
         }
     }
-    private function get_default(array $item)
+    public function old_get_default(array $item)
     {
         // explicit default always wins
         if (array_key_exists('default', $item)) {
@@ -184,6 +189,45 @@ class CustomizeBase
                 // WP default is null
                 if (!empty($item['choices'])) {
                     $keys = array_keys($item['choices']);
+                    return $keys[0];
+                }
+                return null;
+
+            case 'number':
+            case 'range':
+                return 0;
+
+            case 'color':
+                return '';
+
+            case 'image':
+            case 'media':
+            case 'upload':
+            case 'cropped_image':
+                return '';
+
+                // everything else defaults to empty string
+            default:
+                return '';
+        }
+    }
+    public static function get_default(mixed $default = null, string $type = '', array $choices = [])
+    {
+        // explicit default always wins
+        if ($default) {
+            return $default;
+        }
+
+        switch ($type) {
+            case 'checkbox':
+                // WP default is ''
+                return false;
+
+            case 'radio':
+            case 'select':
+                // WP default is null
+                if (!empty($choices)) {
+                    $keys = array_keys($choices);
                     return $keys[0];
                 }
                 return null;
@@ -241,25 +285,4 @@ class CustomizeBase
             'priority' => $priority,
         ]);
     }
-
-    // protected function add_subheading(
-    //     \WP_Customize_Manager $wp_customize,
-    //     string $id,
-    //     string $label,
-    //     string $section,
-    //     ?int $priority = null,
-    // ) {
-    //     $wp_customize->add_setting($id, [
-    //         'sanitize_callback' => 'sanitize_text_field'
-    //     ]);
-    //     $wp_customize->add_control(new CustomizerSubheadingControl(
-    //         $wp_customize,
-    //         $id,
-    //         [
-    //             'label' => __($label, I18nService::get_domain()),
-    //             'section' => $section,
-    //             'priority' => $priority
-    //         ]
-    //     ));
-    // }
 }

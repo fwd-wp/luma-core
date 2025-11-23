@@ -215,7 +215,7 @@ class TemplateTags
 	 *
 	 * @return void
 	 */
-	public static function the_posts_navigation(): void
+	public static function the_posts_pagination(): void
 	{
 		the_posts_pagination(
 			array(
