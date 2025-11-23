@@ -74,7 +74,7 @@ final class BackCompat
 
         if (version_compare($GLOBALS['wp_version'], $this->required_wp_version, '<')) {
             $messages[] = sprintf(
-                __('This theme requires WordPress %s or newer. You are running version %s.', I18nService::getDomain()),
+                __('This theme requires WordPress %s or newer. You are running version %s.', I18nService::get_domain()),
                 $this->required_wp_version,
                 $GLOBALS['wp_version']
             );
@@ -82,14 +82,15 @@ final class BackCompat
 
         if (version_compare(PHP_VERSION, $this->required_php_version, '<')) {
             $messages[] = sprintf(
-                __('This theme requires PHP %s or newer. You are running version %s.', I18nService::getDomain()),
+                __('This theme requires PHP %s or newer. You are running version %s.', I18nService::get_domain()),
                 $this->required_php_version,
                 PHP_VERSION
             );
         }
-               
-        return implode(' ', $messages . ' ' . __(' Please upgrade.', I18nService::getDomain()));
-         
+
+        $messages[] = __('Please upgrade.', I18nService::get_domain());
+
+        return implode(' ', $messages);
     }
 
     /**
@@ -113,7 +114,7 @@ final class BackCompat
     {
         wp_die(
             esc_html($this->get_upgrade_message()),
-            esc_html__('Theme Incompatible', I18nService::getDomain()),
+            esc_html__('Theme Incompatible', I18nService::get_domain()),
             [
                 'back_link' => true,
             ]
