@@ -6,18 +6,19 @@ namespace Luma\Core\Setup;
 
 use Luma\Core\Controllers\CustomizerButtonControl;
 use Luma\Core\Controllers\CustomizerSubheadingControl;
+use Luma\Core\Core\Config;
 use Luma\Core\Services\ThemeJsonService;
 use Luma\Core\Services\ThemeSettingsSchema;
-use Luma\Core\Services\I18nService;
+
 
 class CustomizeBase
 {
     protected string $prefix;
     protected ThemeJsonService $theme_json;
 
-    public function __construct(string $prefix = 'luma_core')
+    public function __construct()
     {
-        $this->prefix = $prefix;
+        $this->prefix = Config::get_prefix();
         $this->theme_json = new ThemeJsonService();
         ThemeSettingsSchema::set_prefix($this->prefix);
     }
@@ -90,7 +91,7 @@ class CustomizeBase
         $translated_choices = [];
         if (isset($item['choices']) && is_array($item['choices'])) {
             foreach ($item['choices'] as $key => $value) {
-                $translated_choices[$key] = __($value, I18nService::get_domain());
+                $translated_choices[$key] = __($value, Core::get_domain());
             }
         }
         $input_attrs = [];
@@ -281,7 +282,7 @@ class CustomizeBase
         ?int $priority = null,
     ) {
         $wp_customize->add_section($id, [
-            'title'    => __($title, I18nService::get_domain()),
+            'title'    => __($title, Core::get_domain()),
             'priority' => $priority,
         ]);
     }

@@ -2,6 +2,7 @@
 
 namespace Luma\Core\Setup;
 
+use Luma\Core\Core\Config;
 use Luma\Core\Helpers\TemplateFunctions;
 use Luma\Core\Services\ThemeSettingsSchema;
 
@@ -16,6 +17,14 @@ use Luma\Core\Services\ThemeSettingsSchema;
  */
 class Enqueue
 {
+    protected string $prefix;
+    protected string $prefix_core;
+
+    public function __construct()
+    {
+        $this->prefix = Config::get_prefix_kebab();
+        $this->prefix_core = Config::get_prefix_kebab_core();
+    }
     /**
      * Invoke method to hook enqueue actions.
      *
@@ -55,10 +64,10 @@ class Enqueue
 
         if (has_nav_menu('main')) {
             wp_enqueue_script(
-                'luma-core-menu-main-script',
+                "{$this->prefix_core}-menu-main-script",
                 get_template_directory_uri() . '/assets/js/menu-main.js',
                 array(),
-                wp_get_theme()->get('Version'),
+                Config::get_theme_version(),
                 array(
                     'in_footer' => true,
                     'strategy'  => 'defer',
@@ -68,10 +77,10 @@ class Enqueue
 
         if (ThemeSettingsSchema::theme_mod_with_default('display_archive_excerpt_format') === 'masonry') {
             wp_enqueue_script(
-                'luma-core-archive-masonry',
+                "{$this->prefix_core}-archive-masonry",
                 get_template_directory_uri() . '/assets/js/archive-masonry.js',
                 ['masonry'],
-                null,
+                Config::get_theme_version(),
                 true
             );
         }
@@ -89,10 +98,11 @@ class Enqueue
     public function styles(): void
     {
         wp_enqueue_style(
-            'luma-core-fonts',
+            "{$this->prefix_core}-fonts",
             get_template_directory_uri() . '/assets/fonts/font-face.css',
             array(),
-            wp_get_theme()->get('Version')
+            Config::get_theme_version(),
+
         );
 
         // wp_enqueue_style(
@@ -125,10 +135,10 @@ class Enqueue
     public function block_editor_script(): void
     {
         wp_enqueue_script(
-            'luma-core-editor',
+            "{$this->prefix_core}-editor",
             get_theme_file_uri('/assets/js/editor.js'),
             array('wp-blocks', 'wp-dom'),
-            wp_get_theme()->get('Version'),
+            Config::get_theme_version(),
             array('in_footer' => true)
         );
     }

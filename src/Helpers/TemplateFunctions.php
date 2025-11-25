@@ -2,8 +2,8 @@
 
 namespace Luma\Core\Helpers;
 
+use Luma\Core\Core\Config;
 use Luma\Core\Models\SVGIconsModel;
-use Luma\Core\Services\I18nService;
 use Luma\Core\Services\ThemeSettingsSchema;
 
 /**
@@ -16,6 +16,12 @@ use Luma\Core\Services\ThemeSettingsSchema;
 class TemplateFunctions
 {
 
+	protected string $prefix;
+
+	public function __construct(string $prefix = 'luma_core')
+	{
+		$this->prefix = $prefix;
+	}
 	/**
 	 * Gets the SVG code for a given icon.
 	 *
@@ -290,7 +296,8 @@ class TemplateFunctions
 		 *
 		 * @param string The list of classes. Default empty string.
 		 */
-		$classes = apply_filters('luma_core_html_classes', '');
+		$prefix = Config::get_prefix();
+		$classes = apply_filters("{$prefix}_html_classes", '');
 		if (! $classes) {
 			return '';
 		}
@@ -319,7 +326,7 @@ class TemplateFunctions
 	{
 		$grid_classes  = 'archive-grid';
 		$grid_classes .= ' archive-grid--' . ThemeSettingsSchema::theme_mod_with_default('display_archive_excerpt_format');
-		
+
 		return $grid_classes;
 	}
 
@@ -355,7 +362,7 @@ class TemplateFunctions
 	{
 		$continue_reading = sprintf(
 			/* translators: %s: Post title. Only visible to screen readers. */
-			__('Continue reading %s', I18nService::get_domain()),
+			__('Continue reading %s', Core::get_domain()),
 			get_the_title('<span class="screen-reader-text">', '</span>')
 		);
 

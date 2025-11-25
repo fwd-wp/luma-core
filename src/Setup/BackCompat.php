@@ -2,6 +2,7 @@
 
 namespace Luma\Core\Setup;
 
+use Luma\Core\Core\Config;
 use Luma\Core\Services\I18nService;
 
 if (! defined('ABSPATH')) {
@@ -25,25 +26,23 @@ final class BackCompat
      *
      * @var float
      */
-    private float $required_wp_version;
+    private string $required_wp_version;
 
     /**
      * Minimum required PHP version.
      *
      * @var float
      */
-    private float $required_php_version;
+    private string $required_php_version;
 
     /**
      * Constructor.
-     *
-     * @param string $wp_ver  Minimum WordPress version required.
-     * @param string $php_ver Minimum PHP version required.
+     * Gets values from Config class which should be localised to the theme variant
      */
-    public function __construct(string $wp_ver, string $php_ver)
+    public function __construct()
     {
-        $this->required_wp_version  = $wp_ver;
-        $this->required_php_version = $php_ver;
+        $this->required_wp_version  = Config::get_minimum_wp_version();
+        $this->required_php_version = Config::get_minimum_php_version();
     }
 
     /**
