@@ -7,6 +7,7 @@ namespace Luma\Core\Setup;
 use Luma\Core\Controllers\CustomizerButtonControl;
 use Luma\Core\Controllers\CustomizerSubheadingControl;
 use Luma\Core\Core\Config;
+use Luma\Core\Helpers\Functions;
 use Luma\Core\Services\ThemeJsonService;
 use Luma\Core\Services\ThemeSettingsSchema;
 
@@ -14,13 +15,12 @@ use Luma\Core\Services\ThemeSettingsSchema;
 class CustomizeBase
 {
     protected string $prefix;
-    protected ThemeJsonService $theme_json;
+    public ThemeJsonService $theme_json;
 
     public function __construct()
     {
         $this->prefix = Config::get_prefix();
         $this->theme_json = new ThemeJsonService();
-        ThemeSettingsSchema::set_prefix($this->prefix);
     }
 
     protected function register_settings(\WP_Customize_Manager $wp_customize, string $group, ?string $section_id = null)
@@ -34,6 +34,7 @@ class CustomizeBase
         $schema = ThemeSettingsSchema::get();
 
         if (!isset($schema[$group])) {
+            Functions::error_log("ThemeSettingsSchema group '{$group}' not found.");
             return;
         }
         $data = $schema[$group];
@@ -91,7 +92,7 @@ class CustomizeBase
         $translated_choices = [];
         if (isset($item['choices']) && is_array($item['choices'])) {
             foreach ($item['choices'] as $key => $value) {
-                $translated_choices[$key] = __($value, Core::get_domain());
+                $translated_choices[$key] = __($value, Config::get_domain());
             }
         }
         $input_attrs = [];
@@ -134,84 +135,67 @@ class CustomizeBase
         ];
     }
 
-    private function get_sanitizer($item)
-    {
-        switch ($item['type']) {
-            case 'checkbox':
-                return 'rest_sanitize_boolean';
+private function get_sanitizer(array $item)
+{
+    switch ($item['type']) {
 
-            case 'radio':
-            case 'select':
-                $valid_keys = array_keys($item['choices'] ?? []);
-                return static function ($val) use ($valid_keys) {
-                    return in_array($val, $valid_keys, true) ? $val : ($valid_keys[0] ?? '');
-                };
+        // Boolean checkbox
+        case 'checkbox':
+            return 'rest_sanitize_boolean';
 
-            case 'color':
-                return 'sanitize_hex_color';
+        // Single-choice inputs
+        case 'radio':
+        case 'select':
+            $valid_keys = array_keys($item['choices'] ?? []);
+            return static function ($val) use ($valid_keys) {
+                return in_array($val, $valid_keys, true) ? $val : ($valid_keys[0] ?? '');
+            };
 
-            case 'number':
-            case 'range':
-                return 'absint'; // ensures integer value
+        // Color input
+        case 'color':
+            return 'sanitize_hex_color';
 
-            case 'url':
-                return 'esc_url_raw';
+        // Numeric input
+        case 'number':
+        case 'range':
+            $min = $item['min'] ?? null;
+            $max = $item['max'] ?? null;
+            return static function ($val) use ($min, $max) {
+                $val = absint($val);
+                if ($min !== null) $val = max($val, $min);
+                if ($max !== null) $val = min($val, $max);
+                return $val;
+            };
 
-            case 'email':
-                return 'sanitize_email';
+        // URL
+        case 'url':
+            return 'esc_url_raw';
 
-            case 'textarea':
-                return 'sanitize_textarea_field';
+        // Email
+        case 'email':
+            return 'sanitize_email';
 
-            case 'image':
-            case 'media':
-            case 'upload':
-            case 'cropped_image':
-                return 'absint'; // assuming WP attachment ID; or 'esc_url_raw' if URL
+        // Textarea
+        case 'textarea':
+            return 'sanitize_textarea_field';
 
-            default:
-                return 'sanitize_text_field';
-        }
+        // Media / image uploads
+        case 'image':
+        case 'media':
+        case 'upload':
+        case 'cropped_image':
+            return static function ($val) {
+                $val = absint($val);
+                return ($val && wp_attachment_is_image($val)) ? $val : 0;
+            };
+
+        // Default: generic text input
+        default:
+            return 'sanitize_text_field';
     }
-    public function old_get_default(array $item)
-    {
-        // explicit default always wins
-        if (array_key_exists('default', $item)) {
-            return $item['default'];
-        }
+}
 
-        switch ($item['type']) {
-            case 'checkbox':
-                // WP default is ''
-                return false;
 
-            case 'radio':
-            case 'select':
-                // WP default is null
-                if (!empty($item['choices'])) {
-                    $keys = array_keys($item['choices']);
-                    return $keys[0];
-                }
-                return null;
-
-            case 'number':
-            case 'range':
-                return 0;
-
-            case 'color':
-                return '';
-
-            case 'image':
-            case 'media':
-            case 'upload':
-            case 'cropped_image':
-                return '';
-
-                // everything else defaults to empty string
-            default:
-                return '';
-        }
-    }
     public static function get_default(mixed $default = null, string $type = '', array $choices = [])
     {
         // explicit default always wins
@@ -282,7 +266,7 @@ class CustomizeBase
         ?int $priority = null,
     ) {
         $wp_customize->add_section($id, [
-            'title'    => __($title, Core::get_domain()),
+            'title'    => __($title, Config::get_domain()),
             'priority' => $priority,
         ]);
     }

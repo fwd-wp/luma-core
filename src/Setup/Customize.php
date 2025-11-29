@@ -3,10 +3,11 @@
 namespace Luma\Core\Setup;
 
 use Luma\Core\Helpers\Functions;
-use Luma\Core\Services\I18nService;
+use Luma\Core\Core\Config;
+use Luma\Core\Services\StaticCustomizeSettings;
 use Luma\Core\Services\ThemeSettingsSchema;
 use Luma\Core\Setup\CustomizeBase;
-
+use Luma\Core\Services\ThemeJsonSettings;
 use WP_Customize_Manager;
 
 if (!defined('ABSPATH')) {
@@ -30,9 +31,8 @@ class Customize extends CustomizeBase
 
         add_action('customize_register', [$this, 'core_modifications']);
 
-        add_action('after_theme_setup', [$this, 'generate_settings_from_theme_json'], 20);
-        add_action('customize_register', [$this, 'generate_settings_from_theme_json'], 5); // early priority to generate settings in time
-        add_action('customize_register', [$this, 'register_customize_settings']);
+        add_action('customize_register', [$this, 'generate_settings'], 5); // generate earlier than 10
+        add_action('customize_register', [$this, 'register_customize_settings']); // registers generated settings
         add_filter('wp_theme_json_data_user', [$this, 'modify_theme_json_user']);
 
         // Enqueue Customizer assets
@@ -48,144 +48,6 @@ class Customize extends CustomizeBase
     }
 
     /**
-     * Generate settings from theme.json
-     */
-    public function generate_settings_from_theme_json()
-    {
-
-        // TODO add this to a class property so it can be easily overriden if color palette changes
-        $settings = [
-            'color' => [
-                'title' => 'Colors',
-                'priority' => 35,
-                'settings' => [
-                    'typography_heading' => [
-                        'label'     => 'Typography',
-                        'type'      => 'subheading',
-                        'priority'  => 1,
-                    ],
-                    'general_heading' => [
-                        'label'     => 'General',
-                        'type'      => 'subheading',
-                        'priority'  => 31,
-                    ],
-                    'background_heading' => [
-                        'label'     => 'Background',
-                        'type'      => 'subheading',
-                        'priority'  => 71,
-                    ],
-                ],
-            ],
-            'font' => [
-                'title' => 'Fonts',
-                'priority' => 50,
-                'settings' => [],
-            ]
-        ];
-
-        $colors = $this->theme_json->get(['settings', 'color', 'palette'])->raw();
-        $priority = 5;
-
-        if (! empty($colors)) {
-            foreach ($colors as $color) {
-                $settings['color']['settings'][$color['slug']] = [
-                    'default'   => $color['color'],
-                    'label'     => $color['name'] . ' Color',
-                    'type'      => 'color',
-                    'priority'  => $priority,
-                ];
-                $priority += 5;
-            }
-        }
-
-        foreach (self::get_font_categories() as $category => $props) {
-
-            // Subheading for the current category
-            $settings['font']['settings']["heading_{$category}"] = [
-                'label'     => $props['label'],
-                'type'      => 'subheading',
-                'priority'  => $priority,
-            ];
-            $priority += 5;
-
-            // Font family
-            if ($props['family'] ?? false) {
-                $choices = $this->theme_json->get(['settings', 'typography', 'fontFamilies'])->choices();
-
-                if (!empty($choices)) {
-                    $default = $this->theme_json->get(['settings', 'custom', 'font', 'family', $category])->slug_from_css_var();
-
-                    $settings['font']['settings']["family_{$category}"] = [
-                        'default'   => $default,
-                        'label'     => 'Font',
-                        'type'      => 'select',
-                        'priority'  => $priority,
-                        'choices'   =>  $choices
-                    ];
-                    $priority += 5;
-                }
-            }
-
-            // Font weight
-            if ($props['weight'] ?? false) {
-                $default = $this->theme_json->get(['settings', 'custom', 'font', 'weight', $category])->raw_string();
-
-                $settings['font']['settings']["weight_{$category}"] = [
-                    'default'   => $default,
-                    'label'     => 'Font Weight',
-                    'type'      => 'number',
-                    'priority'  => $priority,
-                    'choices'   =>  $choices,
-                    'input_attrs' => [
-                        'min'  => $props['weight']['min'],
-                        'max'  => $props['weight']['max'],
-                        'step' => 100,
-                    ],
-                ];
-                $priority += 5;
-            }
-
-            // Line height
-            if ($props['line_height'] ?? false) {
-                $default = $this->theme_json->get(['settings', 'custom', 'font', 'lineHeight', $category])->raw_string();
-
-                $settings['font']['settings']["line_height_{$category}"] = [
-                    'default'   => $default,
-                    'label'     => 'Line Height',
-                    'type'      => 'number',
-                    'priority'  => $priority,
-                    'choices'   =>  $choices,
-                    'input_attrs' => [
-                        'min'  => $props['line_height']['min'],
-                        'max'  => $props['line_height']['max'],
-                        'step' => 0.5,
-                    ],
-                ];
-                $priority += 5;
-            }
-
-            // Font size (if applicable)
-            if (!empty($props['size'])) {
-                $choices = $this->theme_json->get(['settings', 'typography', 'fontSizes'])->choices();
-                if (!empty($choices)) {
-                    $default = $this->theme_json->get(['settings', 'custom', 'font', 'size', $category])->slug_from_css_var();
-
-                    $settings['font']['settings']["size_{$category}"] = [
-                        'default'   => $default,
-                        'label'     => 'Line Height',
-                        'type'      => 'select',
-                        'priority'  => $priority,
-                        'choices'   =>  $choices,
-                    ];
-                    $priority += 5;
-                }
-            }
-        }
-        ThemeSettingsSchema::set($settings);
-    }
-
-
-    /**
      * Register site identity settings
      */
     public function core_modifications(WP_Customize_Manager $wp_customize): void
@@ -197,61 +59,44 @@ class Customize extends CustomizeBase
             }
         }
 
-        // TODO: rename Display Site Title and Tagline to Display Site Title in Navbar, also move to different section
+        // Change labels
+        if ($control = $wp_customize->get_control('blogdescription')) {
+            $control->label = 'Site Description';
+        }
+
+        // change label and move to header section
+        if ($control = $wp_customize->get_control('display_header_text')) {
+            $control->label = 'Display Site Title in Navbar';
+            $control->section = $this->namespaced('header_section');
+            $control->priority = 10;
+        }
+
+        // move custom header controls into new header section
+        $priority = 50;
+        foreach (['header_image', 'header_video', 'external_header_video'] as $setting) {
+            if ($control = $wp_customize->get_control($setting)) {
+                $control->section = $this->namespaced('header_section');
+                $control->priority = $priority;
+                $priority += 5;
+            }
+        }
 
         // Logo description
         if ($control = $wp_customize->get_control('custom_logo')) {
-            $control->description = __('Upload your logo file for the navbar. Should be at least 300px x 130px', I18nService::get_domain());
+            $control->description = __('Upload your logo file for the navbar. Should be at least 300px x 130px', Config::get_domain());
         }
 
         // // Remove the built-in Colors section
         $wp_customize->remove_section('colors');
-
-        // // Optionally remove specific default settings too
-        // $wp_customize->remove_setting('background_color');
-        // $wp_customize->remove_setting('header_textcolor');
     }
 
-    /**
-     * Get all font categories and their properties.
-     *
-     * @since Luma-Core 1.0
-     *
-     * @return array<string, array<string, mixed>> Array of font categories and their properties.
-     */
-    public static function get_font_categories(): array
+    public function generate_settings(): void
     {
-        $categories = [
-            'body' => [
-                'label'       => 'Body',
-                'family' => ['choices' => 'fontFamilies'],
-                'weight' => ['min' => 300, 'max' => 600,],
-                'line_height' => ['min' => 1.2, 'max' => 2.0,],
-                'size'   => ['choices' => 'fontSizes'],
-            ],
-            'heading' => [
-                'label'       => 'Heading',
-                'family' => ['choices' => 'fontFamilies'],
-                'weight' => ['min' => 400, 'max' => 900,],
-                'line_height' => ['min' => 1.0, 'max' => 1.5,],
-                'size'   => false,
-            ],
-        ];
-
-        // Optionally add custom header if supported and enabled
-        if (current_theme_supports('custom-header') && get_header_image()) {
-            $categories['custom_header'] = [
-                'label'       => 'Image Header',
-                'family' => false,
-                'weight' => ['min' => 400, 'max' => 700,],
-                'line_height' => ['min' => 1.0, 'max' => 1.5,],
-                'size'   => false,
-            ];
-        }
-
-        return $categories;
+        $static_settings = StaticCustomizeSettings::get();
+        ThemeSettingsSchema::set($static_settings, false); // dont merge on first call
+        $dynamic_settings = new ThemeJsonSettings($this->theme_json);
+        ThemeSettingsSchema::set($dynamic_settings->generate());
     }
-
 
     /**
      * Register Post section options in the Customizer.
@@ -268,7 +113,6 @@ class Customize extends CustomizeBase
         $this->register_settings($wp_customize, 'color');
         $this->register_settings($wp_customize, 'font');
     }
-
 
     public function modify_theme_json_user(\WP_Theme_JSON_Data $wp_theme_json_data)
     {
@@ -289,7 +133,7 @@ class Customize extends CustomizeBase
         }
 
         // FONTS
-        $font_categories = self::get_font_categories();
+        $font_categories = StaticCustomizeSettings::get_font_categories();
         foreach ($font_categories as $category => $props) { // body, heading
             foreach ($props as $prop => $entries) {
                 if (empty($entries)) break;
@@ -390,7 +234,7 @@ class Customize extends CustomizeBase
 
         // Localize only the keys (category slugs), not the full config (to keep JS light)
         wp_localize_script('luma-core-customize-controls', 'wpData', [
-            'categories' => self::get_font_categories(),
+            'categories' => StaticCustomizeSettings::get_font_categories(),
             'prefix' => $this->prefix,
             'ajax'  => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('font_reset_nonce'),
@@ -406,7 +250,7 @@ class Customize extends CustomizeBase
         }
 
         $category = sanitize_key($_POST['category'] ?? '');
-        $categories = self::get_font_categories();
+        $categories = StaticCustomizeSettings::get_font_categories();
 
         if (!$category || !isset($categories[$category])) {
             wp_send_json_error('invalid_category');

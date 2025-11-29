@@ -193,4 +193,26 @@ class Functions
 
     //     return '--wp--' . implode('--', $parts);
     // }
+
+    /**
+     * Recursively merge two arrays, overriding scalar values instead of merging them into arrays.
+     *
+     * @param array $array1 Base array.
+     * @param array $array2 Array with values to merge/override.
+     * @return array Merged array.
+     */
+    public static function array_merge_recursive_distinct(array $array1, array $array2): array
+    {
+        $merged = $array1;
+
+        foreach ($array2 as $key => $value) {
+            if (is_array($value) && isset($merged[$key]) && is_array($merged[$key])) {
+                $merged[$key] = self::array_merge_recursive_distinct($merged[$key], $value);
+            } else {
+                $merged[$key] = $value;
+            }
+        }
+
+        return $merged;
+    }
 }

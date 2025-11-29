@@ -16,12 +16,6 @@ use Luma\Core\Services\ThemeSettingsSchema;
 class TemplateFunctions
 {
 
-	protected string $prefix;
-
-	public function __construct(string $prefix = 'luma_core')
-	{
-		$this->prefix = $prefix;
-	}
 	/**
 	 * Gets the SVG code for a given icon.
 	 *
@@ -362,7 +356,7 @@ class TemplateFunctions
 	{
 		$continue_reading = sprintf(
 			/* translators: %s: Post title. Only visible to screen readers. */
-			__('Continue reading %s', Core::get_domain()),
+			__('Continue reading %s', Config::get_domain()),
 			get_the_title('<span class="screen-reader-text">', '</span>')
 		);
 

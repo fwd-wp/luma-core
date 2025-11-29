@@ -3,7 +3,7 @@
 namespace Luma\Core\Setup;
 
 use Luma\Core\Helpers\TemplateFunctions;
-use Luma\Core\Services\I18nService;
+use Luma\Core\Core\Config;
 
 /**
  * Filter Functions which enhance the theme by hooking into WordPress
@@ -133,7 +133,7 @@ class TemplateFilters
 	 */
 	public function post_title($title): string
 	{
-		return '' === $title ? esc_html_x('Untitled', 'Added to posts and pages that are missing titles', I18nService::get_domain()) : $title;
+		return '' === $title ? esc_html_x('Untitled', 'Added to posts and pages that are missing titles', Config::get_domain()) : $title;
 	}
 
 	/**
@@ -166,9 +166,9 @@ class TemplateFilters
 	{
 		$post   = get_post($post);
 		$label  = 'pwbox-' . (empty($post->ID) ? wp_rand() : $post->ID);
-		$output = '<p class="post-password-message">' . esc_html__('This content is password protected. Please enter a password to view.', I18nService::get_domain()) . '</p>
+		$output = '<p class="post-password-message">' . esc_html__('This content is password protected. Please enter a password to view.', Config::get_domain()) . '</p>
 	<form action="' . esc_url(site_url('wp-login.php?action=postpass', 'login_post')) . '" class="post-password-form" method="post">
-	<label class="post-password-form__label" for="' . esc_attr($label) . '">' . esc_html_x('Password', 'Post password form', I18nService::get_domain()) . '</label><input class="post-password-form__input" name="post_password" id="' . esc_attr($label) . '" type="password" spellcheck="false" size="20" /><input type="submit" class="post-password-form__submit" name="' . esc_attr_x('Submit', 'Post password form', I18nService::get_domain()) . '" value="' . esc_attr_x('Enter', 'Post password form', I18nService::get_domain()) . '" /></form>
+	<label class="post-password-form__label" for="' . esc_attr($label) . '">' . esc_html_x('Password', 'Post password form', Config::get_domain()) . '</label><input class="post-password-form__input" name="post_password" id="' . esc_attr($label) . '" type="password" spellcheck="false" size="20" /><input type="submit" class="post-password-form__submit" name="' . esc_attr_x('Submit', 'Post password form', Config::get_domain()) . '" value="' . esc_attr_x('Enter', 'Post password form', Config::get_domain()) . '" /></form>
 	';
 		return $output;
 	}

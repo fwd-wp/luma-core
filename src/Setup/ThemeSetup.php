@@ -2,7 +2,7 @@
 
 namespace Luma\Core\Setup;
 
-use Luma\Core\Services\I18nService;
+use Luma\Core\Core\Config;
 
 /**s
  * Class Setup
@@ -135,6 +135,7 @@ class ThemeSetup
                 'flex-height' => true,
                 'flex-width'  => true,
                 'header-text' => true,
+                'video'       => true,
                 // TODO: Set up default header image so it works with imported content.
                 // 'default-image' => get_template_directory_uri() . '/images/sunset.jpg',
             )
@@ -176,8 +177,8 @@ class ThemeSetup
          */
         register_nav_menus(
             array(
-                'main'   => esc_html__('Main menu', I18nService::get_domain()),
-                'footer' => esc_html__('Footer menu', I18nService::get_domain()),
+                'main'   => esc_html__('Main menu', Config::get_domain()),
+                'footer' => esc_html__('Footer menu', Config::get_domain()),
             )
         );
     }
@@ -197,7 +198,7 @@ class ThemeSetup
     {
         for ($i = 1; $i <= 4; $i++) {
             register_sidebar(array(
-                'name'          => sprintf(__('Footer %d', I18nService::get_domain()), $i),
+                'name'          => sprintf(__('Footer %d', Config::get_domain()), $i),
                 'id'            => 'footer-' . $i,
                 'before_widget' => '<section id="%1$s" class="widget %2$s">',
                 'after_widget'  => '</section>',

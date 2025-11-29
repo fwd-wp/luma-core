@@ -5,14 +5,14 @@ namespace Luma\Core\Core;
 class Config
 {
 
-    private string $prefix_snake = 'luma_core';
-    private string $prefix_snake_core = 'luma_core';
-    private string $prefix_kebab = 'luma-core';
-    private string $prefix_kebab_core = 'luma-core';
-    private string $text_domain  = 'luma-core';
-    private string $text_domain_core  = 'luma-core';
-    private string $minimum_wp_version  = '6.8';
-    private string $minimum_php_version = '7.4';
+    private static string $prefix_snake = 'luma_core';
+    private static string $prefix_snake_core = 'luma_core';
+    private static string $prefix_kebab = 'luma-core';
+    private static string $prefix_kebab_core = 'luma-core';
+    private static string $text_domain  = 'luma-core';
+    private static string $text_domain_core  = 'luma-core';
+    private static string $minimum_wp_version  = '6.8';
+    private static string $minimum_php_version = '7.4';
 
     public static function set_prefix(string $prefix): void
     {

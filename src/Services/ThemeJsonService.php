@@ -20,11 +20,25 @@ class ThemeJsonService
     protected array|string $data = [];
     protected array $original_path = [];
 
-    public function __construct(string $origin = 'theme')
+    public function __construct(string $origin = 'theme', array|null $override_data = null)
     {
         $this->origin = $origin;
-        // No data load here; only set origin
-        $this->data = []; // always start with empty array
+        $this->data = [];
+
+        // For testing: use override data instead of WP_Theme_JSON_Resolver
+        if ($override_data !== null) {
+            self::$cache["json:{$this->origin}"] = $override_data;
+        }
+    }
+
+    public static function reset_cache(): void
+    {
+        self::$cache = [];
+    }
+
+    public static function alter_css_generation(): void
+    {
+        
     }
 
     /**
@@ -136,7 +150,7 @@ class ThemeJsonService
 
     /** --- Internal helpers --- */
 
-    private function drill_down(array $path, array|string $data = null): array|string|null
+    private function drill_down(array $path, array|string|null $data = null): array|string|null
     {
         $data = $data ?? self::$cache["json:{$this->origin}"];
 
@@ -178,11 +192,11 @@ class ThemeJsonService
         } else {
             $segments[] = 'preset';
             $map = [
-                'color' => ['palette'=>'color','gradients'=>'gradient','duotone'=>'duotone'],
-                'typography' => ['fontFamilies'=>'font-family','fontSizes'=>'font-size'],
-                'spacing' => ['spacingSizes'=>'spacing','spacing_scale'=>'spacing'],
-                'border' => ['radius'=>'border-radius','width'=>'border-width'],
-                'shadow' => ['*'=>'shadow'],
+                'color' => ['palette' => 'color', 'gradients' => 'gradient', 'duotone' => 'duotone'],
+                'typography' => ['fontFamilies' => 'font-family', 'fontSizes' => 'font-size'],
+                'spacing' => ['spacingSizes' => 'spacing', 'spacing_scale' => 'spacing'],
+                'border' => ['radius' => 'border-radius', 'width' => 'border-width'],
+                'shadow' => ['*' => 'shadow'],
             ];
 
             $group = $path[0] ?? null;
@@ -211,7 +225,7 @@ class ThemeJsonService
     {
         if (!is_array($data)) return [];
         $formatted = [];
-        $presetValueKeys = ['size','fontFamily','color','gradient','shadow','colors'];
+        $presetValueKeys = ['size', 'fontFamily', 'color', 'gradient', 'shadow', 'colors'];
 
         if (array_values($data) === $data) {
             foreach ($data as $item) {
