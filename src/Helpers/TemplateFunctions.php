@@ -2,12 +2,13 @@
 
 namespace Luma\Core\Helpers;
 
-use Luma\Core\Core\Config;
 use Luma\Core\Models\SVGIconsModel;
 use Luma\Core\Services\ThemeSettingsSchema;
 
 /**
  * Functions which enhance the theme by hooking into WordPress
+ * 
+ *  Class must be initialised with TemplateFunctions::init($config) before use to set prefix and domain.
  *
  * @package Luma-Core
  *  
@@ -15,6 +16,12 @@ use Luma\Core\Services\ThemeSettingsSchema;
  */
 class TemplateFunctions
 {
+	protected static string $domain = 'luma-core';
+
+	public static function init($config): void
+	{
+		self::$domain = $config['text_domain'] ?? self::$domain;
+	}
 
 	/**
 	 * Gets the SVG code for a given icon.
@@ -161,17 +168,19 @@ class TemplateFunctions
 	}
 
 	/**
-	 * Print the first instance of a block in the content, and then break away.
+	 * Get the first instance(s) of a block in the content.
 	 *
 	 * @since Luma-Core 1.0
 	 *
-	 * @param string      $block_name The full block type name, or a partial match.
-	 *                                Example: `core/image`, `core-embed/*`.
-	 * @param string|null $content    The content to search in. Use null for get_the_content().
-	 * @param int         $instances  How many instances of the block will be printed (max). Default  1.
-	 * @return bool Returns true if a block was located & printed, otherwise false.
+	 * @param string      $block_name The full block type name, or a partial match with '*'.
+	 *                                Example: 'core/image', 'core-embed/*'.
+	 * @param string|null $content    The content to search in. Defaults to get_the_content().
+	 * @param int         $instances  How many instances of the block to return. Default 1.
+	 * @param bool        $echo       Whether to echo the output or return it. Default true.
+	 *
+	 * @return string|bool Returns the HTML of the block(s) if $echo is false, otherwise true/false.
 	 */
-	public static function print_first_instance_of_block($block_name, $content = null, $instances = 1)
+	public static function get_first_instance_of_block(string $block_name, ?string $content = null, int $instances = 1, bool $echo = false)
 	{
 		$instances_count = 0;
 		$blocks_content  = '';
@@ -180,48 +189,84 @@ class TemplateFunctions
 			$content = get_the_content();
 		}
 
-		// Parse blocks in the content.
-		$blocks = parse_blocks($content);
+		/**
+		 * Recursive function to search blocks, including nested blocks.
+		 */
+		$search_blocks = function (array $blocks) use (&$search_blocks, $block_name, $instances, &$instances_count, &$blocks_content) {
+			foreach ($blocks as $block) {
+				if (! isset($block['blockName'])) {
+					continue;
+				}
 
-		// Loop blocks.
-		foreach ($blocks as $block) {
+				$is_matching_block = false;
 
-			// Confidence check.
-			if (! isset($block['blockName'])) {
-				continue;
-			}
+				if ('*' === substr($block_name, -1)) {
+					$is_matching_block = 0 === strpos($block['blockName'], rtrim($block_name, '*'));
+				} else {
+					$is_matching_block = $block_name === $block['blockName'];
+				}
 
-			// Check if this the block matches the $block_name.
-			$is_matching_block = false;
+				if ($is_matching_block) {
+					++$instances_count;
+					$blocks_content .= render_block($block);
 
-			// If the block ends with *, try to match the first portion.
-			if ('*' === $block_name[-1]) {
-				$is_matching_block = 0 === strpos($block['blockName'], rtrim($block_name, '*'));
-			} else {
-				$is_matching_block = $block_name === $block['blockName'];
-			}
+					if ($instances_count >= $instances) {
+						return true; // stop search
+					}
+				}
 
-			if ($is_matching_block) {
-				// Increment count.
-				++$instances_count;
-
-				// Add the block HTML.
-				$blocks_content .= render_block($block);
-
-				// Break the loop if the $instances count was reached.
-				if ($instances_count >= $instances) {
-					break;
+				// Recursively check inner blocks
+				if (! empty($block['innerBlocks'])) {
+					if ($search_blocks($block['innerBlocks'])) {
+						return true;
+					}
 				}
 			}
-		}
+
+			return false;
+		};
+
+		$blocks = parse_blocks($content);
+		$search_blocks($blocks);
 
 		if ($blocks_content) {
-			/** This filter is documented in wp-includes/post-template.php */
-			echo apply_filters('the_content', $blocks_content); // phpcs:ignore WordPress.Security.EscapeOutput
-			return true;
+			$blocks_content = apply_filters('luma_core_first_instance_of_block', $blocks_content, $block_name, $instances);
+
+			if ($echo) {
+				echo $blocks_content; // phpcs:ignore WordPress.Security.EscapeOutput
+				return true;
+			}
+
+			return $blocks_content;
 		}
 
 		return false;
+	}
+
+	/**
+	 * Get or print the first matching block from a list of block types.
+	 *
+	 * @param string[]    $block_types Array of block names in priority order.
+	 * @param string|null $content     Content to search. Defaults to get_the_content().
+	 * @param int         $instances   How many instances to get per block type. Default 1.
+	 * @param bool        $echo        Whether to echo (true) or return (false). Default true.
+	 *
+	 * @return string|bool HTML output if $echo is false, otherwise true if printed, false if nothing found.
+	 */
+	public static function get_first_available_block(array $block_types, ?string $content = null, int $instances = 1, bool $echo = false)
+	{
+		foreach ($block_types as $block_type) {
+			$html = self::get_first_instance_of_block($block_type, $content, $instances, false);
+			if ($html) {
+				if ($echo) {
+					echo $html;
+					return true;
+				}
+				return $html;
+			}
+		}
+
+		return $echo ? false : '';
 	}
 
 	/**
@@ -279,50 +324,109 @@ class TemplateFunctions
 	 *
 	 * @since Luma-Core 1.0
 	 *
-	 * @return void
+	 * @return string
 	 */
 	public static function html_classes(): string
 	{
 		/**
-		 * Filters the classes for the main <html> element.
+		 * Filter the classes for the main <html> element.
+		 *
+		 * Multiple callbacks can append to the existing class string.
 		 *
 		 * @since Luma-Core 1.0
 		 *
-		 * @param string The list of classes. Default empty string.
+		 * @param string $classes Current list of classes. Default empty string.
 		 */
-		$prefix = Config::get_prefix();
-		$classes = apply_filters("{$prefix}_html_classes", '');
+
+		$classes = apply_filters('luma_core_html_classes', '');
 		if (! $classes) {
 			return '';
 		}
 		return 'class="' . esc_attr($classes) . '"';
 
-		// USAGE:
-		// add_filter('luma_core_html_classes', function () {
-		// 	return 'dark-mode custom-layout';
-		// });
+		/* USAGE:
+		add_filter('luma_core_html_classes', function($classes) {
+    		return trim($classes . ' dark-mode custom-layout');
+		});
+		*/
 	}
 
-	public static function body_classes(): array
-	{
-		$body_classes = [];
-		$body_classes[] = TemplateFunctions::is_excerpt() ? ' is-excerpt' : ' is-full';
-		if (is_single()) {
-			$body_classes[] = ThemeSettingsSchema::theme_mod_with_default('display_post_width') === 'wide' ? ' is-wide-single' : '';
-		}
-		if (is_page()) {
-			$body_classes[] = ThemeSettingsSchema::theme_mod_with_default('display_page_width') === 'wide' ? ' is-wide-page' : '';
-		}
-		return $body_classes;
-	}
-
+	/**
+	 * Calculates classes for the archive grid container.
+	 *
+	 * @since Luma-Core 1.0
+	 *
+	 * @return string CSS classes for the archive grid container.
+	 */
 	public static function grid_classes(): string
 	{
-		$grid_classes  = 'archive-grid';
-		$grid_classes .= ' archive-grid--' . ThemeSettingsSchema::theme_mod_with_default('display_archive_excerpt_format');
+		$grid_classes = 'archive-grid';
+		$grid_classes .= ' archive-grid--' . ThemeSettingsSchema::get_theme_mod('display_archive_excerpt_format');
 
-		return $grid_classes;
+		/**
+		 * Filter the archive grid container classes.
+		 *
+		 * @since Luma-Core 1.0
+		 *
+		 * @param string $grid_classes The CSS classes for the archive grid container.
+		 */
+		return apply_filters('luma_core_grid_classes', $grid_classes);
 	}
+
+	/**
+	 * Calculates classes for the site header container.
+	 *
+	 * @since Luma-Core 1.0
+	 *
+	 * @return string CSS classes for the site header.
+	 */
+	public static function header_classes(): string
+	{
+		$classes = 'site-header';
+		$classes .= ThemeSettingsSchema::get_theme_mod('header_sticky') ? ' is-sticky' : '';
+		$classes .= ThemeSettingsSchema::get_theme_mod('header_navbar_transparent') ? ' is-transparent' : '';
+
+		/**
+		 * Filter the site header CSS classes.
+		 *
+		 * @since Luma-Core 1.0
+		 *
+		 * @param string $classes The CSS classes for the site header.
+		 */
+		return apply_filters('luma_core_header_classes', $classes);
+	}
+
+	/**
+	 * Calculates classes for the main site navigation container.
+	 *
+	 * @since Luma-Core 1.0
+	 *
+	 * @return string CSS classes for the site navigation container.
+	 */
+	public static function nav_classes(): string
+	{
+		$classes = 'site-navigation';
+		$classes .= has_custom_logo() ? ' has-logo' : '';
+		$classes .= has_nav_menu('main') ? ' has-menu' : '';
+
+		if (ThemeSettingsSchema::get_theme_mod('wp-core_display_title_and_tagline')) {
+			$classes .= get_bloginfo('name') ? ' has-title' : '';
+			$classes .= get_bloginfo('description') ? ' has-description' : '';
+		}
+
+		$classes .= ThemeSettingsSchema::get_theme_mod('header_navbar_full_width') ? ' is-full-width' : '';
+		$classes .= ThemeSettingsSchema::get_theme_mod('header_navbar_shrink') ? ' is-sticky is-shrink-enabled' : '';
+
+		/**
+		 * Filter the site navigation CSS classes.
+		 *
+		 * @since Luma-Core 1.0
+		 *
+		 * @param string $classes The CSS classes for the site navigation container.
+		 */
+		return apply_filters('luma_core_nav_classes', $classes);
+	}
+
 
 
 	/**
@@ -356,7 +460,7 @@ class TemplateFunctions
 	{
 		$continue_reading = sprintf(
 			/* translators: %s: Post title. Only visible to screen readers. */
-			__('Continue reading %s', Config::get_domain()),
+			__('Continue reading %s', self::$domain),
 			get_the_title('<span class="screen-reader-text">', '</span>')
 		);
 
@@ -398,7 +502,7 @@ class TemplateFunctions
 	 */
 	public static function is_excerpt(): bool
 	{
-		$is_excerpt = (ThemeSettingsSchema::theme_mod_with_default('display_archive_view') === 'excerpt');
+		$is_excerpt = (ThemeSettingsSchema::get_theme_mod('display_archive_view') === 'excerpt');
 
 		if (! $is_excerpt || is_single()) {
 			return false;

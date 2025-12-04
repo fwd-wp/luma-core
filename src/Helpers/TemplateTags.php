@@ -5,285 +5,338 @@ namespace Luma\Core\Helpers;
 use Luma\Core\Services\ThemeSettingsSchema;
 
 /**
- * Custom template tags for this theme
+ * Custom template tags for this theme.
+ *
+ * All functions output escaped (safe) HTML.
+ * 
+ * Class must be initialised with TemplateTags::init($config) before use to set prefix and domain.
  *
  * @package Luma-Core
- *  
  * @since Luma-Core 1.0
  */
-
 class TemplateTags
 {
+	protected static string $domain = 'luma-core';
 
-
-	/**
-	 * Prints HTML with meta information for the current post-date/time.
-	 *
-	 * @since Luma-Core 1.0
-	 *
-	 * @return void
-	 */
-	public static function posted_on(): void
+	public static function init($config): void
 	{
-		$time_string = '<time class="entry-date published updated" datetime="%1$s">%2$s</time>';
-
-		$time_string = sprintf(
-			$time_string,
-			esc_attr(get_the_date(DATE_W3C)),
-			esc_html(get_the_date())
-		);
-		echo '<span class="posted-on">';
-		printf(
-			/* translators: %s: Publish date. */
-			esc_html__('Published %s', 'luma-core'),
-			$time_string // phpcs:ignore WordPress.Security.EscapeOutput
-		);
-		echo '</span>';
+		self::$domain = $config['text_domain'] ?? self::$domain;
 	}
 
-	/**
-	 * Prints HTML with meta information for how long ago the post was published or updated
-	 *
-	 * @since Luma-Core 1.0
-	 *
-	 * @return void
-	 */
-	public static function posted_ago(): void
+	public static function posted_on($class = 'posted-on', $time_class = 'entry-date published updated', bool $echo = true): ?string
+	{
+		$time_string = '<time class="' . esc_attr($time_class) . '" datetime="'
+			. esc_attr(get_the_date(DATE_W3C)) . '">'
+			. esc_html(get_the_date()) . '</time>';
+
+		$output = '<span class="' . esc_attr($class) . '">'
+			. sprintf(
+				/* translators: %s is the date */
+				__('Published %s', self::$domain),
+				$time_string
+			)
+			. '</span>';
+
+		$output = apply_filters('luma_core_posted_on', $output, $time_string, $class, $time_class);
+
+		if ($echo) {
+			echo $output;
+			return null;
+		}
+
+		return $output;
+	}
+
+	public static function posted_ago(string $class = 'posted-on', bool $echo = true): ?string
 	{
 		$published_time = get_the_time('U');
 		$modified_time  = get_the_modified_time('U');
 		$current_time   = current_time('timestamp');
 
-		// Default to published
-		$label = __('%s ago', 'luma-core');
-		$time_diff = human_time_diff($published_time, $current_time);
+		$time_to_show = ($modified_time > $published_time) ? $modified_time : $published_time;
+		$time_diff    = human_time_diff($time_to_show, $current_time);
 
-		// If modified time is later than published time, show "Updated"
-		if ($modified_time > $published_time) {
-			$time_diff = human_time_diff($modified_time, $current_time);
-		}
-
-		echo '<span class="posted-on">';
-		printf(
-			/* translators: %s: Human-readable time difference. */
-			esc_html($label),
-			esc_html($time_diff)
-		);
-		echo '</span>';
-	}
-
-
-	/**
-	 * Prints HTML with meta information about theme author.
-	 *
-	 * @since Luma-Core 1.0
-	 *
-	 * @return void
-	 */
-	public static function posted_by(): void
-	{
-		// TODO check if the if condition is correct based on the output
-		if (get_the_author() && post_type_supports(get_post_type(), 'author')) {
-			echo '<span class="posted-by">';
-			printf(
-				/* translators: %s: Author name. */
-				esc_html__('%s', 'luma-core'),
-				'<a href="' . esc_url(get_author_posts_url(get_the_author_meta('ID'))) . '" rel="author">' . esc_html(get_the_author()) . '</a>'
-			);
-			echo '</span>';
-		}
-	}
-
-	/**
-	 * Prints HTML of the whole posted by section
-	 *
-	 * @since Luma-Core 1.0
-	 *
-	 * @return void
-	 */
-	public static function single_posted_meta(): void
-	{ ?>
-		<div class="posted-meta">
-			<?php self::posted_on(); ?>
-			<?php if (!ThemeSettingsSchema::theme_mod_with_default('display_post_author_bio')): ?>
-				<?php self::posted_by(); ?>
-			<?php endif; ?>
-			<?php self::edit_post_link(); ?>
-		</div>
-	<?php
-	}
-
-	/**
-	 * Prints HTML of the whole posted by section
-	 *
-	 * @since Luma-Core 1.0
-	 *
-	 * @return void
-	 */
-	public static function archive_posted_meta(): void
-	{ ?>
-		<div class="posted-meta">
-			<?php self::posted_by(); ?>
-			<span class="separator"> &middot; </span>
-			<?php self::posted_ago(); ?>
-		</div>
-	<?php
-	}
-
-
-	/**
-	 * Displays taxonomy categories and tags for a post
-	 *
-	 * @since Luma-Core 1.0
-	 *
-	 * @return void
-	 */
-
-	public static function post_taxonomies(): void
-	{
-		if (has_category() || has_tag()) {
-
-			echo '<div class="post-taxonomies">';
-
-			$categories_list = get_the_category_list(wp_get_list_item_separator());
-			if ($categories_list) {
-				printf(
-					/* translators: %s: List of categories. */
-					'<span class="cat-links">' . esc_html__('Categorized as %s', 'luma-core') . ' </span>',
-					$categories_list // phpcs:ignore WordPress.Security.EscapeOutput
-				);
-			}
-
-			$tags_list = get_the_tag_list('', wp_get_list_item_separator());
-			if ($tags_list && ! is_wp_error($tags_list)) {
-				printf(
-					/* translators: %s: List of tags. */
-					'<span class="tags-links">' . esc_html__('Tagged %s', 'luma-core') . '</span>',
-					$tags_list // phpcs:ignore WordPress.Security.EscapeOutput
-				);
-			}
-			echo '</div>';
-		}
-	}
-
-	/**
-	 * Displays an optional post thumbnail.
-	 *
-	 * Wraps the post thumbnail in an anchor element on index views, or a div
-	 * element when on single views.
-	 *
-	 * @since Luma-Core 1.0
-	 *
-	 * @return void
-	 */
-	public static function post_thumbnail(): void
-	{
-		if (! TemplateFunctions::can_show_post_thumbnail()) {
-			return;
-		}
-	?>
-		<?php if (is_singular()) : ?>
-			<?php // post, page, custom post types, attachment & password protected excluded above 
-			?>
-			<figure class="post-thumbnail">
-				<?php
-				// Lazy-loading attributes should be skipped for thumbnails since they are immediately in the viewport.
-				the_post_thumbnail('post-thumbnail', array('loading' => false));
-				?>
-				<?php if (wp_get_attachment_caption(get_post_thumbnail_id())) : ?>
-					<figcaption class="wp-caption-text"><?php echo wp_kses_post(wp_get_attachment_caption(get_post_thumbnail_id())); ?></figcaption>
-				<?php endif; ?>
-			</figure><!-- .post-thumbnail -->
-
-		<?php else : ?>
-			<?php // list pages - links the image, but no caption
-			?>
-			<figure class="post-thumbnail">
-				<a class="post-thumbnail-inner" href="<?php the_permalink(); ?>" aria-hidden="true" tabindex="-1">
-					<?php the_post_thumbnail('post-thumbnail'); ?>
-				</a>
-			</figure><!-- .post-thumbnail -->
-
-		<?php endif; ?>
-<?php
-	}
-
-	/**
-	 * Print the next and previous posts navigation.
-	 *
-	 * @since Luma-Core 1.0
-	 *
-	 * @return void
-	 */
-	public static function the_posts_pagination(): void
-	{
-		the_posts_pagination(
-			array(
-				'before_page_number' => esc_html__('Page', 'luma-core') . ' ',
-				'mid_size'           => 0,
-				'prev_text'          => sprintf(
-					'%s <span class="nav-prev-text">%s</span>',
-					is_rtl() ? TemplateFunctions::get_icon_svg('ui', 'arrow_right') : TemplateFunctions::get_icon_svg('ui', 'arrow_left'),
-					wp_kses(
-						__('Newer <span class="nav-short">posts</span>', 'luma-core'),
-						array(
-							'span' => array(
-								'class' => array(),
-							),
-						)
-					)
-				),
-				'next_text'          => sprintf(
-					'<span class="nav-next-text">%s</span> %s',
-					wp_kses(
-						__('Older <span class="nav-short">posts</span>', 'luma-core'),
-						array(
-							'span' => array(
-								'class' => array(),
-							),
-						)
-					),
-					is_rtl() ? TemplateFunctions::get_icon_svg('ui', 'arrow_left') : TemplateFunctions::get_icon_svg('ui', 'arrow_right')
-				),
+		$output = '<span class="' . esc_attr($class) . '">'
+			. sprintf(
+				/* translators: %s is human-readable time difference, e.g. "5 minutes" */
+				__('%s ago', self::$domain),
+				$time_diff
 			)
-		);
+			. '</span>';
+
+		$output = apply_filters('luma_core_posted_ago', $output, $time_diff, $class);
+
+		if ($echo) {
+			echo $output;
+			return null;
+		}
+
+		return $output;
 	}
 
-	/**
-	 * Displays page links for paginated posts
-	 * 
-	 * @since Luma-Core 1.0
-	 *
-	 * @return void
-	 */
-	public static function page_links(): void
+	public static function posted_by(string $class = 'posted-by', bool $echo = true): ?string
 	{
-		wp_link_pages(
-			array(
-				'before'   => '<nav class="page-links" aria-label="' . esc_attr__('Page', 'luma-core') . '">',
-				'after'    => '</nav>',
-				/* translators: %: Page number. */
-				'pagelink' => esc_html__('Page %', 'luma-core'),
-			)
-		);
+		if (!get_the_author() || !post_type_supports(get_post_type(), 'author')) {
+			return null;
+		}
+
+		$author_name = get_the_author();
+		$author_url  = esc_url(get_author_posts_url(get_the_author_meta('ID')));
+
+		$output = '<span class="' . esc_attr($class) . '"><a href="' . $author_url . '" rel="author">'
+			. esc_html($author_name) . '</a></span>';
+
+		$output = apply_filters('luma_core_posted_by', $output, $author_name, $author_url);
+
+		if ($echo) {
+			echo $output;
+			return null;
+		}
+
+		return $output;
 	}
-	/**
-	 * Displays edit post link for pages and posts
-	 * 
-	 * @since Luma-Core 1.0
-	 *
-	 * @return void
-	 */
-	public static function edit_post_link(): void
+
+	public static function single_posted_meta(string $class = 'posted-meta', bool $echo = true): ?string
 	{
+		$output = '<div class="' . esc_attr($class) . '">';
+		$output .= self::posted_on(false);
+
+		if (!ThemeSettingsSchema::get_theme_mod('display_post_author_bio')) {
+			$output .= self::posted_by(false);
+		}
+
+		$output .= self::edit_post_link(false);
+		$output .= '</div>';
+
+		$output = apply_filters('luma_core_single_posted_meta', $output, $class);
+
+		if ($echo) {
+			echo $output;
+			return null;
+		}
+
+		return $output;
+	}
+
+	public static function archive_posted_meta(string $class = 'posted-meta', string $separator_class = 'separator', bool $echo = true): ?string
+	{
+		$output = '<div class="' . esc_attr($class) . '">';
+		$output .= self::posted_by(false);
+		$output .= '<span class="' . esc_attr($separator_class) . '"> &middot; </span>';
+		$output .= self::posted_ago(false);
+		$output .= '</div>';
+
+		$output = apply_filters('luma_core_archive_posted_meta', $output, $class, $separator_class);
+
+		if ($echo) {
+			echo $output;
+			return null;
+		}
+
+		return $output;
+	}
+
+	public static function post_taxonomies(bool $echo = true): ?string
+	{
+		if (!has_category() && !has_tag()) {
+			return null;
+		}
+
+		$output = '<div class="post-taxonomies">';
+
+		$categories_list = get_the_category_list(wp_get_list_item_separator());
+		if ($categories_list) {
+			$output .= '<span class="cat-links">'
+				. sprintf(
+					/* translators: %s is a comma-separated list of categories */
+					__('Categorized as %s', self::$domain),
+					wp_kses_post($categories_list)
+				)
+				. '</span>';
+		}
+
+		$tags_list = get_the_tag_list('', wp_get_list_item_separator());
+		if ($tags_list && !is_wp_error($tags_list)) {
+			$output .= '<span class="tags-links">'
+				. sprintf(
+					/* translators: %s is a comma-separated list of tags */
+					__('Tagged %s', self::$domain),
+					wp_kses_post($tags_list)
+				)
+				. '</span>';
+		}
+
+		$output .= '</div>';
+
+		$output = apply_filters('luma_core_post_taxonomies', $output, $categories_list, $tags_list);
+
+		if ($echo) {
+			echo $output;
+			return null;
+		}
+
+		return $output;
+	}
+
+	public static function post_thumbnail(bool $echo = true): ?string
+	{
+		if (!TemplateFunctions::can_show_post_thumbnail()) {
+			return null;
+		}
+
+		$post_thumbnail_id = get_post_thumbnail_id();
+		$caption           = wp_get_attachment_caption($post_thumbnail_id);
+		$thumbnail_args    = ['loading' => is_singular() ? false : 'lazy'];
+
+		$output = '<figure class="post-thumbnail">';
+
+		if (is_singular()) {
+			ob_start();
+			the_post_thumbnail('post-thumbnail', $thumbnail_args);
+			$output .= ob_get_clean();
+
+			if ($caption) {
+				$output .= '<figcaption class="wp-caption-text">' . wp_kses_post($caption) . '</figcaption>';
+			}
+		} else {
+			$output .= '<a class="post-thumbnail-inner" href="' . esc_url(get_permalink()) . '" aria-hidden="true" tabindex="-1">';
+			ob_start();
+			the_post_thumbnail('post-thumbnail', $thumbnail_args);
+			$output .= ob_get_clean();
+			$output .= '</a>';
+		}
+
+		$output .= '</figure>';
+
+		$output = apply_filters('luma_core_post_thumbnail', $output, $post_thumbnail_id, $caption);
+
+		if ($echo) {
+			echo $output;
+			return null;
+		}
+
+		return $output;
+	}
+
+	public static function the_posts_pagination(bool $echo = true): ?string
+	{
+		$prev_icon = is_rtl() ? TemplateFunctions::get_icon_svg('ui', 'arrow_right') : TemplateFunctions::get_icon_svg('ui', 'arrow_left');
+		$next_icon = is_rtl() ? TemplateFunctions::get_icon_svg('ui', 'arrow_left') : TemplateFunctions::get_icon_svg('ui', 'arrow_right');
+
+		$prev_text = $prev_icon
+			. '<span class="nav-prev-text">'
+			. sprintf(
+				/* translators: "Newer posts" text in pagination */
+				__('Newer <span class="nav-short">posts</span>', self::$domain)
+			)
+			. '</span>';
+		$next_text = '<span class="nav-next-text">'
+			. sprintf(
+				/* translators: "Older posts" text in pagination */
+				__('Older <span class="nav-short">posts</span>', self::$domain)
+			)
+			. '</span>' . $next_icon;
+
+		ob_start();
+		the_posts_pagination([
+			'before_page_number' => __('Page ', self::$domain),
+			'mid_size'           => 0,
+			'prev_text'          => $prev_text,
+			'next_text'          => $next_text,
+		]);
+		$output = ob_get_clean();
+
+		$output = apply_filters('luma_core_the_posts_pagination', $output, $prev_text, $next_text);
+
+		if ($echo) {
+			echo $output;
+			return null;
+		}
+
+		return $output;
+	}
+
+	public static function page_links(bool $echo = true): ?string
+	{
+		global $page;
+
+		ob_start();
+		wp_link_pages([
+			'before'   => '<nav class="page-links" aria-label="' . esc_attr(__('Page navigation', self::$domain)) . '">',
+			'after'    => '</nav>',
+			'pagelink' => sprintf(
+				/* translators: %s is the page number. Use singular/plural as appropriate in your language. In English, use "Page" for both singular and plural. */
+				_n('Page %s', 'Page %s', $page, self::$domain),
+				$page
+			),
+		]);
+		$output = ob_get_clean();
+
+		/**
+		 * Filter the page links output.
+		 *
+		 * @param string $output The HTML output for paginated page links.
+		 */
+		$output = apply_filters('luma_core_page_links', $output);
+
+		if ($echo) {
+			echo $output;
+			return null;
+		}
+
+		return $output;
+	}
+
+	public static function edit_post_link(bool $echo = true): ?string
+	{
+		$post_type_obj = get_post_type_object(get_post_type());
+		$singular_name = $post_type_obj ? $post_type_obj->labels->singular_name : __('post', self::$domain);
+
+		ob_start();
 		edit_post_link(
 			sprintf(
-				/* translators: %s: Post title. Only visible to screen readers. */
-				esc_html__('Edit %s', 'luma-core'),
-				'<span class="screen-reader-text">' . get_the_title() . '</span>'
+				/* translators: %s is the singular post type name */
+				__('Edit this %s', self::$domain),
+				$singular_name
 			),
 			'<span class="edit-link">',
 			'</span>'
 		);
+		$output = ob_get_clean();
+
+		$output = apply_filters('luma_core_edit_post_link', $output, $singular_name);
+
+		if ($echo) {
+			echo $output;
+			return null;
+		}
+
+		return $output;
+	}
+
+	public static function site_title(string $class = 'site-title', bool $echo = true): ?string
+	{
+		$name  = get_bloginfo('name');
+		$show  = ThemeSettingsSchema::get_theme_mod('wp-core_display_title_and_tagline');
+		$class = $show ? $class : 'screen-reader-text';
+
+		if (!$name) {
+			return null;
+		}
+
+		$title = is_front_page()
+			? esc_html($name)
+			: '<a href="' . esc_url(home_url('/')) . '" rel="home">' . esc_html($name) . '</a>';
+
+		$output = '<h1 class="' . esc_attr($class) . '">' . $title . '</h1>';
+
+		$output = apply_filters('luma_core_site_title', $output, $class, $title);
+
+		if ($echo) {
+			echo $output;
+			return null;
+		}
+
+		return $output;
 	}
 }

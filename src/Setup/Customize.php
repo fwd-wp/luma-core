@@ -28,10 +28,9 @@ class Customize extends CustomizeBase
      */
     public function __invoke(): void
     {
-
         add_action('customize_register', [$this, 'core_modifications']);
 
-        add_action('customize_register', [$this, 'generate_settings'], 5); // generate earlier than 10
+        add_action('after_setup_theme',  [$this, 'generate_settings']); // runs
         add_action('customize_register', [$this, 'register_customize_settings']); // registers generated settings
         add_filter('wp_theme_json_data_user', [$this, 'modify_theme_json_user']);
 
@@ -121,13 +120,13 @@ class Customize extends CustomizeBase
         // COLOR
         $colors = $this->theme_json->get(['settings', 'color', 'palette'])->raw();
         foreach ($colors as $color) {
-            // check if theme_mod exists and compare against defaut
+            // check if theme_mod exists and compare against default in theme_json
             $slug = $color['slug'] ?? null;
-            $theme_mod = get_theme_mod("color_{$slug}", null);
+            $theme_mod_value = ThemeSettingsSchema::get_theme_mod("color_{$slug}");
             // TODO: normalise settings so no need to specify setting specific e.g. ['color']
-            $default = $color['color'];
-            if ($theme_mod && $default && $theme_mod !== $default) {
-                $color['color'] = $theme_mod;
+            $theme_json_default = $color['color'];
+            if ($theme_mod_value && $theme_json_default && $theme_mod_value !== $theme_json_default) {
+                $color['color'] = $theme_mod_value;
                 $user_json['color']['palette'][] = $color;
             }
         }
@@ -135,17 +134,15 @@ class Customize extends CustomizeBase
         // FONTS
         $font_categories = StaticCustomizeSettings::get_font_categories();
         foreach ($font_categories as $category => $props) { // body, heading
-            foreach ($props as $prop => $entries) {
-                if (empty($entries)) break;
+            foreach ($props as $prop => $value) {
+                if (empty($value) || $prop === 'label') continue;
+                $settings = ThemeSettingsSchema::get_theme_mod_default_and_value("font_{$prop}_{$category}");
 
-                $default = $this->theme_json->get(['settings', 'custom', 'font', $prop, $category])->slug_from_css_var();
-                $theme_mod = get_theme_mod("font_{$prop}_{$category}", null);
-
-                if (isset($theme_mod) && isset($default) && $theme_mod !== $default) {
+                if (isset($settings['value']) && isset($settings['default']) && $settings['value'] !== $settings['default']) {
                     if ($prop === 'weight' || $prop === 'line_height') {
-                        $user_json['custom']['font'][$prop][$category] = $theme_mod;
+                        $user_json['custom']['font'][$prop][$category] = $settings['value'];
                     } else if ($prop === 'family' || $prop === 'size') {
-                        $value = $this->theme_json->get(['settings', 'typography', $entries['choices']])->get_by_slug($theme_mod)->css_var();
+                        $value = $this->theme_json->get(['settings', 'typography', $value['choices']])->get_by_slug($settings['value'])->css_var();
                         $user_json['custom']['font'][$prop][$category] = "var({$value})";
                     }
                 }

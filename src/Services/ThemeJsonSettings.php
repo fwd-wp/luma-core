@@ -2,8 +2,8 @@
 
 namespace Luma\Core\Services;
 
+use Luma\Core\Helpers\Functions;
 use Luma\Core\Services\ThemeJsonService;
-use Luma\Core\Setup\Customize;
 
 class ThemeJsonSettings
 {
@@ -61,83 +61,61 @@ class ThemeJsonSettings
         // Fonts
         $priority = 5;
         foreach (StaticCustomizeSettings::get_font_categories() as $category => $props) {
+            foreach ($props as $key => $value) {
+                // skip if property not defined
+                if (!isset($value)) {
+                    continue;
+                }
 
-            // Subheading for the current category
-            $settings['font']['settings']["heading_{$category}"] = [
-                'label'     => $props['label'],
-                'type'      => 'subheading',
-                'priority'  => $priority,
-            ];
-            $priority += 5;
-
-            // Font family
-            if ($props['family'] ?? false) {
-                $choices = $this->theme_json->get(['settings', 'typography', 'fontFamilies'])->choices();
-
-                if (!empty($choices)) {
-                    $default = $this->theme_json->get(['settings', 'custom', 'font', 'family', $category])->slug_from_css_var();
-
-                    $settings['font']['settings']["family_{$category}"] = [
-                        'default'   => $default,
-                        'label'     => 'Font',
-                        'type'      => 'select',
+                // Subheading for the current category
+                if ($key === 'label') {
+                    $settings['font']['settings']["heading_{$category}"] = [
+                        'label'     => $value,
+                        'type'      => 'subheading',
                         'priority'  => $priority,
-                        'choices'   =>  $choices
                     ];
                     $priority += 5;
                 }
-            }
 
-            // Font weight
-            if ($props['weight'] ?? false) {
-                $default = $this->theme_json->get(['settings', 'custom', 'font', 'weight', $category])->raw_string();
+                // Font family and size
+                if ($key === 'family' || $key === 'size') {
+                    if (!isset($value['choices']) || !isset($value['label']) || !$value) {
+                        continue;
+                    }
 
-                $settings['font']['settings']["weight_{$category}"] = [
-                    'default'   => $default,
-                    'label'     => 'Font Weight',
-                    'type'      => 'number',
-                    'priority'  => $priority,
-                    'choices'   =>  $choices,
-                    'input_attrs' => [
-                        'min'  => $props['weight']['min'],
-                        'max'  => $props['weight']['max'],
-                        'step' => 100,
-                    ],
-                ];
-                $priority += 5;
-            }
+                    $choices = $this->theme_json->get(['settings', 'typography', $value['choices']])->choices();
 
-            // Line height
-            if ($props['line_height'] ?? false) {
-                $default = $this->theme_json->get(['settings', 'custom', 'font', 'lineHeight', $category])->raw_string();
+                    if (!empty($choices)) {
+                        $default = $this->theme_json->get(['settings', 'custom', 'font', $key, $category])->slug_from_css_var();
 
-                $settings['font']['settings']["line_height_{$category}"] = [
-                    'default'   => $default,
-                    'label'     => 'Line Height',
-                    'type'      => 'number',
-                    'priority'  => $priority,
-                    'choices'   =>  $choices,
-                    'input_attrs' => [
-                        'min'  => $props['line_height']['min'],
-                        'max'  => $props['line_height']['max'],
-                        'step' => 0.5,
-                    ],
-                ];
-                $priority += 5;
-            }
+                        $settings['font']['settings']["{$key}_{$category}"] = [
+                            'default'   => $default,
+                            'label'     => $value['label'],
+                            'type'      => 'select',
+                            'priority'  => $priority,
+                            'choices'   =>  $choices
+                        ];
+                        $priority += 5;
+                    }
+                }
 
-            // Font size (if applicable)
-            if (!empty($props['size'])) {
-                $choices = $this->theme_json->get(['settings', 'typography', 'fontSizes'])->choices();
-                if (!empty($choices)) {
-                    $default = $this->theme_json->get(['settings', 'custom', 'font', 'size', $category])->slug_from_css_var();
+                // Font weight and line height
+                if ($key === 'weight' || $key === 'line-height') {
+                    if (!isset($value['label'])) {
+                        continue;
+                    }
 
-                    $settings['font']['settings']["size_{$category}"] = [
+                    $default = $this->theme_json->get(['settings', 'custom', 'font', Functions::kebab_to_camel($key), $category])->raw_string();
+                    $settings['font']['settings']["{$key}_{$category}"] = [
                         'default'   => $default,
-                        'label'     => 'Line Height',
-                        'type'      => 'select',
+                        'label'     => $value['label'],
+                        'type'      => 'number',
                         'priority'  => $priority,
-                        'choices'   =>  $choices,
+                        'input_attrs' => [
+                            'min'  => $props['weight']['min'] ?? '',
+                            'max'  => $props['weight']['max'] ?? '',
+                            'step' => $props['weight']['step'] ?? '',
+                        ],
                     ];
                     $priority += 5;
                 }

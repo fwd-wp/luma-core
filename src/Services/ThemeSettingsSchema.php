@@ -8,44 +8,55 @@ use Luma\Core\Setup\CustomizeBase;
 
 class ThemeSettingsSchema
 {
-    private static bool $cache_set = false;
     private static array $cache = [];
 
-    // for debugging and listing all settings
-    public static function get_settings_list($prefix = false, $default_and_value = false): array
+    /**
+     * Get a list of all settings with their default and current value.
+     * @param bool $prefix Whether to prefix the keys with the theme prefix. Only used to see whats available to custoize.
+     * @return array An associative array of settings keys to their default and current value.
+     * 
+     */
+    public static function get_settings_list($prefix = false): array
     {
-        // prefixed with sagewood if true
-        $schema =  self::get();
+        $schema = self::get();
+        if (!is_array($schema)) {
+            return []; // nothing to process
+        }
+
         $list = [];
         $theme_prefix = Config::get_prefix();
-        foreach ($schema as $group => $values) {
-            foreach ($values['settings'] as $id => $items) {
-                if ($items['type'] !== 'subheading' || $items['type'] !== 'button') {
-                    if ($default_and_value) {
-                        $value = self::theme_mod_with_default("{$group}_{$id}",true);
-                    } else {
-                        $value = $items['label'];
-                    }
 
-                    if ($prefix) {
-                        $list["{$theme_prefix}{$group}_{$id}"] = $value;
-                    } else {
-                        $list["{$group}_{$id}"] = $value;
-                    }
+        foreach ($schema as $group => $values) {
+            // Ensure 'settings' exists and is an array
+            if (!isset($values['settings']) || !is_array($values['settings'])) {
+                continue;
+            }
+
+            foreach ($values['settings'] as $id => $items) {
+                // Safety: $items must be an array with 'type' and 'label'
+                if (!is_array($items)) {
+                    continue;
                 }
+
+                // Skip subheadings or buttons
+                if (isset($items['type']) && in_array($items['type'], ['subheading', 'button'], true)) {
+                    continue;
+                }
+
+                // Build key
+                $key = ($prefix ? $theme_prefix : '') . "{$group}_{$id}";
+
+                $list[$key] =  self::get_theme_mod_default_and_value("{$group}_{$id}");
             }
         }
+
         return $list;
-    }
-    private static function set_cache(): void
-    {
-        self::$cache_set = true;
     }
 
     public static function get(): array
     {
-        if (!self::$cache_set) {
-            self::set_cache();
+        if (empty(self::$cache)) {
+            Functions::error_log("ThemeSettingsSchema cache not set. Returning empty array.");
         }
         return self::$cache;
     }
@@ -58,70 +69,75 @@ class ThemeSettingsSchema
      */
     public static function set(array $settings, bool $merge = true): void
     {
-        if (!self::$cache_set) {
-            self::set_cache();
-        }
         if ($merge) {
-            // self::$cache = array_merge(self::$cache, $settings);
             self::$cache = Functions::array_merge_recursive_distinct(self::$cache, $settings);
         } else {
             self::$cache = $settings;
         }
     }
 
+    /** gets a theme mod value with default from schema the customizer also uses for defaults
+     * safe to use in templates
+     * 
+     */
     public static function get_theme_mod(string $key): mixed
     {
-        return self::theme_mod_with_default($key);
-    }
-    public static function get_theme_mod_with_default_and_value(string $key): mixed
-    {
-        return self::theme_mod_with_default($key, true);
-    }
-
-    /**
-     * dont pass in theme prefix only 'group_setting_name'
-     * must be called later e.g. from within template to ensure settings are set up
-     */
-    public static function theme_mod_with_default(string $full_key, ?bool $default_and_value = false): mixed
-    {
-        if (!self::$cache_set) {
-            self::set_cache();
-        }
-
         // Extract group and key
-        $parts = explode('_', $full_key, 2); // split into 2 parts only
+        $parts = explode('_', $key, 2); // split into 2 parts only
         if (count($parts) < 2) {
             // fallback if key format is invalid
-            return get_theme_mod($full_key);
+            return get_theme_mod($key);
         }
 
         [$group_name, $sub_key] = $parts;
 
         $theme_prefix = Config::get_prefix();
-        $prefixed_key = "{$theme_prefix}_{$full_key}";
+
+        if ($group_name === 'wp-core') {
+            $full_key = $sub_key;
+        }
+        $full_key = "{$theme_prefix}_{$key}";
+
+        $default = self::get_theme_mod_default($key);
+        if ($default) {
+            return get_theme_mod($full_key, $default);
+        }
+
+        return get_theme_mod($full_key);
+    }
+
+    public static function get_theme_mod_default(string $key): mixed
+    {
+        // Extract group and key
+        $parts = explode('_', $key, 2); // split into 2 parts only
+        if (count($parts) < 2) {
+            // fallback if key format is invalid
+            return get_theme_mod($key);
+        }
+
+        [$group_name, $sub_key] = $parts;
 
         // utlize default from settings list, if it exists
         $item = self::$cache[$group_name]['settings'][$sub_key] ?? null;
         if (isset($item)) {
             $default = $item['default'] ?? null;
-            $type = $item['type'] ?? null;
+            $type = $item['type'] ?? '';
             $choices = $item['choices'] ?? [];
             $default_fallback = CustomizeBase::get_default($default, $type, $choices) ?? null;
 
             $default = $default ?? $default_fallback;
-            if ($default_and_value) {
-                return [
-                    'default' => $default ?? null,
-                    'value' => get_theme_mod($prefixed_key, $default),
-                ];
-            }
-
-            if ($default) {
-                return get_theme_mod($prefixed_key, $default);
-            }
+            return $default;
         }
+        return '';
+    }
 
-
-        return get_theme_mod($prefixed_key);
+    public static function get_theme_mod_default_and_value(string $key): array
+    {
+        $default = self::get_theme_mod_default($key);
+        $value = self::get_theme_mod($key);
+        return [
+            'default' => $default,
+            'value' => $value,
+        ];
     }
 }

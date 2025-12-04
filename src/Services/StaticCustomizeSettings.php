@@ -7,6 +7,14 @@ class StaticCustomizeSettings
     public static function get(): array
     {
         $settings = [
+            'wp-core' => [
+                'defaults_only' => true,
+                'settings' => [
+                    'display_title_and_tagline' => [
+                        'default'   => true,
+                    ],
+                ],
+            ],
             'header' => [
                 'title' => 'Header',
                 'priority' => 30,
@@ -108,7 +116,7 @@ class StaticCustomizeSettings
                             'masonry'    => 'Masonry',
                         ],
                     ],
-                    'post_author_bio' => [  // was 'post_display_author_bio'
+                    'post_author_bio' => [
                         'default'   => false,
                         'label'     =>  'On single post pages, show author bio in the footer',
                         'description' => '(if set up)',
@@ -122,13 +130,20 @@ class StaticCustomizeSettings
                             },
                         ]
                     ],
+                    'page_comments' => [
+                        'default'   => false,
+                        'label'     =>  'On pages, show comments',
+                        'description' => '(if enabled)',
+                        'type'      => 'checkbox',
+                        'priority'  => 30,
+                    ],
                 ],
             ],
         ];
         return $settings;
     }
 
-     /**
+    /**
      * Get all font categories and their properties.
      *
      * @since Luma-Core 1.0
@@ -140,28 +155,28 @@ class StaticCustomizeSettings
         $categories = [
             'body' => [
                 'label'       => 'Body',
-                'family' => ['choices' => 'fontFamilies'],
-                'weight' => ['min' => 300, 'max' => 600,],
-                'line_height' => ['min' => 1.2, 'max' => 2.0,],
-                'size'   => ['choices' => 'fontSizes'],
+                'family'      => ['label' => 'Font Family', 'choices' => 'fontFamilies'],
+                'weight'      => ['label' => 'Font Weight', 'min' => 300, 'max' => 600,],
+                'line-height' => ['label' => 'Line Height', 'min' => 1.2, 'max' => 2.0,],
+                'size'        => ['label' => 'Font Size',   'choices' => 'fontSizes'],
             ],
             'heading' => [
                 'label'       => 'Heading',
-                'family' => ['choices' => 'fontFamilies'],
-                'weight' => ['min' => 400, 'max' => 900,],
-                'line_height' => ['min' => 1.0, 'max' => 1.5,],
-                'size'   => false,
+                'family'      => ['label' => 'Font Family', 'choices' => 'fontFamilies'],
+                'weight'      => ['label' => 'Font Weight', 'min' => 400, 'max' => 900, 'step' => 100,],
+                'line-height' => ['label' => 'Line Height', 'min' => 1.0, 'max' => 1.5, 'step' => 0.1,],
+                'size'        => false,
             ],
         ];
 
         // Optionally add custom header if supported and enabled
         if (current_theme_supports('custom-header') && get_header_image()) {
-            $categories['custom_header'] = [
+            $categories['custom-header'] = [
                 'label'       => 'Image Header',
-                'family' => false,
-                'weight' => ['min' => 400, 'max' => 700,],
-                'line_height' => ['min' => 1.0, 'max' => 1.5,],
-                'size'   => false,
+                'family'      => false,
+                'weight'      => ['label' => 'Font Weight', 'min' => 400, 'max' => 700,],
+                'line-height' => ['label' => 'Line Height', 'min' => 1.0, 'max' => 1.5,],
+                'size'        => false,
             ];
         }
 

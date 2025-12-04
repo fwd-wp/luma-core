@@ -1,12 +1,10 @@
 TODO:
-add core customize settings to the theme_mod class as they are needed so defaults are in one place
 if video support is enabled get_header_image in template and font categories need to be updated maybe make a custom function
-
-
+test image fall back check for core css and add css for both. potentially use core markup for image with heading overlay added
+add option to turn off header text on custom image header
+fix masonry preview
 
                 - need to create js for reset buttons in typography
-                - remove calls to old theme json, delete model and rename new model and usage
-                - customize typography look into heading font sizes,and custom header font size options
                 - customize full list view and single view (same html)
                 - look into custom search result format (modify list archive view)
                 - add categories to archive views, also is_sticky (featured post);

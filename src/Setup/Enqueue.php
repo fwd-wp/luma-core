@@ -75,7 +75,7 @@ class Enqueue
             );
         }
 
-        if (ThemeSettingsSchema::theme_mod_with_default('display_archive_excerpt_format') === 'masonry') {
+        if (ThemeSettingsSchema::get_theme_mod('display_archive_excerpt_format') === 'masonry') {
             wp_enqueue_script(
                 "{$this->prefix_core}-archive-masonry",
                 get_template_directory_uri() . '/assets/js/archive-masonry.js',
@@ -158,7 +158,7 @@ class Enqueue
         $custom_css = TemplateFunctions::get_non_latin_css('front-end');
 
         if ($custom_css) {
-            wp_add_inline_style('luma-core-style', $custom_css);
+            wp_add_inline_style("{$this->prefix_core}-non-latin-css", $custom_css);
         }
     }
 }

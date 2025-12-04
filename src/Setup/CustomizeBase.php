@@ -103,7 +103,7 @@ class CustomizeBase
         }
 
         $setting = [
-            'default' => $this::get_default($item['default'] ?? null, $item['type'], $item['choices'] ?? []),
+            'default' => $this::get_default($item['default'] ?? null, $item['type'] ?? '', $item['choices'] ?? []),
             'sanitize_callback' => $this->get_sanitizer($item),
             'transport' => $item['transport'] ?? 'postMessage',
         ];

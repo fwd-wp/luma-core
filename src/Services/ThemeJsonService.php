@@ -43,6 +43,7 @@ class ThemeJsonService
 
     /**
      * Explicitly load and get data (lazy load)
+     * earlist safe point to call is 'after_setup_theme'
      */
     public function get(array $path = [], bool $snake_case = false): self
     {

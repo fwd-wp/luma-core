@@ -1,6 +1,7 @@
 (function (wp) {
     if (typeof wp === 'undefined' || !wp.customize) return;
     const prefix = wpData.prefix;
+    console.log(prefix)
 
     // Shrink depends on Sticky
     wp.customize(`${prefix}_header_navbar_shrink`, (shrinkSetting) => {
@@ -55,30 +56,30 @@
         });
     });
 
-    wp.customize.bind('ready', () => {
+    // wp.customize.bind('ready', () => {
 
-        const categories = Object.keys(wpData.categories || {});
+    //     const categories = Object.keys(wpData.categories || {});
 
-        categories.forEach(category => {
-            const buttonId = `font_reset_${category}_control`;
-            const button = document.getElementById(buttonId);
+    //     categories.forEach(category => {
+    //         const buttonId = `font_reset_${category}_control`;
+    //         const button = document.getElementById(buttonId);
 
-            if (!button) return;
-            console.log(button);
-            button.addEventListener('click', () => {
-                fetch(wpData.ajax, {
-                    method: 'POST',
-                    credentials: 'same-origin',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: new URLSearchParams({
-                        action: 'font_reset',
-                        category: category,
-                        nonce: wpData.nonce
-                    })
-                })
-                    .then(() => wp.customize.previewer.refresh());
-            });
-        });
+    //         if (!button) return;
+    //         console.log(button);
+    //         button.addEventListener('click', () => {
+    //             fetch(wpData.ajax, {
+    //                 method: 'POST',
+    //                 credentials: 'same-origin',
+    //                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    //                 body: new URLSearchParams({
+    //                     action: 'font_reset',
+    //                     category: category,
+    //                     nonce: wpData.nonce
+    //                 })
+    //             })
+    //                 .then(() => wp.customize.previewer.refresh());
+    //         });
+    //     });
 
-    });
+    // });
 })(wp);
