@@ -3,10 +3,11 @@
 namespace Luma\Core\Setup;
 
 use Luma\Core\Helpers\TemplateFunctions;
-use Luma\Core\Core\Config;
+use Luma\Core\Services\ThemeSettingsSchema;
+
 
 /**
- * Filter Functions which enhance the theme by hooking into WordPress
+ * Filter WP core Functions which enhance the theme by hooking into WordPress 
  * originally in template-functions.php
  *
  * @package Luma-Core
@@ -17,9 +18,12 @@ use Luma\Core\Core\Config;
 class TemplateFilters
 {
 
+
+	protected string $domain = 'luma-core';
+
 	public function __invoke()
 	{
-		add_filter('body_class', array($this, 'body_classes'));
+		add_filter('body_class', array($this, 'body_class'));
 		add_filter('comment_form_defaults', array($this, 'comment_form_defaults'));
 		add_filter('excerpt_length', array($this, 'excerpt_length'));
 		add_filter('excerpt_more', array($this, 'continue_reading_link_excerpt'));
@@ -27,6 +31,11 @@ class TemplateFilters
 		add_filter('the_title', array($this, 'post_title'));
 		add_filter('get_calendar', array($this, 'change_calendar_nav_arrows'));
 		add_filter('the_password_form', array($this, 'password_form'), 10, 2);
+	}
+
+	public function __construct($config)
+	{
+		$this->domain = $config['text_domain'] ?? $this->domain;
 	}
 
 	/**
@@ -37,18 +46,39 @@ class TemplateFilters
 	 * @param array $classes Classes for the body element.
 	 * @return array
 	 */
-	public function body_classes($classes)
+	public function body_class(array $classes): array
 	{
+		// Core logic
+		$classes[] = TemplateFunctions::is_excerpt() ? 'is-excerpt' : 'is-full';
 
-		// Add a body class if main navigation is active.
+		if (is_single()) {
+			$classes[] = ThemeSettingsSchema::get_theme_mod('display_post_width') === 'wide' ? 'is-wide-single' : '';
+		}
+
+		if (is_page()) {
+			$classes[] = ThemeSettingsSchema::get_theme_mod('display_page_width') === 'wide' ? 'is-wide-page' : '';
+		}
+
+		// Theme-specific classes
 		if (has_nav_menu('primary')) {
 			$classes[] = 'has-main-navigation';
 		}
 
-		// Add a body class if there are no footer widgets.
-		if (! is_active_sidebar('sidebar-1')) {
+		// Check all registered sidebars
+		$sidebar_widgets = wp_get_sidebars_widgets();
+		$has_widgets = false;
+		foreach ($sidebar_widgets as $widget) {
+			if (!empty($widget)) {
+				$has_widgets = true;
+				break;
+			}
+		}
+		if (!$has_widgets) {
 			$classes[] = 'no-widgets';
 		}
+
+		// Clean up empty values
+		$classes = array_filter($classes);
 
 		return $classes;
 	}
@@ -133,7 +163,7 @@ class TemplateFilters
 	 */
 	public function post_title($title): string
 	{
-		return '' === $title ? esc_html_x('Untitled', 'Added to posts and pages that are missing titles', Config::get_domain()) : $title;
+		return '' === $title ? esc_html_x('Untitled', 'Added to posts and pages that are missing titles', $this->domain) : $title;
 	}
 
 	/**
@@ -166,9 +196,9 @@ class TemplateFilters
 	{
 		$post   = get_post($post);
 		$label  = 'pwbox-' . (empty($post->ID) ? wp_rand() : $post->ID);
-		$output = '<p class="post-password-message">' . esc_html__('This content is password protected. Please enter a password to view.', Config::get_domain()) . '</p>
+		$output = '<p class="post-password-message">' . esc_html__('This content is password protected. Please enter a password to view.', $this->domain) . '</p>
 	<form action="' . esc_url(site_url('wp-login.php?action=postpass', 'login_post')) . '" class="post-password-form" method="post">
-	<label class="post-password-form__label" for="' . esc_attr($label) . '">' . esc_html_x('Password', 'Post password form', Config::get_domain()) . '</label><input class="post-password-form__input" name="post_password" id="' . esc_attr($label) . '" type="password" spellcheck="false" size="20" /><input type="submit" class="post-password-form__submit" name="' . esc_attr_x('Submit', 'Post password form', Config::get_domain()) . '" value="' . esc_attr_x('Enter', 'Post password form', Config::get_domain()) . '" /></form>
+	<label class="post-password-form__label" for="' . esc_attr($label) . '">' . esc_html_x('Password', 'Post password form', $this->domain) . '</label><input class="post-password-form__input" name="post_password" id="' . esc_attr($label) . '" type="password" spellcheck="false" size="20" /><input type="submit" class="post-password-form__submit" name="' . esc_attr_x('Submit', 'Post password form', $this->domain) . '" value="' . esc_attr_x('Enter', 'Post password form', $this->domain) . '" /></form>
 	';
 		return $output;
 	}
