@@ -5,79 +5,129 @@ namespace Luma\Core\Core;
 class Config
 {
 
-    private static string $prefix_snake = 'luma_core';
-    private static string $prefix_snake_core = 'luma_core';
-    private static string $prefix_kebab = 'luma-core';
-    private static string $prefix_kebab_core = 'luma-core';
-    private static string $text_domain  = 'luma-core';
-    private static string $text_domain_core  = 'luma-core';
-    private static string $minimum_wp_version  = '6.8';
-    private static string $minimum_php_version = '7.4';
+    /*
 
-    public static function set_prefix(string $prefix): void
+    example config structure:
+    Config::init([
+        'prefix_snake'       => 'luma_core',
+        'prefix_kebab'       => 'luma-core',
+        'text_domain'        => 'luma-core',
+        'minimum_wp_version' => '6.8',
+        'minimum_php_version' => '7.4',
+    ]);
+
+    */
+    private static array $config = [
+        'prefix_snake'       => 'luma_core',
+        'prefix_snake_core'  => 'luma_core',
+        'prefix_kebab'       => 'luma-core',
+        'prefix_kebab_core'  => 'luma-core',
+        'text_domain'        => 'luma-core',
+        'text_domain_core'   => 'luma-core',
+        'minimum_wp_version' => '6.8',
+        'minimum_php_version' => '7.4',
+    ];
+
+    /**
+     * Initialize config with an array of key => value pairs.
+     *
+     * @param array $config
+     */
+    public static function init(array $config): void
     {
-        self::$prefix_snake = $prefix;
+        foreach ($config as $key => $value) {
+            if (array_key_exists($key, self::$config)) {
+                self::$config[$key] = $value;
+            }
+        }
     }
+
+    /**
+     * Generic setter for a single config key.
+     *
+     * @param string $key
+     * @param mixed  $value
+     */
+    public static function set(string $key, mixed $value): void
+    {
+        if (array_key_exists($key, self::$config)) {
+            self::$config[$key] = $value;
+        } else {
+            \Luma\Core\Helpers\Functions::error_log(sprintf(
+                'Config key "%s" does not exist. Cannot set value.',
+                $key
+            ));
+        }
+    }
+
+    /**
+     * Generic getter for a single config key.
+     *
+     * @param string $key
+     * @return mixed|null
+     */
+    public static function get(string $key): mixed
+    {
+        if (!array_key_exists($key, self::$config)) {
+            \Luma\Core\Helpers\Functions::error_log(sprintf(
+                'Config key "%s" does not exist. Returning null.',
+                $key
+            ));
+        }
+
+        return self::$config[$key] ?? null;
+    }
+
+    // --- Specific getters for convenience and backward compatibility ---
+
     public static function get_prefix(): string
     {
-        return self::$prefix_snake;
+        return self::$config['prefix_snake'];
     }
+
     public static function get_prefix_core(): string
     {
-        return self::$prefix_snake_core;
+        return self::$config['prefix_snake_core'];
     }
 
-    public static function set_prefix_kebab(string $prefix): void
-    {
-        self::$prefix_kebab = $prefix;
-    }
     public static function get_prefix_kebab(): string
     {
-        return self::$prefix_kebab;
+        return self::$config['prefix_kebab'];
     }
+
     public static function get_prefix_kebab_core(): string
     {
-        return self::$prefix_kebab_core;
+        return self::$config['prefix_kebab_core'];
     }
 
-    public static function set_domain(string $domain): void
-    {
-        self::$text_domain = $domain;
-    }
     public static function get_domain(): string
     {
-        return self::$text_domain;
+        return self::$config['text_domain'];
     }
+
     public static function get_domain_core(): string
     {
-        return self::$text_domain_core;
+        return self::$config['text_domain_core'];
     }
 
-    public static function set_minimum_wp_version(string $version): void
-    {
-        self::$minimum_wp_version = $version;
-    }
     public static function get_minimum_wp_version(): string
     {
-        return self::$minimum_wp_version;
+        return self::$config['minimum_wp_version'];
     }
 
-    public static function set_minimum_php_version(string $version): void
-    {
-        self::$minimum_php_version = $version;
-    }
     public static function get_minimum_php_version(): string
     {
-        return self::$minimum_php_version;
+        return self::$config['minimum_php_version'];
     }
 
     public static function get_theme_version(): string
     {
-        if (defined('WP_LOCAL_DEV') && WP_LOCAL_DEV) {
+        if (defined('WP_LOCAL_DEV') && constant('WP_LOCAL_DEV')) {
             return date('Ymd-His');
         }
+
         $path = get_template_directory() . '/package.json';
-        if (! file_exists($path)) {
+        if (!file_exists($path)) {
             return '1.0.0';
         }
 
