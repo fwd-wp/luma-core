@@ -297,7 +297,7 @@ class TemplateFunctions
 	 * @param bool   $display  Print the styles.
 	 * @return string
 	 */
-	public static function generate_css($selector, $style, $value, $prefix = '', $suffix = '', $display = true)
+	public static function generate_css($selector, $style, $value, $prefix = '', $suffix = '', $echo = false)
 	{
 
 		// Bail early if there is no $selector elements or properties and $value.
@@ -307,7 +307,7 @@ class TemplateFunctions
 
 		$css = sprintf('%s { %s: %s; }', $selector, $style, $prefix . $value . $suffix);
 
-		if ($display) {
+		if ($echo) {
 			/*
 		 * Note to reviewers: $css contains auto-generated CSS.
 		 * It is included inside <style> tags and can only be interpreted as CSS on the browser.
@@ -315,6 +315,7 @@ class TemplateFunctions
 		 * malicious attempts to close </style> and open a <script>.
 		 */
 			echo wp_strip_all_tags($css); // phpcs:ignore WordPress.Security.EscapeOutput
+			return null;
 		}
 		return $css;
 	}
@@ -326,7 +327,7 @@ class TemplateFunctions
 	 *
 	 * @return string
 	 */
-	public static function html_classes(): string
+	public static function html_class(): string
 	{
 		/**
 		 * Filter the classes for the main <html> element.
@@ -338,7 +339,7 @@ class TemplateFunctions
 		 * @param string $classes Current list of classes. Default empty string.
 		 */
 
-		$classes = apply_filters('luma_core_html_classes', '');
+		$classes = apply_filters('luma_core_html_class', '');
 		if (! $classes) {
 			return '';
 		}
@@ -358,10 +359,11 @@ class TemplateFunctions
 	 *
 	 * @return string CSS classes for the archive grid container.
 	 */
-	public static function grid_classes(): string
+	public static function grid_classes(string $class = ''): string
 	{
-		$grid_classes = 'archive-grid';
-		$grid_classes .= ' archive-grid--' . ThemeSettingsSchema::get_theme_mod('display_archive_excerpt_format');
+		$classes = $class;
+		$classes .= 'archive-grid';
+		$classes .= ' archive-grid--' . ThemeSettingsSchema::get_theme_mod('display_archive_excerpt_format');
 
 		/**
 		 * Filter the archive grid container classes.
@@ -370,7 +372,7 @@ class TemplateFunctions
 		 *
 		 * @param string $grid_classes The CSS classes for the archive grid container.
 		 */
-		return apply_filters('luma_core_grid_classes', $grid_classes);
+		return apply_filters('luma_core_grid_classes', $classes);
 	}
 
 	/**
@@ -380,9 +382,10 @@ class TemplateFunctions
 	 *
 	 * @return string CSS classes for the site header.
 	 */
-	public static function header_classes(): string
+	public static function header_class(string $class = ''): string
 	{
-		$classes = 'site-header';
+		$classes = $class;
+		$classes .= 'site-header';
 		$classes .= ThemeSettingsSchema::get_theme_mod('header_sticky') ? ' is-sticky' : '';
 		$classes .= ThemeSettingsSchema::get_theme_mod('header_navbar_transparent') ? ' is-transparent' : '';
 
@@ -393,7 +396,8 @@ class TemplateFunctions
 		 *
 		 * @param string $classes The CSS classes for the site header.
 		 */
-		return apply_filters('luma_core_header_classes', $classes);
+		$classes = apply_filters('luma_core_header_classes', $classes);
+		return 'class="' . esc_attr($classes) . '"';
 	}
 
 	/**
@@ -403,9 +407,10 @@ class TemplateFunctions
 	 *
 	 * @return string CSS classes for the site navigation container.
 	 */
-	public static function nav_classes(): string
+	public static function nav_class(string $class = ''): string
 	{
-		$classes = 'site-navigation';
+		$classes = $class;
+		$classes .= 'site-navigation';
 		$classes .= has_custom_logo() ? ' has-logo' : '';
 		$classes .= has_nav_menu('main') ? ' has-menu' : '';
 
@@ -424,7 +429,8 @@ class TemplateFunctions
 		 *
 		 * @param string $classes The CSS classes for the site navigation container.
 		 */
-		return apply_filters('luma_core_nav_classes', $classes);
+		$classes = apply_filters('luma_core_nav_class', $classes);
+		return 'class="' . esc_attr($classes) . '"';
 	}
 
 

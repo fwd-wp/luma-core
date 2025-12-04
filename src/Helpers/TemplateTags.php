@@ -314,6 +314,36 @@ class TemplateTags
 		return $output;
 	}
 
+
+	public static function single_post_navigation(string $class = 'meta-nav', string $title_class = 'post-title', bool $echo = true): ?string
+	{
+		$next_icon = is_rtl() ? TemplateFunctions::get_icon_svg('ui', 'arrow_left') : TemplateFunctions::get_icon_svg('ui', 'arrow_right');
+		$prev_icon = is_rtl() ? TemplateFunctions::get_icon_svg('ui', 'arrow_right') : TemplateFunctions::get_icon_svg('ui', 'arrow_left');
+
+		$next_label = esc_html__('Next post', self::$domain);
+		$prev_label = esc_html__('Previous post', self::$domain);
+
+		ob_start();
+
+		the_post_navigation(
+			array(
+				'next_text' => '<span class="' . esc_attr($class) . '">' . $next_label . $next_icon . '</span><span class="' . esc_attr($title_class) . '">%title</span>',
+				'prev_text' => '<span class="' . esc_attr($class) . '">' . $prev_icon . $prev_label . '</span><span class="' . esc_attr($title_class) . '">%title</span>',
+			)
+		);
+
+		$output = ob_get_clean();
+
+		$output = apply_filters('luma_core_single_post_navigation', $output);
+
+		if ($echo) {
+			echo $output;
+			return null;
+		}
+
+		return $output;
+	}
+
 	public static function site_title(string $class = 'site-title', bool $echo = true): ?string
 	{
 		$name  = get_bloginfo('name');
@@ -338,5 +368,203 @@ class TemplateTags
 		}
 
 		return $output;
+	}
+
+	/**
+	 * Outputs the attachment image.
+	 *
+	 * @since Luma-Core 1.0
+	 *
+	 * @param string $size Image size to display.
+	 * @param bool   $echo Whether to echo or return the HTML.
+	 * @return string|null
+	 */
+	public static function attachment_image(string $size = 'full', bool $echo = true): ?string
+	{
+		$size = apply_filters('luma_core_attachment_size', $size);
+
+		$html = wp_get_attachment_image(get_the_ID(), $size);
+		$html = apply_filters('luma_core_attachment_image', $html, $size);
+
+		if ($echo) {
+			echo $html;
+			return null;
+		}
+
+		return $html;
+	}
+
+	/**
+	 * Outputs the attachment caption inside a <figcaption>.
+	 *
+	 * @since Luma-Core 1.0
+	 *
+	 * @param bool $echo Whether to echo or return the HTML.
+	 * @return string|null
+	 */
+	public static function attachment_caption(bool $echo = true): ?string
+	{
+		$caption = wp_get_attachment_caption();
+		if (!$caption) {
+			return $echo ? null : '';
+		}
+
+		$html = sprintf(
+			'<figcaption class="wp-caption-text">%s</figcaption>',
+			wp_kses_post($caption)
+		);
+
+		$html = apply_filters('luma_core_attachment_caption', $html, $caption);
+
+		if ($echo) {
+			echo $html;
+			return null;
+		}
+
+		return $html;
+	}
+
+	/**
+	 * Outputs a link back to the parent post if one exists.
+	 *
+	 * @since Luma-Core 1.0
+	 *
+	 * @param bool $echo Whether to echo or return the HTML.
+	 * @return string|null
+	 */
+	public static function attachment_parent_link(bool $echo = true): ?string
+	{
+		$parent_id = wp_get_post_parent_id(get_the_ID());
+		if (!$parent_id) {
+			return $echo ? null : '';
+		}
+
+		$parent_title = get_the_title($parent_id);
+		$parent_link  = get_the_permalink($parent_id);
+
+		$html = sprintf(
+			'<span class="posted-on">%s <a href="%s">%s</a></span>',
+			esc_html__('Published in', 'luma-core'),
+			esc_url($parent_link),
+			esc_html($parent_title)
+		);
+
+		$html = apply_filters('luma_core_attachment_parent_link', $html, $parent_id);
+
+		if ($echo) {
+			echo $html;
+			return null;
+		}
+
+		return $html;
+	}
+
+	/**
+	 * Outputs a "Full-size" link showing width × height.
+	 *
+	 * @since Luma-Core 1.0
+	 *
+	 * @param bool $echo Whether to echo or return the HTML.
+	 * @return string|null
+	 */
+	public static function attachment_full_size_link(bool $echo = true): ?string
+	{
+		$metadata = wp_get_attachment_metadata();
+		if (!$metadata || empty($metadata['width']) || empty($metadata['height'])) {
+			return $echo ? null : '';
+		}
+
+		$html = sprintf(
+			'<span class="full-size-link"><span class="screen-reader-text">%1$s</span><a href="%2$s">%3$d × %4$d</a></span>',
+			esc_html_x('Full size', 'Used before full size attachment link.', 'luma-core'),
+			esc_url(wp_get_attachment_url()),
+			absint($metadata['width']),
+			absint($metadata['height'])
+		);
+
+		$html = apply_filters('luma_core_attachment_full_size_link', $html, $metadata);
+
+		if ($echo) {
+			echo $html;
+			return null;
+		}
+
+		return $html;
+	}
+
+	/**
+	 * Outputs the edit post link for attachments.
+	 *
+	 * @since Luma-Core 1.0
+	 *
+	 * @param bool $echo Whether to echo or return the HTML.
+	 * @return string|null
+	 */
+	public static function attachment_edit_link(bool $echo = true): ?string
+	{
+		if (!current_user_can('edit_post', get_the_ID())) {
+			return $echo ? null : '';
+		}
+
+		ob_start();
+		edit_post_link(
+			esc_html__('Edit', 'luma-core'),
+			'<span class="edit-link">',
+			'</span>'
+		);
+		$html = ob_get_clean();
+
+		$html = apply_filters('luma_core_attachment_edit_link', $html);
+
+		if ($echo) {
+			echo $html;
+			return null;
+		}
+
+		return $html;
+	}
+
+
+	public static function maybe_comments_template(bool $echo = true): ?string
+	{
+		if (!comments_open() && !get_comments_number()) {
+			return null;
+		}
+
+		ob_start();
+		comments_template();
+		$html = ob_get_clean();
+
+		$html = apply_filters('luma_core_maybe_comments_template', $html);
+
+		if ($echo) {
+			echo $html;
+			return null;
+		}
+
+		return $html;
+	}
+
+	public static function attachment_navigation(bool $echo = true): ?string
+	{
+		if (!is_attachment()) {
+			return null;
+		}
+
+		$html = get_the_post_navigation([
+			'prev_text' => sprintf(
+				__('<span class="meta-nav">Published in</span><span class="post-title">%s</span>', 'luma-core'),
+				'%title'
+			),
+		]);
+
+		$html = apply_filters('luma_core_attachment_navigation', $html);
+
+		if ($echo) {
+			echo $html;
+			return null;
+		}
+
+		return $html;
 	}
 }
