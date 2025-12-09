@@ -462,18 +462,26 @@ class TemplateFunctions
 	 *
 	 * @since Luma-Core 1.0
 	 */
-	public static function continue_reading_text($echo = true)
+	public static function continue_reading_text($echo = true): ?string
 	{
+		$title = get_the_title();
+		if (empty($title)) {
+			$title = __('this post', self::$domain);
+		}
+
+		$screen_reader_title = '<span class="screen-reader-text">' . esc_html($title) . '</span>';
+
 		$continue_reading = sprintf(
 			/* translators: %s: Post title. Only visible to screen readers. */
 			__('Continue reading %s', self::$domain),
-			get_the_title('<span class="screen-reader-text">', '</span>')
+			$screen_reader_title
 		);
 
 		$continue_reading = apply_filters('luma_core_continue_reading_text', $continue_reading);
 
 		if ($echo) {
-			echo esc_html($continue_reading);
+			echo $continue_reading; // phpcs:ignore WordPress.Security.EscapeOutput
+			return null;
 		}
 
 		return $continue_reading;
@@ -488,14 +496,13 @@ class TemplateFunctions
 	 *
 	 * @return bool
 	 */
-	public static function is_excerpt_micro_post(): bool
+	public static function is_micro_post(): bool
 	{
 		if (! self::is_excerpt()) {
 			return false;
 		}
 
-		$post_format = get_post_format();
-		return in_array($post_format, array('aside', 'status'), true);
+		return in_array(get_post_format(), array('aside', 'status'), true);
 	}
 
 	/**
@@ -508,13 +515,44 @@ class TemplateFunctions
 	 */
 	public static function is_excerpt(): bool
 	{
-		$is_excerpt = (ThemeSettingsSchema::get_theme_mod('display_archive_view') === 'excerpt');
-
-		if (! $is_excerpt || is_single()) {
+		// Check if theme mod is set to 'excerpt'
+		if (ThemeSettingsSchema::get_theme_mod('display_archive_view') !== 'excerpt') {
 			return false;
 		}
 
-		$post_format = get_post_format();
-		return !in_array($post_format, array('aside', 'status'), true);
+		if (is_404()) {
+			return false; // explicitly exclude 404
+		}
+
+		// Return true only for archive-like views
+		if (is_archive() || is_home() || is_search() || is_post_type_archive()) {
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Returns the singular or plural label of the current post type.
+	 *
+	 * @param string $type   'singular' or 'plural'. Default 'plural'.
+	 * @param string $default Optional fallback if labels are unavailable otherwise returns ''.
+	 *
+	 * @return string Content is not escape must be escape at output
+	 */
+	public static function get_post_type_label(string $type = 'plural', string $default = ''): string
+	{
+		$post_type_object = get_post_type_object(get_post_type());
+
+		if (!$post_type_object) {
+			if ($default !== '') {
+				return $default;
+			}
+			return '';
+		}
+
+		return $type === 'singular'
+			? ($post_type_object->labels->singular_name ?? '')
+			: ($post_type_object->labels->name ?? '');
 	}
 }

@@ -117,7 +117,7 @@ class StaticCustomizeSettings
                         ],
                     ],
                     'post_author_bio' => [
-                        'default'   => false,
+                        'default'   => true,
                         'label'     =>  'On single post pages, show author bio in the footer',
                         'description' => '(if set up)',
                         'type'      => 'checkbox',

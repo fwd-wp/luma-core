@@ -31,6 +31,8 @@ class TemplateFilters
 		add_filter('the_title', array($this, 'post_title'));
 		add_filter('get_calendar', array($this, 'change_calendar_nav_arrows'));
 		add_filter('the_password_form', array($this, 'password_form'), 10, 2);
+		add_filter('wp_link_pages_args', [$this, 'wp_link_pages_args']);
+		add_filter('edit_post_link', [$this, 'filter_edit_post_link'], 10, 3);
 	}
 
 	public function __construct($config)
@@ -49,14 +51,15 @@ class TemplateFilters
 	public function body_class(array $classes): array
 	{
 		// Core logic
-		$classes[] = TemplateFunctions::is_excerpt() ? 'is-excerpt' : 'is-full';
-
-		if (is_single()) {
-			$classes[] = ThemeSettingsSchema::get_theme_mod('display_post_width') === 'wide' ? 'is-wide-single' : '';
+		if (is_archive() || is_home() || is_search() || is_post_type_archive()) {
+			$classes[] = TemplateFunctions::is_excerpt() ? 'is-excerpt' : 'is-full';
 		}
 
 		if (is_page()) {
-			$classes[] = ThemeSettingsSchema::get_theme_mod('display_page_width') === 'wide' ? 'is-wide-page' : '';
+			$classes[] = ThemeSettingsSchema::get_theme_mod('display_page_width') === 'wide' ? 'is-wide' : '';
+		}
+		if (is_single()) {
+			$classes[] = ThemeSettingsSchema::get_theme_mod('display_post_width') === 'wide' ? 'is-wide' : '';
 		}
 
 		// Theme-specific classes
@@ -75,6 +78,8 @@ class TemplateFilters
 		}
 		if (!$has_widgets) {
 			$classes[] = 'no-widgets';
+		} else {
+			$classes[] = 'has-widgets';
 		}
 
 		// Clean up empty values
@@ -185,8 +190,6 @@ class TemplateFilters
 	 * Retrieve protected post password form content.
 	 *
 	 * @since Luma-Core 1.0
-	 * @since Luma-Core 1.4 Corrected parameter name for `$output`,
-	 *                              added the `$post` parameter.
 	 *
 	 * @param string      $output The password form HTML output.
 	 * @param int|WP_Post $post   Optional. Post ID or WP_Post object. Default is global $post.
@@ -201,5 +204,64 @@ class TemplateFilters
 	<label class="post-password-form__label" for="' . esc_attr($label) . '">' . esc_html_x('Password', 'Post password form', $this->domain) . '</label><input class="post-password-form__input" name="post_password" id="' . esc_attr($label) . '" type="password" spellcheck="false" size="20" /><input type="submit" class="post-password-form__submit" name="' . esc_attr_x('Submit', 'Post password form', $this->domain) . '" value="' . esc_attr_x('Enter', 'Post password form', $this->domain) . '" /></form>
 	';
 		return $output;
+	}
+
+	/**
+	 * Modify the args for wp_link_pages().
+	 */
+	public function wp_link_pages_args(array $args): array
+	{
+		$args['before'] = '<p class="post-nav-links">' . esc_html__('Page', $this->domain) . ' ';
+
+		return $args;
+	}
+
+	/**
+	 * Filter the full HTML of edit_post_link().
+	 *
+	 * @param string $link   The existing HTML.
+	 * @param int    $post_id
+	 * @param array  $args
+	 *
+	 * @return string
+	 */
+	public function edit_post_link(string $link, int $post_id, array $args): string
+	{
+
+		$post = get_post($post_id);
+		if (! $post) {
+			return $link;
+		}
+
+		// Get singular label for current post type or default to 'post'
+		$singular = TemplateFunctions::get_post_type_label('singular') ?? __('post');
+
+		if ($post->post_type === 'attachment') {
+			$singular = sprintf(__('attachment', self::$domain));
+		}
+
+		// Build custom link text: "Edit this Page"
+		$text = sprintf(__('Edit this %s'), $singular);
+
+		// Build a new edit URL the same way WP does
+		$url = get_edit_post_link($post_id);
+
+		if (! $url) {
+			return $link;
+		}
+
+		// Recreate link markup (keep class & before/after if provided)
+		$before = $args['before'] ?? '';
+		$after  = $args['after'] ?? '';
+		$class  = $args['class'] ?? 'post-edit-link';
+
+		return sprintf(
+			'%s<a class="%s" href="%s">%s</a>%s',
+			$before,
+			esc_attr($class),
+			esc_url($url),
+			esc_html($text),
+			$after
+		);
 	}
 }
