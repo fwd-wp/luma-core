@@ -458,12 +458,40 @@ class TemplateFunctions
 	}
 
 	/**
-	 * Creates continue reading text.
+	 * Generates the "Continue reading" text used in excerpts and teaser content.
+	 *
+	 * Includes the post title inside a screen-reader-only <span> for accessibility.
 	 *
 	 * @since Luma-Core 1.0
+	 *
+	 * @param bool  $echo Whether to echo the output. If false, the HTML is returned.
+	 * @param array $args {
+	 *     Optional. Arguments controlling the output.
+	 *
+	 *     @type string $label The visible text before the screen reader title.
+	 *                         Default 'Continue reading'.
+	 * }
+	 *
+	 * @return string|null The formatted HTML when `$echo` is false, otherwise null.
 	 */
-	public static function continue_reading_text($echo = true): ?string
+	public static function continue_reading_text($echo = true, array $args = []): ?string
 	{
+		$defaults = [
+			'label' => __('Continue reading', self::$domain),
+		];
+
+		$args = wp_parse_args($args, $defaults);
+
+		/**
+		 * Filters the arguments used to generate the continue reading text.
+		 *
+		 * @since Luma-Core 1.0
+		 *
+		 * @param array $args Parsed arguments after merging defaults.
+		 * @param bool  $echo Whether the output will be echoed.
+		 */
+		$args = apply_filters('luma_core_continue_reading_text_args', $args, $echo);
+
 		$title = get_the_title();
 		if (empty($title)) {
 			$title = __('this post', self::$domain);
@@ -471,21 +499,29 @@ class TemplateFunctions
 
 		$screen_reader_title = '<span class="screen-reader-text">' . esc_html($title) . '</span>';
 
-		$continue_reading = sprintf(
-			/* translators: %s: Post title. Only visible to screen readers. */
-			__('Continue reading %s', self::$domain),
-			$screen_reader_title
-		);
+		$html = $args['label'] . $screen_reader_title;
 
-		$continue_reading = apply_filters('luma_core_continue_reading_text', $continue_reading);
+		/**
+		 * Filters the full HTML output of the continue reading text.
+		 *
+		 * @since Luma-Core 1.0
+		 *
+		 * @param string $html                 Generated HTML output.
+		 * @param string $screen_reader_title  Screen-reader-only post title.
+		 * @param array  $args                 Arguments used to generate the output.
+		 */
+		$html = apply_filters('luma_core_continue_reading_text', $html, $screen_reader_title, $args);
+
+		$html = wp_kses_post($html);
 
 		if ($echo) {
-			echo $continue_reading; // phpcs:ignore WordPress.Security.EscapeOutput
+			echo $html;
 			return null;
 		}
 
-		return $continue_reading;
+		return $html;
 	}
+
 
 	/**
 	 * Determine if current context is excerpt view for micro post formats.

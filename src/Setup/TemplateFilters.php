@@ -23,15 +23,15 @@ class TemplateFilters
 
 	public function __invoke()
 	{
-		add_filter('body_class', array($this, 'body_class'));
-		add_filter('comment_form_defaults', array($this, 'comment_form_defaults'));
-		add_filter('excerpt_length', array($this, 'excerpt_length'));
-		add_filter('excerpt_more', array($this, 'continue_reading_link_excerpt'));
-		add_filter('the_content_more_link', array($this, 'continue_reading_link'), 10, 2);
-		add_filter('the_title', array($this, 'post_title'));
-		add_filter('get_calendar', array($this, 'change_calendar_nav_arrows'));
-		add_filter('the_password_form', array($this, 'password_form'), 10, 2);
-		add_filter('wp_link_pages_args', [$this, 'wp_link_pages_args']);
+		add_filter('body_class', array($this, 'filter_body_class'));
+		add_filter('comment_form_defaults', array($this, 'filter_comment_form_defaults'));
+		add_filter('excerpt_length', array($this, 'filter_excerpt_length'));
+		add_filter('excerpt_more', array($this, 'filter_excerpt_more'));
+		add_filter('the_content_more_link', array($this, 'filter_the_content_more_link'), 10, 2);
+		add_filter('the_title', array($this, 'filter_the_title'));
+		add_filter('get_calendar', array($this, 'filter_get_calendar'));
+		add_filter('the_password_form', array($this, 'filter_password_form'), 10, 2);
+		add_filter('wp_link_pages_args', [$this, 'filter_wp_link_pages_args']);
 		add_filter('edit_post_link', [$this, 'filter_edit_post_link'], 10, 3);
 	}
 
@@ -48,7 +48,7 @@ class TemplateFilters
 	 * @param array $classes Classes for the body element.
 	 * @return array
 	 */
-	public function body_class(array $classes): array
+	public function filter_body_class(array $classes): array
 	{
 		// Core logic
 		if (is_archive() || is_home() || is_search() || is_post_type_archive()) {
@@ -97,7 +97,7 @@ class TemplateFilters
 	 * @param array $defaults The form defaults.
 	 * @return array
 	 */
-	public function comment_form_defaults($defaults)
+	public function filter_comment_form_defaults($defaults)
 	{
 		// Adjust height of comment form.
 		$defaults['comment_field'] = str_replace(
@@ -117,7 +117,7 @@ class TemplateFilters
 	 *
 	 * @since Luma-Core 1.0
 	 */
-	public function excerpt_length(int $length): int
+	public function filter_excerpt_length(int $length): int
 	{
 		return 25;
 	}
@@ -130,10 +130,10 @@ class TemplateFilters
 	 *
 	 * @since Luma-Core 1.0
 	 */
-	public function continue_reading_link_excerpt(string $more): string
+	public function filter_excerpt_more(string $more): string
 	{
 		// if (! is_admin()) {
-		// 	return '&hellip; <a class="more-link" href="' . esc_url(get_permalink()) . '">' . TemplateFunctions::continue_reading_text(false) . '</a>';
+			return '&hellip; <a class="more-link" href="' . esc_url(get_permalink()) . '">' . TemplateFunctions::continue_reading_text(false) . '</a>';
 		// } else {
 		// 	return $more;
 		// } 
@@ -149,7 +149,7 @@ class TemplateFilters
 	 *
 	 * @since Luma-Core 1.0
 	 */
-	public function continue_reading_link(string $link, string $text): string
+	public function filter_the_content_more_link(string $link, string $text): string
 	{
 		if (! is_admin()) {
 			return str_replace($text, '<span class="more-link-container">' . TemplateFunctions::continue_reading_text(false) . '</span>', $link);
@@ -166,7 +166,7 @@ class TemplateFilters
 	 * @param string $title The title.
 	 * @return string
 	 */
-	public function post_title($title): string
+	public function filter_the_title($title): string
 	{
 		return '' === $title ? esc_html_x('Untitled', 'Added to posts and pages that are missing titles', $this->domain) : $title;
 	}
@@ -179,7 +179,7 @@ class TemplateFilters
 	 * @param string $calendar_output The generated HTML of the calendar.
 	 * @return string
 	 */
-	public function change_calendar_nav_arrows($calendar_output)
+	public function filter_get_calendar($calendar_output)
 	{
 		$calendar_output = str_replace('&laquo; ', is_rtl() ? TemplateFunctions::get_icon_svg('ui', 'arrow_right') : TemplateFunctions::get_icon_svg('ui', 'arrow_left'), $calendar_output);
 		$calendar_output = str_replace(' &raquo;', is_rtl() ? TemplateFunctions::get_icon_svg('ui', 'arrow_left') : TemplateFunctions::get_icon_svg('ui', 'arrow_right'), $calendar_output);
@@ -195,7 +195,7 @@ class TemplateFilters
 	 * @param int|WP_Post $post   Optional. Post ID or WP_Post object. Default is global $post.
 	 * @return string HTML content for password form for password protected post.
 	 */
-	public function password_form($output, $post = 0)
+	public function filter_password_form($output, $post = 0)
 	{
 		$post   = get_post($post);
 		$label  = 'pwbox-' . (empty($post->ID) ? wp_rand() : $post->ID);
@@ -209,7 +209,7 @@ class TemplateFilters
 	/**
 	 * Modify the args for wp_link_pages().
 	 */
-	public function wp_link_pages_args(array $args): array
+	public function filter_wp_link_pages_args(array $args): array
 	{
 		$args['before'] = '<p class="post-nav-links">' . esc_html__('Page', $this->domain) . ' ';
 
@@ -225,7 +225,7 @@ class TemplateFilters
 	 *
 	 * @return string
 	 */
-	public function edit_post_link(string $link, int $post_id, array $args): string
+	public function filter_edit_post_link(string $link, int $post_id, string $text): string
 	{
 
 		$post = get_post($post_id);
@@ -241,27 +241,8 @@ class TemplateFilters
 		}
 
 		// Build custom link text: "Edit this Page"
-		$text = sprintf(__('Edit this %s'), $singular);
+		$new_text = sprintf(__('Edit this %s'), $singular);
 
-		// Build a new edit URL the same way WP does
-		$url = get_edit_post_link($post_id);
-
-		if (! $url) {
-			return $link;
-		}
-
-		// Recreate link markup (keep class & before/after if provided)
-		$before = $args['before'] ?? '';
-		$after  = $args['after'] ?? '';
-		$class  = $args['class'] ?? 'post-edit-link';
-
-		return sprintf(
-			'%s<a class="%s" href="%s">%s</a>%s',
-			$before,
-			esc_attr($class),
-			esc_url($url),
-			esc_html($text),
-			$after
-		);
+		return str_replace(esc_html($text), esc_html($new_text), $link);
 	}
 }

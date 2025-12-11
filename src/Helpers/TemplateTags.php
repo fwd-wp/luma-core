@@ -14,35 +14,8 @@ use Luma\Core\Services\ThemeSettingsSchema;
  * @package Luma-Core
  * @since Luma-Core 1.0
  */
-class TemplateTags
+class TemplateTags extends TemplateTagsBase
 {
-	protected static string $domain = 'luma-core';
-
-	public static function init($config): void
-	{
-		self::$domain = $config['text_domain'] ?? self::$domain;
-	}
-
-	/**
-	 * Internal helper Wraps an array of label parts in a <span> with a given CSS class.
-	 *
-	 * Empty parts are automatically removed, and the remaining parts
-	 * are joined with spaces. The CSS class is escaped for safe output.
-	 *
-	 * @param string $class CSS class for the <span> wrapper.
-	 * @param string[] $parts Array of strings to include inside the span.
-	 *
-	 * @return string The HTML <span> element containing the label parts.
-	 *
-	 * @since Luma-Core 1.0
-	 */
-	protected static function wrap_content(string $class, array $parts, string $tag = 'span'): string
-	{
-		$label = implode(' ', array_filter($parts));
-		$tag = esc_attr($tag);
-		$class = esc_attr($class);
-		return "<{$tag} class='{$class}'>{$label}</{$tag}>";
-	}
 
 	/**
 	 * Outputs or returns a label for posts marked as sticky.
@@ -121,431 +94,79 @@ class TemplateTags
 	}
 
 
-	/**
-	 * Displays or returns the post's original publication date
-	 * using a semantic <time> element.
-	 *
-	 * Wraps the formatted date in a <time> element with appropriate classes,
-	 * matching WordPress Core conventions for published dates.
-	 *
-	 * @param bool  $echo Whether to echo the output. If false, the method returns the HTML.
-	 * @param array $args {
-	 *     Optional. Arguments controlling the output.
-	 *
-	 *     @type string      $class      CSS class added to the wrapper <span>. Default 'posted-on'.
-	 *     @type string      $time_class CSS class added to the <time> element. Default 'entry-date published'.
-	 *     @type string|null $before     Text/HTML displayed before the date. Default 'Published'.
-	 *     @type string      $after      Text/HTML displayed after the date. Default empty string.
-	 * }
-	 *
-	 * @since Luma-Core 1.0
-	 *
-	 * @return string|null The final HTML when `$echo` is false, otherwise null.
-	 */
 	public static function published_on(bool $echo = true, array $args = []): ?string
 	{
-		$defaults = [
-			'class'      => 'posted-on',
-			'time_class' => 'entry-date published',
-			'before'     => __('Published', self::$domain),
-			'after'      => '',
-		];
-
-		$args = wp_parse_args($args, $defaults);
-
-		$time_string = sprintf(
-			'<time class="%s" datetime="%s">%s</time>',
-			esc_attr($args['time_class']),
-			esc_attr(get_the_date(DATE_W3C)),
-			esc_html(get_the_date())
-		);
-
-		/**
-		 * Filters the arguments used to generate the published_on output.
-		 *
-		 * @since Luma-Core 1.0
-		 *
-		 * @param array $args Parsed arguments after merging defaults.
-		 * @param bool  $echo Whether the output will be echoed.
-		 */
-		$args = apply_filters('luma_core_published_on_args', $args, $echo);
-
-		$parts = [
-			$args['before'],
-			$time_string,
-			$args['after'],
-		];
-
-		$html = self::wrap_content($args['class'], $parts);
-
-		/**
-		 * Filters the full HTML output of the published date.
-		 *
-		 * @since Luma-Core 1.0
-		 *
-		 * @param string $html        The complete generated HTML.
-		 * @param array  $args        The arguments used to build the output.
-		 * @param string $time_string The formatted <time> element markup.
-		 */
-		$html = apply_filters(
-			'luma_core_published_on',
-			$html,
-			$args,
-			$time_string
-		);
-
-		$html = wp_kses_post($html);
-
-		if ($echo) {
-			echo $html;
-			return null;
-		}
-
+		$html = self::build_time_output('published', false, $args);
+		if ($echo && $html !== null) echo $html;
 		return $html;
 	}
 
+	public static function published_ago(bool $echo = true, array $args = []): ?string
+	{
+		$fallback = fn() => self::published_on(false, $args);
+		$html = self::build_time_output('published', true, $args, $fallback);
+		if ($echo && $html !== null) echo $html;
+		return $html;
+	}
 
-	/**
-	 * Displays or returns the post's last modified date
-	 * using a semantic <time> element.
-	 *
-	 * Outputs only if the post has been modified after its original publication.
-	 * Matches WordPress conventions by using the "updated" class.
-	 *
-	 * @param bool  $echo Whether to echo the output. If false, the method returns the HTML.
-	 * @param array $args {
-	 *     Optional. Arguments controlling the output.
-	 *
-	 *     @type string      $class      CSS class added to the wrapper <span>. Default 'updated-on'.
-	 *     @type string      $time_class CSS class added to the <time> element. Default 'updated'.
-	 *     @type string|null $before     Text/HTML displayed before the date. Default 'Updated'.
-	 *     @type string      $after      Text/HTML displayed after the date. Default empty string.
-	 * }
-	 *
-	 * @since Luma-Core 1.0
-	 *
-	 * @return string|null The formatted HTML when `$echo` is false, otherwise null.
-	 */
 	public static function updated_on(bool $echo = true, array $args = []): ?string
 	{
-		$modified  = get_the_modified_time('U');
-		$published = get_the_time('U');
-
-		// Only show if modified AFTER the initial publish date.
-		if ($modified <= $published) {
-			return null;
-		}
-
-		$defaults = [
-			'class'      => 'updated-on',
-			'time_class' => 'updated',
-			'before'     => __('Updated', self::$domain),
-			'after'      => '',
-		];
-
-		$args = wp_parse_args($args, $defaults);
-
-		$time_string = sprintf(
-			'<time class="%s" datetime="%s">%s</time>',
-			esc_attr($args['time_class']),
-			esc_attr(get_the_modified_date(DATE_W3C)),
-			esc_html(get_the_modified_date())
-		);
-
-		/**
-		 * Filters the arguments used to generate the updated_on output.
-		 *
-		 * @since Luma-Core 1.0
-		 *
-		 * @param array $args Parsed arguments after merging defaults.
-		 * @param bool  $echo Whether the output will be echoed.
-		 */
-		$args = apply_filters('luma_core_updated_on_args', $args, $echo);
-
-		$parts = [
-			$args['before'],
-			$time_string,
-			$args['after'],
-		];
-
-		$html = self::wrap_content($args['class'], $parts);
-
-		/**
-		 * Filters the full HTML output of the updated date.
-		 *
-		 * @since Luma-Core 1.0
-		 *
-		 * @param string $html        Generated HTML output.
-		 * @param array  $args        Arguments used to build the output.
-		 * @param string $time_string The formatted <time> element.
-		 */
-		$html = apply_filters(
-			'luma_core_updated_on',
-			$html,
-			$args,
-			$time_string
-		);
-
-		$html = wp_kses_post($html);
-
-		if ($echo) {
-			echo $html;
-			return null;
-		}
-
+		$html = self::build_time_output('modified', false, $args);
+		if ($echo && $html !== null) echo $html;
 		return $html;
 	}
 
-
+	public static function updated_ago(bool $echo = true, array $args = []): ?string
+	{
+		$fallback = fn() => self::updated_on(false, $args);
+		$html = self::build_time_output('modified', true, $args, $fallback);
+		if ($echo && $html !== null) echo $html;
+		return $html;
+	}
 
 	/**
-	 * Outputs or returns the time since the post was published
-	 * in a human-readable "ago" format.
+	 * Outputs or returns the most relevant human-readable "ago" timestamp.
 	 *
-	 * Falls back to `published_on()` when the time exceeds the configured limit.
+	 * Compares the published and modified timestamps and chooses the newer one.
+	 * If the post has been updated after publication, calls updated_ago().
+	 * Otherwise, calls published_ago().
+	 *
+	 * Only arguments explicitly provided in `$args` are forwarded, allowing
+	 * each child function's own defaults to remain intact.
 	 *
 	 * @param bool  $echo Whether to echo the output. If false, returns the HTML.
 	 * @param array $args {
-	 *     Optional. Arguments controlling the output.
+	 *     Optional. Arguments for controlling the output. All keys are optional:
 	 *
-	 *     @type string      $class      CSS class added to the wrapper <span>. Default 'posted-on'.
-	 *     @type string|null $before     Text/HTML before the time string. Default 'Published'.
-	 *     @type string|null $after      Text/HTML after the time string. Default 'ago'.
-	 *     @type int         $max_days   Maximum number of days to show "ago".  
-	 *                                   If exceeded, falls back to `published_on()`.  
-	 *                                   Set to 0 to always show "ago".  
-	 *                                   Default 364.
+	 *     @type string|null $published_class    CSS class for the published <span>.  
+	 *     @type string|null $published_before   Text/HTML before the published time.  
+	 *     @type string|null $published_after    Text/HTML after the published time.  
+	 *     @type int|null    $published_max_days Max "ago" days before fallback.
+	 *
+	 *     @type string|null $updated_class      CSS class for the updated <span>.  
+	 *     @type string|null $updated_before     Text/HTML before the updated time.  
+	 *     @type string|null $updated_after      Text/HTML after the updated time.  
+	 *     @type int|null    $updated_max_days   Max "ago" days before fallback.
 	 * }
 	 *
 	 * @since Luma-Core 1.0
 	 *
 	 * @return string|null The HTML if `$echo` is false, otherwise null.
-	 */
-	public static function published_ago(bool $echo = true, array $args = []): ?string
-	{
-		$defaults = [
-			'class'    => 'posted-on',
-			'before'   => __('Published', self::$domain),
-			'after'    => __('ago', self::$domain),
-			'max_days' => 364,
-		];
-
-		$args = wp_parse_args($args, $defaults);
-
-		/**
-		 * Filters the arguments used to generate the published_ago output.
-		 *
-		 * @since Luma-Core 1.0
-		 *
-		 * @param array $args Parsed arguments after merging defaults.
-		 * @param bool  $echo Whether the output will be echoed.
-		 */
-		$args = apply_filters('luma_core_published_ago_args', $args, $echo);
-
-		$published = get_the_time('U');
-		$now       = current_time('timestamp');
-
-		$days_old = floor(($now - $published) / DAY_IN_SECONDS);
-
-		// Fallback to published_on() if max_days exceeded
-		if ((int) $args['max_days'] > 0 && $days_old > (int) $args['max_days']) {
-
-			// Reformat args so published_on() receives equivalent structure
-			$published_args = [
-				'class'      => $args['class'],
-				'time_class' => 'entry-date published',
-				'before'     => $args['before'],
-				'after'      => $args['after'],
-			];
-
-			return self::published_on($echo, $published_args);
-		}
-
-		$published_ago = human_time_diff($published, $now);
-
-		$parts = [
-			$args['before'],
-			esc_html($published_ago),
-			$args['after'],
-		];
-
-		$html = self::wrap_content($args['class'], $parts);
-
-		/**
-		 * Filters the output of the published "ago" HTML.
-		 *
-		 * @since Luma-Core 1.0
-		 *
-		 * @param string $html        The generated HTML.
-		 * @param array  $args        The arguments used to generate the markup.
-		 * @param string $published_ago The human-readable relative time string.
-		 */
-		$html = apply_filters(
-			'luma_core_published_ago',
-			$html,
-			$args,
-			$published_ago
-		);
-
-		$html = wp_kses_post($html);
-
-		if ($echo) {
-			echo $html;
-			return null;
-		}
-
-		return $html;
-	}
-
-	/**
-	 * Outputs or returns the time since the post was last updated
-	 * in a human-readable "Updated X ago" format.
-	 *
-	 * Only outputs when the post has been updated after publication.
-	 * If the time exceeds the configured limit, falls back to updated_on().
-	 *
-	 * @param bool  $echo Whether to echo the value. If false, returns the HTML.
-	 * @param array $args {
-	 *     Optional. Arguments controlling output.
-	 *
-	 *     @type string      $class     CSS class for the wrapper <span>. Default 'updated-on'.
-	 *     @type string|null $before    Text/HTML before the time string. Default 'Updated'.
-	 *     @type string|null $after     Text/HTML after the time string. Default 'ago'.
-	 *     @type int         $max_days  Maximum age (in days) for using the "ago" format.  
-	 *                                  If exceeded, falls back to updated_on().  
-	 *                                  Set to 0 to always show "ago".  
-	 *                                  Default 364.
-	 * }
-	 *
-	 * @since Luma-Core 1.0
-	 *
-	 * @return string|null The HTML if `$echo` is false, otherwise null.
-	 */
-	public static function updated_ago(bool $echo = true, array $args = []): ?string
-	{
-		$defaults = [
-			'class'     => 'updated-on',
-			'before'    => __('Updated', self::$domain),
-			'after'     => __('ago', self::$domain),
-			'max_days'  => 364,
-		];
-
-		$args = wp_parse_args($args, $defaults);
-
-		/**
-		 * Filters the arguments used to generate the updated_ago output.
-		 *
-		 * @since Luma-Core 1.0
-		 *
-		 * @param array $args Parsed arguments.
-		 * @param bool  $echo Whether the output will be echoed.
-		 */
-		$args = apply_filters('luma_core_updated_ago_args', $args, $echo);
-
-		$published = get_the_time('U');
-		$modified  = get_the_modified_time('U');
-
-		// Only output "updated" if modified after publish
-		if ($modified <= $published) {
-			return null;
-		}
-
-		$now      = current_time('timestamp');
-		$days_old = floor(($now - $modified) / DAY_IN_SECONDS);
-
-		// Fallback to updated_on() when exceeding max_days
-		if ((int) $args['max_days'] > 0 && $days_old > (int) $args['max_days']) {
-
-			// Pass equivalent args to updated_on()
-			$updated_args = [
-				'class'      => $args['class'],
-				'time_class' => 'updated',
-				'before'     => $args['before'],
-				'after'      => $args['after'],
-			];
-
-			return self::updated_on($echo, $updated_args);
-		}
-
-		$modified_ago = human_time_diff($modified, $now);
-
-		$parts = [
-			$args['before'],
-			esc_html($modified_ago),
-			$args['after'],
-		];
-
-		$html = self::wrap_content($args['class'], $parts);
-
-		/**
-		 * Filters the HTML for the human-readable modified "ago" format.
-		 *
-		 * @since Luma-Core 1.0
-		 *
-		 * @param string $html         Generated HTML.
-		 * @param array  $args         The arguments used.
-		 * @param string $modified_ago The human-readable "X time ago" string.
-		 */
-		$html = apply_filters(
-			'luma_core_updated_ago',
-			$html,
-			$args,
-			$modified_ago
-		);
-
-		$html = wp_kses_post($html);
-
-		if ($echo) {
-			echo $html;
-			return null;
-		}
-
-		return $html;
-	}
-
-
-	/**
-	 * Outputs or returns the most recent human-readable "ago" timestamp.
-	 *
-	 * Chooses between `updated_ago()` and `published_ago()` depending on whether
-	 * the post has been updated since publication. All arguments are strictly
-	 * namespaced via `published_*` and `updated_*` prefixes.
-	 *
-	 * @param bool  $echo  Whether to echo the output or return it.
-	 * @param array $args  {
-	 *     Optional. Arguments controlling output.
-	 *
-	 *     For published_ago():
-	 *     @type string $published_class   Wrapper class. Default 'time-ago'.
-	 *     @type string $published_before  Text before published time. Default ''.
-	 *     @type string $published_after   Text after published time. Default ''.
-	 *     @type int    $published_max_days Max "ago" days before fallback. Default 364.
-	 *
-	 *     For updated_ago():
-	 *     @type string $updated_class     Wrapper class. Default 'time-ago'.
-	 *     @type string $updated_before    Text before updated time. Default ''.
-	 *     @type string $updated_after     Text after updated time. Default ''.
-	 *     @type int    $updated_max_days  Max "ago" days before fallback. Default 364.
-	 * }
-	 *
-	 * @since Luma-Core 1.0
-	 *
-	 * @return string|null
 	 */
 	public static function most_recent_ago(bool $echo = true, array $args = []): ?string
 	{
 		$defaults = [
 			// Published version
-			'published_class'    => 'time-ago',
-			'published_before'   => '',
-			'published_after'    => '',
-			'published_max_days' => 364,
+			'published_class'    => null,   // null = do NOT override child default
+			'published_before'   => null,
+			'published_after'    => null,
+			'published_max_days' => null,
 
 			// Updated version
-			'updated_class'      => 'time-ago',
-			'updated_before'     => '',
-			'updated_after'      => '',
-			'updated_max_days'   => 364,
+			'updated_class'      => null,
+			'updated_before'     => null,
+			'updated_after'      => null,
+			'updated_max_days'   => null,
 		];
 
 		$args = wp_parse_args($args, $defaults);
@@ -557,22 +178,27 @@ class TemplateTags
 
 		if ($use_updated) {
 
-			$output = self::updated_ago(
-				false,
-				$args['updated_class'],
-				$args['updated_before'],
-				$args['updated_after'],
-				(int) $args['updated_max_days']
-			);
+			// Build ONLY the args that were provided (preserve child defaults)
+			$updated_args = array_filter([
+				'class'    => $args['updated_class'],
+				'before'   => $args['updated_before'],
+				'after'    => $args['updated_after'],
+				'max_days' => $args['updated_max_days'],
+			], static fn($v) => $v !== null);
+
+			$output = self::updated_ago(false, $updated_args);
 		} else {
 
-			$output = self::published_ago(
-				false,
-				$args['published_class'],
-				$args['published_before'],
-				$args['published_after'],
-				(int) $args['published_max_days']
-			);
+			// Same: only pass through provided overrides
+			$published_args = array_filter([
+				'class'    => $args['published_class'],
+				'before'   => $args['published_before'],
+				'after'    => $args['published_after'],
+				'max_days' => $args['published_max_days'],
+			], static fn($v) => $v !== null);
+
+			// Must pass echo=false so we control output
+			$output = self::published_ago(false, $published_args);
 		}
 
 		$output = wp_kses_post($output);
@@ -584,6 +210,7 @@ class TemplateTags
 
 		return $output;
 	}
+
 
 
 
@@ -665,256 +292,16 @@ class TemplateTags
 	}
 
 
-	/**
-	 * Outputs or returns a list of categories for the current post.
-	 *
-	 * Wraps the category links in a <span> with a CSS class and optional
-	 * text before and after the list. Uses the provided separator or
-	 * the theme default.
-	 *
-	 * @param bool  $echo   Whether to echo the output or return it.
-	 * @param array $params {
-	 *     Optional. Arguments controlling output.
-	 *
-	 *     @type string $before    Text displayed before the category list. Default ''.
-	 *     @type string $after     Text displayed after the category list. Default ''.
-	 *     @type string $separator Separator between categories. Default theme list item separator.
-	 *     @type string $class     CSS class for the wrapper <span>. Default 'cat-links'.
-	 * }
-	 *
-	 * @since Luma-Core 1.0
-	 *
-	 * @return string|null The formatted HTML output or null if echoed.
-	 */
-	public static function category_list(bool $echo = true, array $params = []): ?string
+
+	public static function category_list(bool $echo = true, array $args = []): ?string
 	{
-		if (!has_category()) {
-			return null;
-		}
-
-		$defaults = [
-			'before'    => '',
-			'after'     => '',
-			'separator' => wp_get_list_item_separator(),
-			'class'     => 'cat-links',
-		];
-
-		$params = wp_parse_args($params, $defaults);
-
-		/**
-		 * Filter the arguments used to generate the category list.
-		 *
-		 * @since Luma-Core 1.0
-		 *
-		 * @param array $params Parsed parameters controlling the category list.
-		 * @param bool  $echo   Whether the output will be echoed.
-		 */
-		$params = apply_filters('luma_core_category_list_args', $params, $echo);
-
-		$categories_list = get_the_category_list($params['separator']) ?? '';
-
-		$parts = [
-			$params['before'],
-			$categories_list,
-			$params['after'],
-		];
-
-		$html = self::wrap_content($params['class'], $parts);
-
-		/**
-		 * Filters the category list output.
-		 *
-		 * @since Luma-Core 1.0
-		 *
-		 * @param string $html            The HTML output of the category list.
-		 * @param string $categories_list The raw category links generated by get_the_category_list().
-		 * @param array  $params          The parsed parameters array.
-		 * @param bool   $echo            Whether the output will be echoed.
-		 */
-		$html = apply_filters('luma_core_category_list', $html, $categories_list, $params, $echo);
-
-		$html = wp_kses_post($html);
-
-		if ($echo) {
-			echo $html;
-			return null;
-		}
-
-		return $html;
+		return self::term_list($echo, 'category', $args);
 	}
 
-
-	/**
-	 * Outputs or returns a list of tags for the current post.
-	 *
-	 * Wraps the tag links in a <span> with a CSS class and optional
-	 * text before and after the list. Uses the provided separator or
-	 * the theme default.
-	 *
-	 * @param bool  $echo   Whether to echo the output or return it.
-	 * @param array $params {
-	 *     Optional. Arguments controlling output.
-	 *
-	 *     @type string $before    Text displayed before the tag list. Default ''.
-	 *     @type string $after     Text displayed after the tag list. Default ''.
-	 *     @type string $separator Separator used between tags. Default theme list item separator.
-	 *     @type string $class     CSS class for the wrapper <span>. Default 'tags-links'.
-	 * }
-	 *
-	 * @since Luma-Core 1.0
-	 *
-	 * @return string|null The formatted HTML output or null if echoed.
-	 */
-	public static function tag_list(bool $echo = true, array $params = []): ?string
+	public static function tag_list(bool $echo = true, array $args = []): ?string
 	{
-		if (!has_tag()) {
-			return null;
-		}
-
-		$defaults = [
-			'before'    => '',
-			'after'     => '',
-			'separator' => wp_get_list_item_separator(),
-			'class'     => 'tags-links',
-		];
-
-		$params = wp_parse_args($params, $defaults);
-
-		/**
-		 * Filter the arguments used to generate the tag list.
-		 *
-		 * @since Luma-Core 1.0
-		 *
-		 * @param array $params Parsed parameters controlling the tag list.
-		 * @param bool  $echo   Whether the output will be echoed.
-		 */
-		$params = apply_filters('luma_core_tag_list_args', $params, $echo);
-
-		$tags_list = get_the_tag_list('', $params['separator']) ?? '';
-
-		$parts = [
-			$params['before'],
-			$tags_list,
-			$params['after'],
-		];
-
-		$html = self::wrap_content($params['class'], $parts);
-
-		/**
-		 * Filters the tag list output.
-		 *
-		 * @since Luma-Core 1.0
-		 *
-		 * @param string      $html      The HTML output of the tag list.
-		 * @param string|null $tags_list The raw tag links generated by get_the_tag_list(), or null if no tags.
-		 * @param array       $params    The parsed parameters array.
-		 * @param bool        $echo      Whether the output will be echoed.
-		 */
-		$html = apply_filters('luma_core_tag_list', $html, $tags_list, $params, $echo);
-
-		$html = wp_kses_post($html);
-
-		if ($echo) {
-			echo $html;
-			return null;
-		}
-
-		return $html;
+		return self::term_list($echo, 'tag', $args);
 	}
-
-
-
-
-	/**
-	 * Outputs or returns the post thumbnail with optional caption.
-	 *
-	 * Wraps the thumbnail in a <figure> with a CSS class, and optionally
-	 * wraps the caption in a <figcaption> with its own class. For
-	 * non-singular views, the thumbnail is wrapped in a link to the post.
-	 *
-	 * @param bool  $echo   Whether to echo the output or return it.
-	 * @param array $params {
-	 *     Optional. Arguments controlling output.
-	 *
-	 *     @type string $class            CSS class for the <figure> wrapper. Default 'post-thumbnail'.
-	 *     @type string $figcaption_class CSS class for the <figcaption> element. Default 'post-thumbnail-inner'.
-	 * }
-	 *
-	 * @since Luma-Core 1.0
-	 *
-	 * @return string|null The formatted HTML or null if no thumbnail exists.
-	 */
-	public static function post_thumbnail(bool $echo = true, array $params = []): ?string
-	{
-		if (!TemplateFunctions::can_show_post_thumbnail()) {
-			return null;
-		}
-
-		$defaults = [
-			'class'            => 'post-thumbnail',
-			'figcaption_class' => 'post-thumbnail-inner',
-		];
-
-		$params = wp_parse_args($params, $defaults);
-
-		/**
-		 * Filter the arguments used to generate the post thumbnail.
-		 *
-		 * @since Luma-Core 1.0
-		 *
-		 * @param array $params Parsed parameters for the post thumbnail.
-		 * @param bool  $echo   Whether the output will be echoed.
-		 */
-		$params = apply_filters('luma_core_post_thumbnail_args', $params, $echo);
-
-		$post_thumbnail_id = get_post_thumbnail_id();
-		$caption           = wp_get_attachment_caption($post_thumbnail_id);
-		$thumbnail_args    = ['loading' => is_singular() ? false : 'lazy'];
-
-		$parts = [];
-
-		if (is_singular()) {
-			$parts[] = get_the_post_thumbnail('post-thumbnail', $thumbnail_args);
-
-			if ($caption) {
-				$parts[] = '<figcaption class="' . esc_attr($params['figcaption_class']) . '">'
-					. wp_kses_post($caption)
-					. '</figcaption>';
-			}
-		} else {
-			$parts[] = '<a class="' . esc_attr($params['figcaption_class']) . '" href="'
-				. esc_url(get_permalink())
-				. '" aria-hidden="true" tabindex="-1">'
-				. get_the_post_thumbnail('post-thumbnail', $thumbnail_args)
-				. '</a>';
-		}
-
-		$html = self::wrap_content($params['class'], $parts, 'figure');
-
-		/**
-		 * Filters the post thumbnail output.
-		 *
-		 * @since Luma-Core 1.0
-		 *
-		 * @param string $html               The HTML output of the post thumbnail.
-		 * @param int    $post_thumbnail_id  Attachment ID of the post thumbnail.
-		 * @param string $caption            Caption text for the thumbnail.
-		 * @param array  $params             The parsed parameters array.
-		 * @param bool   $echo               Whether the output will be echoed.
-		 */
-		$html = apply_filters('luma_core_post_thumbnail', $html, $post_thumbnail_id, $caption, $params, $echo);
-
-		$html = wp_kses_post($html);
-
-		if ($echo) {
-			echo $html;
-			return null;
-		}
-
-		return $html;
-	}
-
-
 
 	/**
 	 * Outputs or returns navigation links for multi-page posts or post lists.
@@ -1257,6 +644,95 @@ class TemplateTags
 		 * @param bool   $echo Whether the function is set to echo or return.
 		 */
 		$html = apply_filters('luma_core_continue_reading_link', $html, $args, $echo);
+
+		$html = wp_kses_post($html);
+
+		if ($echo) {
+			echo $html;
+			return null;
+		}
+
+		return $html;
+	}
+
+	/**
+	 * Outputs or returns the post thumbnail with optional caption.
+	 *
+	 * Wraps the thumbnail in a <figure> with a CSS class, and optionally
+	 * wraps the caption in a <figcaption> with its own class. For
+	 * non-singular views, the thumbnail is wrapped in a link to the post.
+	 *
+	 * @param bool  $echo   Whether to echo the output or return it.
+	 * @param array $params {
+	 *     Optional. Arguments controlling output.
+	 *
+	 *     @type string $class            CSS class for the <figure> wrapper. Default 'post-thumbnail'.
+	 *     @type string $figcaption_class CSS class for the <figcaption> element. Default 'post-thumbnail-inner'.
+	 * }
+	 *
+	 * @since Luma-Core 1.0
+	 *
+	 * @return string|null The formatted HTML or null if no thumbnail exists.
+	 */
+	public static function post_thumbnail(bool $echo = true, array $params = []): ?string
+	{
+		if (!TemplateFunctions::can_show_post_thumbnail()) {
+			return null;
+		}
+
+		$defaults = [
+			'class'            => 'post-thumbnail',
+			'figcaption_class' => 'post-thumbnail-inner',
+		];
+
+		$params = wp_parse_args($params, $defaults);
+
+		/**
+		 * Filter the arguments used to generate the post thumbnail.
+		 *
+		 * @since Luma-Core 1.0
+		 *
+		 * @param array $params Parsed parameters for the post thumbnail.
+		 * @param bool  $echo   Whether the output will be echoed.
+		 */
+		$params = apply_filters('luma_core_post_thumbnail_args', $params, $echo);
+
+		$post_thumbnail_id = get_post_thumbnail_id();
+		$caption           = wp_get_attachment_caption($post_thumbnail_id);
+		$thumbnail_args    = ['loading' => is_singular() ? false : 'lazy'];
+
+		$parts = [];
+
+		if (is_singular()) {
+			$parts[] = get_the_post_thumbnail('post-thumbnail', $thumbnail_args);
+
+			if ($caption) {
+				$parts[] = '<figcaption class="' . esc_attr($params['figcaption_class']) . '">'
+					. wp_kses_post($caption)
+					. '</figcaption>';
+			}
+		} else {
+			$parts[] = '<a class="' . esc_attr($params['figcaption_class']) . '" href="'
+				. esc_url(get_permalink())
+				. '" aria-hidden="true" tabindex="-1">'
+				. get_the_post_thumbnail('post-thumbnail', $thumbnail_args)
+				. '</a>';
+		}
+
+		$html = self::wrap_content($params['class'], $parts, 'figure');
+
+		/**
+		 * Filters the post thumbnail output.
+		 *
+		 * @since Luma-Core 1.0
+		 *
+		 * @param string $html               The HTML output of the post thumbnail.
+		 * @param int    $post_thumbnail_id  Attachment ID of the post thumbnail.
+		 * @param string $caption            Caption text for the thumbnail.
+		 * @param array  $params             The parsed parameters array.
+		 * @param bool   $echo               Whether the output will be echoed.
+		 */
+		$html = apply_filters('luma_core_post_thumbnail', $html, $post_thumbnail_id, $caption, $params, $echo);
 
 		$html = wp_kses_post($html);
 
