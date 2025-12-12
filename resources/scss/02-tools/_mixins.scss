@@ -1,0 +1,294 @@
+// TODO: move to a NPM package and import
+
+@use "sass:map";
+@use "sass:meta";
+
+
+// Heading mixin: font + size + line-height + weight + color
+@mixin heading($level) {
+	font-family: var(--wp--preset--font-family--heading);
+	line-height: var(--wp--custom--font--line-height--heading);
+	font-weight: var(--wp--custom--font--weight--heading);
+	color: var(--wp--preset--color--heading);
+
+	@if 1==$level {
+		font-size: var(--wp--preset--font-size--xxx-large);
+	}
+
+	@if 2==$level {
+		font-size: var(--wp--preset--font-size--xx-large);
+	}
+
+	@if 3==$level {
+		font-size: var(--wp--preset--font-size--x-large);
+	}
+
+	@if 4==$level {
+		font-size: var(--wp--preset--font-size--large);
+	}
+
+	@if 5==$level {
+		font-size: var(--wp--preset--font-size--medium);
+	}
+
+	@if 6==$level {
+		font-size: var(--wp--preset--font-size--small);
+	}
+}
+
+// Body text mixin: font + size + line-height + weight + color
+@mixin body-text {
+	font-family: var(--wp--custom--font--family--body);
+	font-size: var(--wp--custom--font--size--body);
+	line-height: var(--wp--custom--font--line-height--body);
+	font-weight: var(--wp--custom--font--weight--body);
+	color: var(--wp--preset--color--dark);
+}
+
+// Local default breakpoints (must match theme.json custom.breakpoint values)
+$breakpoints: (
+	"xs": 400px,
+	"sm": 576px,
+	"md": 768px,
+	"lg": 992px,
+	"xl": 1200px,
+	"xxl": 1400px,
+	"navbar": 992px,
+);
+
+// Usage: @include bp-up(sm) { ... } or @include bp-up(800px) { ... }
+@mixin bp-up($bp) {
+	$is-string: meta.type-of($bp)==string;
+	$is-number: meta.type-of($bp)==number;
+	$val: null;
+
+	@if $is-string {
+		$val: map.get($breakpoints, $bp);
+	}
+
+	@else if $is-number {
+		$val: $bp;
+	}
+
+	@if $val ==null {
+		// If not found, do nothing (no media wrap) to avoid breaking nested content
+		@content;
+	}
+
+	@else {
+
+		// Fallback for older browsers using static px value
+		@media only screen and (min-width: #{$val}) {
+			@content;
+		}
+
+		// Modern browsers using CSS custom properties from theme.json
+		@if $is-string {
+			@media only screen and (min-width: var(--wp--custom--breakpoint--#{$bp})) {
+				@content;
+			}
+		}
+	}
+}
+
+// Max-width helper. Usage: @include bp-down(navbar) { ... } or @include bp-down(800px) { ... }
+@mixin bp-down($bp) {
+	$is-string: type-of($bp)==string;
+	$is-number: type-of($bp)==number;
+	$val: null;
+
+	@if $is-string {
+		$val: map.get($breakpoints, $bp);
+	}
+
+	@else if $is-number {
+		$val: $bp;
+	}
+
+	@if $val ==null {
+		@content;
+	}
+
+	@else {
+
+		// Fallback px
+		@media only screen and (max-width: #{$val}) {
+			@content;
+		}
+
+		// CSS var version for modern browsers (subtract a tiny delta to avoid overlap)
+		@if $is-string {
+			@media only screen and (max-width: calc(var(--wp--custom--breakpoint--#{$bp}) - 0.02px)) {
+				@content;
+			}
+		}
+	}
+}
+
+/**
+* Responsive container widths
+*
+* Usage:
+*
+* @include container.align(content);
+* @include container.align(wide);
+* @include container.align(full);
+*/
+
+@mixin align($alignment) {
+
+	@if default==$alignment {
+		margin-inline: auto;
+		max-width: clamp(0px,
+				calc(100% - (var(--wp--custom--spacing--gutter) * 2)),
+				calc(var(--wp--style--global--content-size) - (var(--wp--custom--spacing--gutter) * 2)));
+	}
+
+	// can be used inside default container
+	@if wide==$alignment {
+		margin-inline: auto;
+		max-width: clamp(0px,
+				calc(100% - (var(--wp--custom--spacing--gutter) * 2)),
+				calc(var(--wp--style--global--wide-size) - (var(--wp--custom--spacing--gutter) * 2)));
+	}
+
+	@if wide-nested==$alignment {
+		@include align(wide);
+		width: var(--wp--style--global--content-size);
+	}
+
+	@if full==$alignment {
+		width: 100%;
+		max-width: none;
+	}
+
+	@if center==$alignment {
+		clear: both;
+		display: block;
+		float: none;
+		margin-right: auto;
+		margin-left: auto;
+		text-align: center;
+	}
+}
+
+
+
+
+@mixin editor-wrapper($selector) {
+	@at-root #{$selector} {
+		@content;
+	}
+}
+
+
+// Responsive breakpoints mixin
+@mixin add_variables($view: frontend) {
+
+	@if frontend==$view {
+
+		:root {
+			@content;
+		}
+	}
+
+	@if editor==$view {
+
+		:root,
+		body {
+			@content;
+		}
+	}
+}
+
+// Button style
+// - Applies button styles to blocks and elements that share them.
+@mixin button-style() {
+	border: var(--button--border-width) solid transparent;
+	border-radius: var(--button--border-radius);
+	cursor: pointer;
+	font-weight: var(--button--font-weight);
+	font-family: var(--button--font-family);
+	font-size: var(--button--font-size);
+	line-height: var(--button--line-height);
+	padding: var(--button--padding-vertical) var(--button--padding-horizontal);
+	text-decoration: none;
+
+	// Standard Button Color Relationship Logic
+	&:not(:hover):not(:active) {
+
+		// Text colors
+		&:not(.has-text-color) {
+			color: var(--wp--preset--color--background);
+
+			// Nested
+			.has-background & {
+				color: var(--local--color-background, var(--wp--preset--color--background));
+
+				&.has-background {
+					color: var(--wp--preset--color--background);
+				}
+			}
+		}
+
+		// Background-colors
+		&:not(.has-background) {
+			background-color: var(--wp--preset--color--background);
+
+			// Nested
+			.has-background & {
+				background-color: var(--local--color-primary, var(--wp--preset--color--background));
+			}
+		}
+	}
+
+	// Hover Button color should match parent element foreground color
+	&:hover,
+	&:active {
+		background-color: transparent;
+		border-color: currentColor;
+		color: inherit;
+	}
+
+	// Focus Button outline color should always match the current text color
+	&:focus {
+		outline-offset: -6px;
+		outline: 2px dotted currentColor;
+	}
+
+	// Disabled Button colors
+	&:disabled {
+		background-color: var(--wp--preset--color--white);
+		border-color: var(--wp--preset--color--white);
+		color: var(--button--color-text-active);
+	}
+}
+
+@mixin innerblock-margin-clear($container) {
+
+	// Clear the top margin for the first-child.
+	>#{$container}>*:first-child {
+		margin-top: 0;
+	}
+
+	// Last child that is not the appender.
+	>#{$container}>*:last-child:not(.block-list-appender) {
+		margin-bottom: 0;
+	}
+
+	// When selected, the last item becomes the second last because of the appender.
+	&.has-child-selected>#{$container}>*:nth-last-child(2),
+	&.is-selected>#{$container}>*:nth-last-child(2) {
+		margin-bottom: 0;
+	}
+}
+
+@mixin form-control-btn() {
+	display: inline-block;
+	padding: var(--wp--custom--form--padding-vertical) var(--wp--custom--form--padding-horizontal);
+	//margin-bottom: var(--wp--custom--form--gap);
+	font-size: var(--wp--custom--form--font-size);
+	line-height: var(--wp--custom--form--line-height);
+	border-radius: var(--wp--custom--form--border-radius);
+	box-sizing: border-box;
+}

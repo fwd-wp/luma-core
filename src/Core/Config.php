@@ -35,48 +35,44 @@ class Config
      */
     public static function init(array $config): void
     {
-        foreach ($config as $key => $value) {
-            if (array_key_exists($key, self::$config)) {
-                self::$config[$key] = $value;
-            }
-        }
+        self::$config = wp_parse_args($config, self::$config);
     }
 
-    /**
-     * Generic setter for a single config key.
-     *
-     * @param string $key
-     * @param mixed  $value
-     */
-    public static function set(string $key, mixed $value): void
-    {
-        if (array_key_exists($key, self::$config)) {
-            self::$config[$key] = $value;
-        } else {
-            \Luma\Core\Helpers\Functions::error_log(sprintf(
-                'Config key "%s" does not exist. Cannot set value.',
-                $key
-            ));
-        }
-    }
+    // /**
+    //  * Generic setter for a single config key.
+    //  *
+    //  * @param string $key
+    //  * @param mixed  $value
+    //  */
+    // public static function set(string $key, mixed $value): void
+    // {
+    //     if (array_key_exists($key, self::$config)) {
+    //         self::$config[$key] = $value;
+    //     } else {
+    //         \Luma\Core\Helpers\Functions::error_log(sprintf(
+    //             'Config key "%s" does not exist. Cannot set value.',
+    //             $key
+    //         ));
+    //     }
+    // }
 
-    /**
-     * Generic getter for a single config key.
-     *
-     * @param string $key
-     * @return mixed|null
-     */
-    public static function get(string $key): mixed
-    {
-        if (!array_key_exists($key, self::$config)) {
-            \Luma\Core\Helpers\Functions::error_log(sprintf(
-                'Config key "%s" does not exist. Returning null.',
-                $key
-            ));
-        }
+    // /**
+    //  * Generic getter for a single config key.
+    //  *
+    //  * @param string $key
+    //  * @return mixed|null
+    //  */
+    // public static function get(string $key): mixed
+    // {
+    //     if (!array_key_exists($key, self::$config)) {
+    //         \Luma\Core\Helpers\Functions::error_log(sprintf(
+    //             'Config key "%s" does not exist. Returning null.',
+    //             $key
+    //         ));
+    //     }
 
-        return self::$config[$key] ?? null;
-    }
+    //     return self::$config[$key] ?? null;
+    // }
 
     // --- Specific getters for convenience and backward compatibility ---
 

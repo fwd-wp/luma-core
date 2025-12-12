@@ -1,0 +1,13 @@
+// Block Styles for the Editor
+// - These styles override Gutenberg Block styles for fonts, colors, and spacing
+// - In the future, these could be compiled into individual CSS files and conditionally loaded
+
+// load the front end styles 
+@use 'styles';
+
+
+@use "legacy/editor" as legacyEditor; // Legacy WP blocks, e.g., galleries, .button
+@use "media-text/editor" as mediaTextEditor;
+@use "navigation/editor" as navigationEditor;
+//@use "utilities/editor" as utilitiesEditor; // Import LAST to cascade properly
+

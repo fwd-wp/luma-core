@@ -1,0 +1,15 @@
+@use 'parts/header';
+@use 'parts/footer';
+@use 'parts/footer-navigation';
+@use 'parts/entry';
+@use 'parts/comments';
+@use 'parts/navigation';
+@use 'parts/page-header';
+@use 'parts/pagination';
+@use 'parts/widgets';
+
+@use 'view/search';
+@use 'view/archives';
+@use 'view/single';
+@use 'view/posts-and-pages';
+@use 'view/404' as notFound;

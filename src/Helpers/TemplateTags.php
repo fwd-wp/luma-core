@@ -20,7 +20,7 @@ class TemplateTags extends TemplateTagsBase
 	/**
 	 * Outputs or returns a label for posts marked as sticky.
 	 *
-	 * Generates a wrapped label (e.g., "Featured Post") using the post type’s
+	 * Generates a wrapped label (e.g., "Featured Post") using the post type's
 	 * singular name, with optional before/after text. Output can be echoed
 	 * or returned as a string.
 	 *
@@ -218,10 +218,10 @@ class TemplateTags extends TemplateTagsBase
 	 * Outputs or returns the post author with a link to their posts.
 	 *
 	 * Supports optional text before and after the author name. All parameters
-	 * are passed via `$params` for consistent filtering and extensibility.
+	 * are passed via `$args` for consistent filtering and extensibility.
 	 *
 	 * @param bool  $echo   Whether to echo the output or return it.
-	 * @param array $params {
+	 * @param array $args {
 	 *     Optional. Arguments controlling the output.
 	 *
 	 *     @type string $class  CSS class for the wrapper <span>. Default 'byline'.
@@ -233,7 +233,7 @@ class TemplateTags extends TemplateTagsBase
 	 *
 	 * @return string|null The HTML output of the posted-by link, or null if no author.
 	 */
-	public static function posted_by(bool $echo = true, array $params = []): ?string
+	public static function posted_by(bool $echo = true, array $args = []): ?string
 	{
 		if (!get_the_author() || !post_type_supports(get_post_type(), 'author')) {
 			return null;
@@ -245,28 +245,28 @@ class TemplateTags extends TemplateTagsBase
 			'after'  => '',
 		];
 
-		$params = wp_parse_args($params, $defaults);
+		$args = wp_parse_args($args, $defaults);
 
 		/**
 		 * Filter the arguments used to generate the posted-by output.
 		 *
 		 * @since Luma-Core 1.0
 		 *
-		 * @param array $params Parsed parameters for the posted-by output.
+		 * @param array $args Parsed parameters for the posted-by output.
 		 * @param bool  $echo   Whether the output will be echoed.
 		 */
-		$params = apply_filters('luma_core_posted_by_args', $params, $echo);
+		$args = apply_filters('luma_core_posted_by_args', $args, $echo);
 
 		$author_name = get_the_author();
 		$author_url  = esc_url(get_author_posts_url(get_the_author_meta('ID')));
 
 		$parts = [
-			$params['before'],
+			$args['before'],
 			'<a href="' . $author_url . '" rel="author">' . esc_html($author_name) . '</a>',
-			$params['after'],
+			$args['after'],
 		];
 
-		$html = self::wrap_content($params['class'], $parts);
+		$html = self::wrap_content($args['class'], $parts);
 
 		/**
 		 * Filters the HTML output of the posted-by link.
@@ -276,10 +276,10 @@ class TemplateTags extends TemplateTagsBase
 		 * @param string $html        The HTML output.
 		 * @param string $author_name The display name of the post author.
 		 * @param string $author_url  URL to the author's posts.
-		 * @param array  $params      The parsed parameters array.
+		 * @param array  $args      The parsed parameters array.
 		 * @param bool   $echo        Whether the output will be echoed.
 		 */
-		$html = apply_filters('luma_core_posted_by', $html, $author_name, $author_url, $params, $echo);
+		$html = apply_filters('luma_core_posted_by', $html, $author_name, $author_url, $args, $echo);
 
 		$html = wp_kses_post($html);
 
@@ -310,7 +310,7 @@ class TemplateTags extends TemplateTagsBase
 	 * translation and post type-specific labels.
 	 *
 	 * @param bool  $echo   Whether to echo the output or return it.
-	 * @param array $params {
+	 * @param array $args {
 	 *     Optional. Arguments controlling output.
 	 *
 	 *     @type string $class      CSS class for the wrapper <nav>. Default ''.
@@ -322,7 +322,7 @@ class TemplateTags extends TemplateTagsBase
 	 *
 	 * @return string|null HTML output or null if echoed.
 	 */
-	public static function the_posts_navigation(bool $echo = true, array $params = []): ?string
+	public static function the_posts_navigation(bool $echo = true, array $args = []): ?string
 	{
 		// Get post type plural label for defaults
 		$plural = TemplateFunctions::get_post_type_label('plural') ?? __('posts', self::$domain);
@@ -333,22 +333,22 @@ class TemplateTags extends TemplateTagsBase
 			'older_text' => sprintf(__('Older %s', self::$domain), $plural),
 		];
 
-		$params = wp_parse_args($params, $defaults);
+		$args = wp_parse_args($args, $defaults);
 
 		/**
 		 * Filter the arguments used to generate the posts navigation.
 		 *
 		 * @since Luma-Core 1.0
 		 *
-		 * @param array $params Parsed parameters controlling the posts navigation.
+		 * @param array $args Parsed parameters controlling the posts navigation.
 		 * @param bool  $echo   Whether the output will be echoed.
 		 */
-		$params = apply_filters('luma_core_posts_nav_links_args', $params, $echo);
+		$args = apply_filters('luma_core_posts_nav_links_args', $args, $echo);
 
 		$html = get_the_posts_navigation([
-			'prev_text' => $params['older_text'],
-			'next_text' => $params['newer_text'],
-			'class'     => $params['class'],
+			'prev_text' => $args['older_text'],
+			'next_text' => $args['newer_text'],
+			'class'     => $args['class'],
 		]);
 
 		/**
@@ -357,11 +357,11 @@ class TemplateTags extends TemplateTagsBase
 		 * @since Luma-Core 1.0
 		 *
 		 * @param string $html   The HTML output of the posts navigation.
-		 * @param array  $params The parsed parameters array.
+		 * @param array  $args The parsed parameters array.
 		 * @param string $plural Plural label for the post type.
 		 * @param bool   $echo   Whether the output will be echoed.
 		 */
-		$html = apply_filters('luma_core_posts_nav_links', $html, $params, $plural, $echo);
+		$html = apply_filters('luma_core_posts_nav_links', $html, $args, $plural, $echo);
 
 		$html = wp_kses_post($html);
 
@@ -381,7 +381,7 @@ class TemplateTags extends TemplateTagsBase
 	 * filters for both arguments and final output.
 	 *
 	 * @param bool  $echo   Whether to echo the navigation. Default true.
-	 * @param array $params {
+	 * @param array $args {
 	 *     Optional. Arguments controlling output.
 	 *
 	 *     @type string $class       Class for the meta navigation label wrapper. Default 'meta-nav'.
@@ -396,7 +396,7 @@ class TemplateTags extends TemplateTagsBase
 	 *
 	 * @return string|null Navigation markup or null when echoing.
 	 */
-	public static function single_post_navigation(bool $echo = true, array $params = []): ?string
+	public static function single_post_navigation(bool $echo = true, array $args = []): ?string
 	{
 		// Get current post type singular label
 		$singular_label = TemplateFunctions::get_post_type_label('singular') ?? esc_html__('Post', self::$domain);
@@ -410,26 +410,26 @@ class TemplateTags extends TemplateTagsBase
 			'prev_label'  => sprintf(esc_html__('Previous %s', self::$domain), $singular_label),
 		];
 
-		$params = wp_parse_args($params, $defaults);
+		$args = wp_parse_args($args, $defaults);
 
 		/**
 		 * Filter the arguments used to generate the single post navigation.
 		 *
 		 * @since Luma-Core 1.0
 		 *
-		 * @param array $params Parsed parameters controlling the navigation.
+		 * @param array $args Parsed parameters controlling the navigation.
 		 * @param bool  $echo   Whether the output will be echoed.
 		 */
-		$params = apply_filters('luma_core_single_post_navigation_args', $params, $echo);
+		$args = apply_filters('luma_core_single_post_navigation_args', $args, $echo);
 
 		$output = get_the_post_navigation([
 			'next_text' =>
-			'<span class="' . esc_attr($params['class']) . '">' . $params['next_label'] . $params['next_icon'] . '</span>' .
-				'<span class="' . esc_attr($params['title_class']) . '">%title</span>',
+			'<span class="' . esc_attr($args['class']) . '">' . $args['next_label'] . $args['next_icon'] . '</span>' .
+				'<span class="' . esc_attr($args['title_class']) . '">%title</span>',
 
 			'prev_text' =>
-			'<span class="' . esc_attr($params['class']) . '">' . $params['prev_icon'] . $params['prev_label'] . '</span>' .
-				'<span class="' . esc_attr($params['title_class']) . '">%title</span>',
+			'<span class="' . esc_attr($args['class']) . '">' . $args['prev_icon'] . $args['prev_label'] . '</span>' .
+				'<span class="' . esc_attr($args['title_class']) . '">%title</span>',
 		]);
 
 		/**
@@ -438,10 +438,10 @@ class TemplateTags extends TemplateTagsBase
 		 * @since Luma-Core 1.0
 		 *
 		 * @param string $output      Complete navigation HTML.
-		 * @param array  $params      Parsed parameters array.
+		 * @param array  $args      Parsed parameters array.
 		 * @param bool   $echo        Whether the output will be echoed.
 		 */
-		$output = apply_filters('luma_core_single_post_navigation', $output, $params, $echo);
+		$output = apply_filters('luma_core_single_post_navigation', $output, $args, $echo);
 
 		$output = wp_kses_post($output);
 
@@ -463,7 +463,7 @@ class TemplateTags extends TemplateTagsBase
 	 * respects the theme setting for displaying title and tagline.
 	 *
 	 * @param bool  $echo   Whether to echo the output. Default true.
-	 * @param array $params {
+	 * @param array $args {
 	 *     Optional. Arguments controlling output.
 	 *
 	 *     @type string $class CSS class for the <h1> wrapper. Default 'site-title'.
@@ -473,27 +473,27 @@ class TemplateTags extends TemplateTagsBase
 	 *
 	 * @return string|null The formatted site title HTML, or null if no site name.
 	 */
-	public static function site_title(bool $echo = true, array $params = []): ?string
+	public static function site_title(bool $echo = true, array $args = []): ?string
 	{
 		$defaults = [
 			'class' => 'site-title',
 		];
 
-		$params = wp_parse_args($params, $defaults);
+		$args = wp_parse_args($args, $defaults);
 
 		/**
 		 * Filter the arguments used to generate the site title.
 		 *
 		 * @since Luma-Core 1.0
 		 *
-		 * @param array $params Parsed parameters controlling the site title.
+		 * @param array $args Parsed parameters controlling the site title.
 		 * @param bool  $echo   Whether the output will be echoed.
 		 */
-		$params = apply_filters('luma_core_site_title_args', $params, $echo);
+		$args = apply_filters('luma_core_site_title_args', $args, $echo);
 
 		$name = get_bloginfo('name');
 		$show = ThemeSettingsSchema::get_theme_mod('wp-core_display_title_and_tagline');
-		$class = $show ? $params['class'] : 'screen-reader-text';
+		$class = $show ? $args['class'] : 'screen-reader-text';
 
 		if (!$name) {
 			return null;
@@ -536,7 +536,7 @@ class TemplateTags extends TemplateTagsBase
 	 * and optionally returned instead of echoed.
 	 *
 	 * @param bool  $echo   Whether to echo the output (true) or return it (false). Default true.
-	 * @param array $params Optional arguments for future flexibility.
+	 * @param array $args Optional arguments for future flexibility.
 	 *
 	 * @since Luma-Core 1.0
 	 *
@@ -565,9 +565,9 @@ class TemplateTags extends TemplateTagsBase
 		 */
 		$html = apply_filters('luma_core_maybe_comments_template', $html, $echo);
 
-		$html = wp_kses_post($html);
-
 		if ($echo) {
+			// Output comes directly from comments_template() and is safe.
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			echo $html;
 			return null;
 		}
@@ -577,7 +577,9 @@ class TemplateTags extends TemplateTagsBase
 
 
 	/**
-	 * Outputs or returns a "Continue reading" link for the current post.
+	 * Outputs or returns a "Continue reading" link for the current post. 
+	 * 
+	 * You need to disable default 'continue reading' text and link with 'filter_excerpt_more'
 	 *
 	 * This helper builds a customizable read-more link with optional screen-reader
 	 * text containing the post title. All output is safely escaped, and both the
@@ -663,7 +665,7 @@ class TemplateTags extends TemplateTagsBase
 	 * non-singular views, the thumbnail is wrapped in a link to the post.
 	 *
 	 * @param bool  $echo   Whether to echo the output or return it.
-	 * @param array $params {
+	 * @param array $args {
 	 *     Optional. Arguments controlling output.
 	 *
 	 *     @type string $class            CSS class for the <figure> wrapper. Default 'post-thumbnail'.
@@ -674,7 +676,7 @@ class TemplateTags extends TemplateTagsBase
 	 *
 	 * @return string|null The formatted HTML or null if no thumbnail exists.
 	 */
-	public static function post_thumbnail(bool $echo = true, array $params = []): ?string
+	public static function post_thumbnail(bool $echo = true, array $args = []): ?string
 	{
 		if (!TemplateFunctions::can_show_post_thumbnail()) {
 			return null;
@@ -685,17 +687,17 @@ class TemplateTags extends TemplateTagsBase
 			'figcaption_class' => 'post-thumbnail-inner',
 		];
 
-		$params = wp_parse_args($params, $defaults);
+		$args = wp_parse_args($args, $defaults);
 
 		/**
 		 * Filter the arguments used to generate the post thumbnail.
 		 *
 		 * @since Luma-Core 1.0
 		 *
-		 * @param array $params Parsed parameters for the post thumbnail.
+		 * @param array $args Parsed parameters for the post thumbnail.
 		 * @param bool  $echo   Whether the output will be echoed.
 		 */
-		$params = apply_filters('luma_core_post_thumbnail_args', $params, $echo);
+		$args = apply_filters('luma_core_post_thumbnail_args', $args, $echo);
 
 		$post_thumbnail_id = get_post_thumbnail_id();
 		$caption           = wp_get_attachment_caption($post_thumbnail_id);
@@ -707,19 +709,19 @@ class TemplateTags extends TemplateTagsBase
 			$parts[] = get_the_post_thumbnail('post-thumbnail', $thumbnail_args);
 
 			if ($caption) {
-				$parts[] = '<figcaption class="' . esc_attr($params['figcaption_class']) . '">'
+				$parts[] = '<figcaption class="' . esc_attr($args['figcaption_class']) . '">'
 					. wp_kses_post($caption)
 					. '</figcaption>';
 			}
 		} else {
-			$parts[] = '<a class="' . esc_attr($params['figcaption_class']) . '" href="'
+			$parts[] = '<a class="' . esc_attr($args['figcaption_class']) . '" href="'
 				. esc_url(get_permalink())
 				. '" aria-hidden="true" tabindex="-1">'
 				. get_the_post_thumbnail('post-thumbnail', $thumbnail_args)
 				. '</a>';
 		}
 
-		$html = self::wrap_content($params['class'], $parts, 'figure');
+		$html = self::wrap_content($args['class'], $parts, 'figure');
 
 		/**
 		 * Filters the post thumbnail output.
@@ -729,10 +731,10 @@ class TemplateTags extends TemplateTagsBase
 		 * @param string $html               The HTML output of the post thumbnail.
 		 * @param int    $post_thumbnail_id  Attachment ID of the post thumbnail.
 		 * @param string $caption            Caption text for the thumbnail.
-		 * @param array  $params             The parsed parameters array.
+		 * @param array  $args             The parsed parameters array.
 		 * @param bool   $echo               Whether the output will be echoed.
 		 */
-		$html = apply_filters('luma_core_post_thumbnail', $html, $post_thumbnail_id, $caption, $params, $echo);
+		$html = apply_filters('luma_core_post_thumbnail', $html, $post_thumbnail_id, $caption, $args, $echo);
 
 		$html = wp_kses_post($html);
 

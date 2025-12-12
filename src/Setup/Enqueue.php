@@ -22,9 +22,11 @@ class Enqueue
 
     public function __construct()
     {
-        $this->prefix = Config::get_prefix_kebab();
-        $this->prefix_core = Config::get_prefix_kebab_core();
+        $this->prefix = Config::get_prefix_kebab() ?? $this->prefix;
+        $this->prefix_core = Config::get_prefix_kebab_core() ?? $this->prefix_core;
     }
+
+
     /**
      * Invoke method to hook enqueue actions.
      *
@@ -36,11 +38,10 @@ class Enqueue
      */
     public function __invoke()
     {
-        add_action('wp_enqueue_scripts', [$this, 'scripts']);
-        // delay to override plugin styles
-        add_action('wp_enqueue_scripts', [$this, 'styles'], 20);
-        add_action('enqueue_block_editor_assets', [$this, 'block_editor_script']);
-        add_action('wp_enqueue_scripts', [$this, 'non_latin_languages']);
+        add_action('wp_enqueue_scripts', [$this, 'core_scripts']);
+        add_action('wp_enqueue_scripts', [$this, 'core_styles'], 5);
+        add_action('enqueue_block_editor_assets', [$this, 'core_block_editor_scripts']);
+        add_action('wp_enqueue_scripts', [$this, 'core_non_latin_languages']);
     }
 
     /**
@@ -56,8 +57,18 @@ class Enqueue
      *
      * @return void
      */
-    public function scripts(): void
+    public function core_scripts(): void
     {
+        /**
+         * Loading priorities for styles
+         * 
+         * Core - 5
+         * Plugin - 7
+         * Theme - 10
+         * Potential overrides 15
+         */
+
+
         if (is_singular() && comments_open() && get_option('thread_comments')) {
             wp_enqueue_script('comment-reply');
         }
@@ -95,32 +106,27 @@ class Enqueue
      *
      * @return void
      */
-    public function styles(): void
+    public function core_styles(): void
     {
+        // main core stylesheet
         wp_enqueue_style(
-            "{$this->prefix_core}-fonts",
-            get_template_directory_uri() . '/assets/fonts/font-face.css',
+            "{$this->prefix_core}-main",
+            get_template_directory_uri() . '/build/css/main.css',
             array(),
-            Config::get_theme_version(),
-
+            wp_get_theme()->get('Version')
         );
 
-        // wp_enqueue_style(
-        //     'luma-core-style',
-        //     get_template_directory_uri() . '/build/css/main.css',
-        //     array(),
-        //     wp_get_theme()->get('Version')
-        // );
+        // Tells WP to look for main-rtl.css in same dir.
+        wp_style_add_data("{$this->prefix_core}-main", 'rtl', 'replace');
 
-        // wp_style_add_data('luma-core-style', 'rtl', 'replace');
-
-        // wp_enqueue_style(
-        //     'luma-core-print-style',
-        //     get_template_directory_uri() . '/build/css/print.css',
-        //     array(),
-        //     wp_get_theme()->get('Version'),
-        //     'print'
-        // );
+        // loads twentytwentyone print stylesheet
+        wp_enqueue_style(
+            "{$this->prefix_core}-print",
+            get_template_directory_uri() . '/build/css/print.css',
+            array(),
+            wp_get_theme()->get('Version'),
+            'print'
+        );
     }
 
     /**
@@ -132,7 +138,7 @@ class Enqueue
      *
      * @return void
      */
-    public function block_editor_script(): void
+    public function core_block_editor_scripts(): void
     {
         wp_enqueue_script(
             "{$this->prefix_core}-editor",
@@ -153,7 +159,7 @@ class Enqueue
      *
      * @return void
      */
-    public function non_latin_languages(): void
+    public function core_non_latin_languages(): void
     {
         $custom_css = TemplateFunctions::get_non_latin_css('front-end');
 

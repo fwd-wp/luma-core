@@ -1,0 +1,58 @@
+/**
+ * Reset specific elements to make them easier to style in other contexts.
+ */
+html,
+body,
+p,
+ol,
+ul,
+li,
+dl,
+dt,
+dd,
+blockquote,
+figure,
+fieldset,
+form,
+textarea,
+pre,
+iframe,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  padding: 0;
+  margin: 0;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased;
+}
+
+ol,
+ul {
+  margin: 0;
+  padding-left: var(--wp--preset--spacing--medium);
+}
+
+/* Apply border-box across the entire page */
+html {
+  box-sizing: border-box;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
+/* Body reset */
+body {
+  background-color: var(--wp--preset--color--background);
+  text-align: left;
+}
+
+/* Buttons */
+button {
+  cursor: pointer;
+}

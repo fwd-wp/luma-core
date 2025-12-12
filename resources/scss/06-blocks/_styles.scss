@@ -1,0 +1,47 @@
+// Blocks
+// - These styles replace key Gutenberg Block styles with font, color, and
+//   spacing with CSS-variables overrides
+// - In the future the Block styles may get compiled to individual .css
+//   files and conditionally loaded
+
+@use "custom/sgwd-plg-testimonials/style.scss" as testimonialsStyle;
+@use 'custom/sgwd-plg-newsletter/style.scss' as newsletterStyle;
+@use 'custom/sgwd-plg-contact-form/style.scss' as contactFormStyle;
+
+// @use "audio/style" as audioStyle;
+@use "button/style" as buttonStyle;
+// @use "code/style" as CodeStyle;
+// @use "columns/style" as columnsStyle;
+//@use "cover/style" as coverStyle;
+@use "file/style" as fileStyle;
+//@use "gallery/style" as galleryStyle;
+// @use "group/style" as groupStyle;
+// @use "heading/style" as headingStyle;
+@use "image/style" as imageStyle;
+// @use "latest-comments/style" as latestCommentsStyle;
+// @use "latest-posts/style" as latestPostsStyle;
+@use "legacy/style" as legacyStyle; // "Blocks" from the legacy WP editor, ie: galleries, .button class, etc.
+// @use "list/style" as listStyle;
+@use "media-text/style" as mediaTextStyle;
+@use "navigation/style" as navigationStyle;
+//@use "paragraph/style" as paragraphStyle;
+// @use "preformatted/style" as preformattedStyle;
+@use "pullquote/style" as pullquoteStyle;
+//@use "query-loop/style" as queryLoopStyle;
+@use "quote/style" as quoteStyle;
+//@use "rss/style" as rssStyle;
+@use "search/style" as searchStyle;
+//@use "separator/style" as separatorStyle;
+//@use "social-icons/style" as socialIconStyle;
+//@use "table/style" as tableStyle;
+//@use "tag-cloud/style" as tagCloudStyle;
+// @use "verse/style" as verseStyle;
+// @use "video/style" as videoStyle;
+// @use "utilities/font-sizes" as utilitiesFontSizes;
+
+
+
+
+
+@use "utilities/style" as utilitiesStyle; // Import LAST to cascade properly
+

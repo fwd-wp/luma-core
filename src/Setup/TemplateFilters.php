@@ -2,9 +2,9 @@
 
 namespace Luma\Core\Setup;
 
+use Luma\core\Core\Config;
 use Luma\Core\Helpers\TemplateFunctions;
 use Luma\Core\Services\ThemeSettingsSchema;
-
 
 /**
  * Filter WP core Functions which enhance the theme by hooking into WordPress 
@@ -17,8 +17,6 @@ use Luma\Core\Services\ThemeSettingsSchema;
 
 class TemplateFilters
 {
-
-
 	protected string $domain = 'luma-core';
 
 	public function __invoke()
@@ -35,9 +33,9 @@ class TemplateFilters
 		add_filter('edit_post_link', [$this, 'filter_edit_post_link'], 10, 3);
 	}
 
-	public function __construct($config)
+	public function __construct()
 	{
-		$this->domain = $config['text_domain'] ?? $this->domain;
+		$this->domain = Config::get_domain() ?? $this->domain;
 	}
 
 	/**
@@ -132,12 +130,7 @@ class TemplateFilters
 	 */
 	public function filter_excerpt_more(string $more): string
 	{
-		// if (! is_admin()) {
-			return '&hellip; <a class="more-link" href="' . esc_url(get_permalink()) . '">' . TemplateFunctions::continue_reading_text(false) . '</a>';
-		// } else {
-		// 	return $more;
-		// } 
-		return '&hellip;';
+		return '&hellip; <a class="more-link" href="' . esc_url(get_permalink()) . '">' . TemplateFunctions::continue_reading_text(false) . '</a>';
 	}
 
 	/**
@@ -237,7 +230,7 @@ class TemplateFilters
 		$singular = TemplateFunctions::get_post_type_label('singular') ?? __('post');
 
 		if ($post->post_type === 'attachment') {
-			$singular = sprintf(__('attachment', self::$domain));
+			$singular = sprintf(__('attachment', $this->domain));
 		}
 
 		// Build custom link text: "Edit this Page"

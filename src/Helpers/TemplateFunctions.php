@@ -2,6 +2,7 @@
 
 namespace Luma\Core\Helpers;
 
+use Luma\Core\Core\Config;
 use Luma\Core\Models\SVGIconsModel;
 use Luma\Core\Services\ThemeSettingsSchema;
 
@@ -18,9 +19,9 @@ class TemplateFunctions
 {
 	protected static string $domain = 'luma-core';
 
-	public static function init($config): void
+	public static function init(): void
 	{
-		self::$domain = $config['text_domain'] ?? self::$domain;
+		self::$domain = Config::get_domain() ?? self::$domain;
 	}
 
 	/**

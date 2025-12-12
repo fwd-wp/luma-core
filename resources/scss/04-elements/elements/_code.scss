@@ -1,0 +1,66 @@
+/**
+ * Code styles
+ * For inline code snippets, keyboard input, variables, and preformatted blocks.
+ */
+
+code,
+pre {
+	font-family: var(--wp--preset--font-family--code);
+	font-size: var(--wp--custom--font--size--body);
+	background-color: var(--wp--preset--color--background);
+	color: var(--wp--preset--color--contrast);
+	border: 1px solid var(--wp--preset--color--contrast);
+	overflow-x: auto;
+}
+
+pre {
+	border-radius: var(--wp--custom--radius--medium);
+	padding: var(--wp--preset--spacing--x-small) var(--wp--preset--spacing--small);
+}
+
+/* Inline code */
+code, kbd {
+	border-radius: var(--wp--custom--radius--small);
+	padding: calc(var(--wp--preset--spacing--x-small) /2) var(--wp--preset--spacing--x-small);
+}
+
+/* Code blocks */
+pre code {
+	border: none;
+	padding: 0;
+}
+
+// wp unit test fake code block
+// p code {
+// 	display: block;
+// 	margin-bottom: 0.25em;
+// }
+
+pre:has(cite) {
+	background-color: var(--wp--preset--color--background);
+}
+
+/* Keyboard input */
+kbd {
+	font-family: var(--wp--preset--font-family--code);
+	font-size: inherit;
+	background-color: var(--wp--preset--color--muted);
+	color: var(--wp--preset--color--white);
+	box-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
+}
+
+/* Variables */
+var {
+	font-family: var(--wp--preset--font-family--code);
+	font-style: italic;
+	color: var(--wp--preset--color--secondary);
+}
+
+/* Sample output */
+samp {
+	font-family: var(--wp--preset--font-family--code);
+	background-color: var(--wp--preset--color--form-field);
+	color: var(--wp--preset--color--contrast);
+	padding: 0.125em 0.375em;
+	border-radius: var(--wp--custom--radius--small);
+}

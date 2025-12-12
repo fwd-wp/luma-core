@@ -1,0 +1,220 @@
+@use '../../02-tools/mixins.scss' as mixin;
+
+// ==========================
+// Site header
+// ==========================
+
+
+
+.site-header {
+	--custom--spacing--nav-mobile: 0.5rem;
+
+	@include mixin.align(full);
+	background-color: var(--wp--preset--color--navbar-background);
+	transition: background .3s ease;
+
+	&.is-shrunk {
+		background-color: rgba(85, 85, 85, 0.5) !important;
+	}
+
+	&.is-sticky {
+		position: sticky;
+		top: 0;
+		z-index: 1000;
+		/* keep above content */
+
+	}
+
+	&.is-transparent {
+		//TODO: transparent needs better styling
+		background: transparent;
+		color: white;
+		//box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+		/* subtle */
+	}
+
+}
+
+.site-navigation {
+	display: flex;
+	flex: 0 0 auto;
+	background: red;
+	flex-direction: row; // mobile first
+	justify-content: space-between;
+	align-items: center;
+	align-content: center;
+	flex-wrap: wrap;
+	color: var(--wp--preset--color--navbar-text);
+	// mobile width
+	width: 100%;
+	max-width: calc(100% - calc(var(--custom--spacing--nav-mobile)*2));
+	margin-inline: auto;
+
+	@include mixin.bp-up(navbar) {
+		@include mixin.align(wide);
+		row-gap: var(--wp--custom--spacing--vertical);
+
+		// customizer setting
+		&.is-full-width {
+			@include mixin.align(full);
+			padding-inline: calc(var(--wp--custom--spacing--horizontal)/2);
+		}
+
+		.site-branding {
+			margin-right: 0;
+			max-width: none;
+		}
+	}
+}
+
+// ==========================
+// Site logo
+// ==========================
+
+.site-logo {
+	padding-block: var(--custom--spacing--nav-mobile);
+	padding-right: var(--custom--spacing--nav-mobile);
+
+
+	>picture,
+	>img {
+		max-height: 45px;
+		width: auto;
+		margin-left: auto;
+		margin-right: auto;
+		padding-right: var(--custom--spacing--mobile);
+		transition: height .5s ease;
+
+		@include mixin.bp-up(navbar) {
+			max-height: 65px;
+		}
+	}
+}
+
+@include mixin.bp-up(navbar) {
+	.site-header.is-shrunk {
+		.site-logo {
+
+			>picture,
+			>img {
+				max-height: 55px;
+			}
+		}
+	}
+}
+
+// ==========================
+// Site branding
+// ==========================
+
+.site-branding {
+	display: flex;
+	flex: 0 0 auto;
+	flex-direction: row;
+	height: 100%;
+	align-items: center;
+}
+
+// ==========================
+// Site title
+// ==========================
+
+.site-title {
+	// color: var(--wp--preset--color--heading);
+	color: currentColor;
+	font-family: var(--wp--preset--font-family--heading);
+	font-weight: var(--wp--custom--font--weight--heading);
+	font-size: var(--wp--custom--font--size--site-title);
+	line-height: 1.3;
+	text-align: center;
+
+	a {
+		color: currentColor;
+		text-decoration: none;
+	}
+
+	@include mixin.bp-up(navbar) {
+		text-align: left;
+	}
+}
+
+// ==========================
+// Search
+// ==========================
+.site-search {
+	display: none;
+	position: relative;
+
+	.search-toggle {
+		background: none;
+		border: none;
+		cursor: pointer;
+	}
+
+	form {
+		display: none; // hidden initially
+		position: absolute;
+		top: 100%;
+		right: 0;
+	}
+
+	&.active form {
+		display: block;
+	}
+}
+
+
+
+
+
+
+
+// Customizer Setting Styles
+
+// -- nav wrapper
+// .is-full-width
+// .is-sticky
+// .is-transparent
+
+// -- components
+// .has-title-and-tagline // if enabled
+// .has-logo              // if uploaded
+// .has-menu              // if generated / enabled
+
+
+
+
+// ==========================
+// Custom header image - inside full width container, but not part of site-header
+// ==========================
+
+.custom-header-image {
+	position: relative;
+	background-size: cover;
+	background-position: center;
+	height: 400px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+	@include mixin.align(full);
+
+	&-inner {
+		background-color: rgba(0, 0, 0, 0.138);
+		padding: 20px;
+
+		.site-title a,
+		.site-title,
+		.site-description {
+			font-size: var(--wp--custom--font--size--custom-header);
+			font-weight: var(--wp--custom--font--weight--custom-header);
+			line-height: var(--wp--custom--font--line-height--custom-header);
+			color: var(--wp--preset--color--custom-header-text);
+			text-decoration: none;
+		}
+
+		.site-description {
+			font-size: calc(var(--wp--custom--font--size--custom-header) * 0.8);
+		}
+	}
+}

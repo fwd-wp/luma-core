@@ -1,4 +1,7 @@
 TODO:
+
+fix up non latin css, maybe move to a file?
+
 header, grid, nav class methods update to act like body_class() filter where you modify the array
 if video support is enabled get_header_image in template and font categories need to be updated maybe make a custom function
 test image fall back check for core css and add css for both. potentially use core markup for image with heading overlay added

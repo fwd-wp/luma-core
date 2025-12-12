@@ -1,0 +1,123 @@
+@use '../../02-tools/mixins.scss' as mixin;
+
+
+/**
+ * Base form styles (front-end)
+ * Uses --wp--custom--form--* for form-specific tokens
+ * and --wp--preset--* for global colors/spacing/typography
+ */
+
+// consistent across all inputs/buttons/selects
+button,
+input,
+textarea,
+select {
+  @include mixin.form-control-btn();
+}
+
+// form>* {
+//   margin-bottom: var(--wp--custom--form--gap);
+// }
+
+// form>*:last-child {
+//   margin-bottom: 0;
+// }
+
+
+//
+// Inputs, textareas, selects
+//
+input[type="text"],
+input[type="email"],
+input[type="url"],
+input[type="password"],
+input[type="search"],
+input[type="number"],
+input[type="tel"],
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"],
+input[type="month"],
+input[type="week"],
+input[type="color"],
+textarea,
+select {
+  width: 100%;
+  border: var(--wp--custom--form--border-width) solid var(--wp--custom--form--border-color);
+  background: var(--wp--custom--form--background, var(--wp--preset--color--background));
+  color: var(--wp--custom--form--color-text, var(--wp--preset--color--foreground));
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 6em;
+}
+
+select {
+  background: var(--wp--custom--form--background, var(--wp--preset--color--background)) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' fill='%2328303d'><polygon points='0,0 10,0 5,5'/></svg>") no-repeat right var(--wp--custom--form--spacing-unit) center;
+  background-size: 0.6em;
+  padding-right: calc(3 * var(--wp--custom--form--gap));
+}
+
+//
+// Focus + disabled
+//
+input:focus,
+textarea:focus,
+select:focus {
+  outline: 2px solid var(--wp--preset--color--primary);
+  //outline-offset: 2px;
+  //box-shadow: 0 0 0 2px var(--wp--preset--color--primary) inset;
+}
+
+input:disabled,
+textarea:disabled,
+select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+//
+// Placeholder
+//
+::placeholder {
+  color: var(--wp--custom--form--color-placeholder, var(--wp--preset--color--secondary));
+  opacity: 1;
+}
+
+//
+// Checkboxes + radios
+//
+input[type="checkbox"],
+input[type="radio"] {
+  width: 1.1em;
+  height: 1.1em;
+  margin-right: var(--wp--custom--form--spacing-unit);
+  accent-color: var(--wp--preset--color--primary);
+  margin-bottom: var(--wp--custom--form--spacing-unit);
+}
+
+//
+// Range
+//
+input[type="range"] {
+  width: 100%;
+}
+
+//
+// File input
+//
+input[type="file"] {
+  font-size: var(--wp--preset--font-size--small);
+}
+
+//
+// Labels
+//
+label {
+  display: block;
+  font-weight: 600;
+}

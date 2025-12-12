@@ -1,0 +1,25 @@
+/**
+ * These styles should be loaded by the Block Editor only
+ */
+
+/**
+ * Category 03 - Generic
+ * Reset and normalise 
+ */
+@use "03-generic/normalize";
+@use "03-generic/reset";
+@use "03-generic/clearings";
+
+/**
+ * Category 04 - Elements
+ * Can contain any default HTML element. 
+ * Do not add classes here, just give the elements some basic styles. 
+ */
+@use '04-elements/editor' as elementsEditor;
+
+/* Category 06 - Blocks
+ * Adjusts the default block styles.
+ */
+@use '06-blocks/editor' as blocksEditor;
+
+

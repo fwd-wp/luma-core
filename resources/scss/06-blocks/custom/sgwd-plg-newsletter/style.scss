@@ -1,0 +1,36 @@
+@use '../../../02-tools/mixins.scss' as mixin;
+
+// added body to increase specificity and override plugin CSS
+body .wp-block-sgwd-plg-newsletter-block {
+    background: var(--wp--preset--color--light);
+    border-radius: var(--wp--custom--radius--small);
+    padding: var(--wp--preset--spacing--small);
+
+    .input-group {
+        gap: var(--wp--custom--form--gap);
+    }
+
+
+    /* Breakpoint: small and up (sm) */
+    @include mixin.bp-up(sm) {
+
+        // this css is coped from plugin, so breakbpoint works
+        .input-group {
+            flex-direction: row;
+            /* single row */
+            flex-wrap: nowrap;
+            /* keep them in one row */
+            align-items: stretch;
+        }
+
+        .newsletter-email {
+            flex: 1;
+            /* input fills remaining space */
+        }
+
+        button {
+            flex-shrink: 0;
+            /* button size fixed */
+        }
+    }
+}
