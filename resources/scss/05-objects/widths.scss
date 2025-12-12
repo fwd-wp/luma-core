@@ -2,34 +2,78 @@
 
 /* Default containers = contentSize */
 
-.page-header,
-.page-content,
-.navigation,
-.entry-header,
 .entry-footer,
+.navigation,
+.comments-area,
 .author-bio,
-.comments-area {
+.post-thumbnail,
+.entry-content .wp-audio-shortcode,
+.entry-content>*:not(.alignwide):not(.alignfull):not(.alignleft):not(.alignright):not(.wp-block-separator),
+*[class*=inner-container]>*:not(.entry-content):not(.alignwide):not(.alignfull):not(.alignleft):not(.alignright):not(.wp-block-separator) {
 	@include mixin.align(default);
 }
 
-
+// Make containers = wideSize if set in customizer
+// pages are set wide by default
 .single.is-wide,
-.page.is-wide,
-.error404 {
-	.page-header,
-	.page-content,
-	.navigation,
-	.entry-header,
-	.entry-footer,
-	.author-bio,
-	.comments-area {
-		@include mixin.align(wide);
-	}
+.page.is-wide {
 
-	// rule copied from blocks/utilities/style.scss
-	// TODO: simply in sytles.scss and fix here. will need to override 
+	.entry-footer,
+	.navigation,
+	.comments-area,
+	.author-bio,
+	.post-thumbnail,
+	.entry-content .wp-audio-shortcode,
 	.entry-content>*:not(.alignwide):not(.alignfull):not(.alignleft):not(.alignright):not(.wp-block-separator),
-	*[class*="inner-container"]>*:not(.entry-content):not(.alignwide):not(.alignfull):not(.alignleft):not(.alignright):not(.wp-block-separator) {
+	*[class*=inner-container]>*:not(.entry-content):not(.alignwide):not(.alignfull):not(.alignleft):not(.alignright):not(.wp-block-separator) {
 		@include mixin.align(wide);
 	}
 }
+
+// wideSize by default
+// .page-content is not used on single or page
+
+.widget-area,
+.pagination,
+.comments-pagination,
+.post-navigation,
+.site-footer,
+.page-header,
+.page-content,
+.entry-header {
+	@include mixin.align(wide);
+}
+
+// make full width if set in customizer
+.site-header.is-full {
+	@include mixin.align(full);
+}
+
+// full width by default
+.site-header-container,
+.site-footer-container {
+	@include mixin.align(full);
+}
+
+// Site nav is full width at mobile widths
+.site-header {
+	@include mixin.align(full);
+
+	@include mixin.bp-up(navbar) {
+		@include mixin.align(wide);
+	}
+}
+
+
+/*
+non content pulling pages
+.page-content ( + .archive-grid)
+
+single view
+.entry-header
+.entry-body > .entry-content
+.entry-footer
+.author-bio
+.comments-area
+.navigation / .posts-navigation
+*/

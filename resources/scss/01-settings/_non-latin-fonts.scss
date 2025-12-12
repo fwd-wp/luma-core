@@ -1,0 +1,47 @@
+// Fallbacks when a language is selected, which system-ui does not support
+// overrides currently selected fonts due to high specificity
+
+/* Arabic */
+html[lang|="ar"],
+html[lang|="fa"],
+html[lang|="ur"] {
+  font-family: Tahoma, Arial, sans-serif;
+}
+
+/* Hebrew */
+html[lang|="he"] {
+  font-family: 'Arial Hebrew', Arial, sans-serif;
+}
+
+/* Chinese Simplified / Traditional */
+html[lang|="zh-CN"],
+html[lang|="zh-SG"] {
+  font-family: 'PingFang SC', 'Microsoft YaHei', 'Helvetica Neue', sans-serif;
+}
+html[lang|="zh-TW"],
+html[lang|="zh-HK"] {
+  font-family: 'PingFang TC', 'Microsoft JhengHei', 'Helvetica Neue', sans-serif;
+}
+
+/* Japanese */
+html[lang|="ja"] {
+  font-family: 'Yu Gothic', 'Hiragino Kaku Gothic Pro', 'Meiryo', sans-serif;
+}
+
+/* Korean */
+html[lang|="ko"] {
+  font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', 'Nanum Gothic', Dotum, sans-serif;
+}
+
+/* Thai */
+html[lang|="th"] {
+  font-family: 'Sukhumvit Set', 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* Devanagari */
+html[lang|="hi"],
+html[lang|="bn"],
+html[lang|="ne"],
+html[lang|="mr"] {
+  font-family: Arial, sans-serif;
+}

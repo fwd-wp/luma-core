@@ -6,8 +6,30 @@
 
 // breakpoint is var(--wp--custom--breakpoint--navbar)
 
+
 // toggle button
-.site-navigation {
+.site-header {
+	.site-navigation {
+	// 	display: flex;
+
+	// 	// mobile width
+	// 	width: 100%;
+	// 	// max-width: calc(100% - calc(var(--custom--spacing--nav-mobile)*2));
+	// 	// margin-inline: auto;
+
+	// 	color: var(--wp--preset--color--navbar-text);
+
+	// 	@include mixin.bp-up(navbar) {
+	// 		row-gap: var(--wp--custom--spacing--vertical);
+
+	// 		//max-width: initial;
+	// 		.site-branding {
+	// 			margin-right: 0;
+	// 			max-width: none;
+	// 		}
+	// 	}
+	}
+
 	.menu-toggle {
 		display: flex;
 		flex: 0 0 auto;
@@ -39,12 +61,12 @@
 		/* prevents extra space under inline SVG */
 	}
 
-	.menu.is-expanded {
-		display: block;
+	.site-navigation.is-expanded {
+		display: flex;
 		/* visible when toggled */
 	}
 
-	.menu {
+	.menu-wrapper {
 		display: none; // hide by default
 		flex-direction: column;
 		flex: 0 1 auto;
@@ -155,7 +177,7 @@
 			display: none;
 		}
 
-		.menu {
+		.menu-wrapper {
 			display: flex;
 			flex-direction: row;
 			justify-content: flex-start;

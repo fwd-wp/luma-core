@@ -1,6 +1,7 @@
 /**
  * Category 01 - settings
  */
+@use '01-settings/non-latin-fonts';
 
 /**
  * Category 02 - Tools
@@ -11,9 +12,9 @@
  * Category 03 - Generic
  * Reset and normalise 
  */
-@use "03-generic/normalize";
-@use "03-generic/reset";
-@use "03-generic/clearings";
+@use '03-generic/normalize';
+@use '03-generic/reset';
+@use '03-generic/clearings';
 
 
 /**
@@ -21,26 +22,26 @@
  * Can contain any default HTML element. 
  * Do not add classes here, just give the elements some basic styles. 
  */
-@use '04-elements/styles' as elementStyles;
+@use '04-elements/main' as elementStyles;
 
 /**
  * Category 05 - Objects 
  * Unstyled layout rules (grid etc)
  */
-@use "05-objects/vertical-margins";
-@use "05-objects/widths";
+@use '05-objects/vertical-margins';
+@use '05-objects/widths';
 
 /* Category 06 - Blocks
  * Adjusts the default block styles.
  */
- @use "06-blocks/styles" as blockStyles;
+ @use '06-blocks/main' as blockStyles;
 
 /**
  * Category 07 - Components
  * Contains all "bigger" components which contain elements of the previous 
  * two categories like header, footer, page template, single template, ... 
  */
-@use './07-components/styles.scss' as componentsStyles; 
+@use './07-components/main' as componentsStyles; 
 
 /**
  * Category 08 - Utilities

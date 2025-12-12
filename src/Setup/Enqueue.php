@@ -11,6 +11,8 @@ use Luma\Core\Services\ThemeSettingsSchema;
  *
  * Hooks into WordPress actions to enqueue frontend scripts, styles, block editor assets,
  * and non-latin language styles.
+ * 
+ * these enqueues use get_template_directory_uri() so that they can't be overriden in a child theme
  *
  * @package Luma-Core
  * @since Luma-Core 1.0
@@ -41,7 +43,6 @@ class Enqueue
         add_action('wp_enqueue_scripts', [$this, 'core_scripts']);
         add_action('wp_enqueue_scripts', [$this, 'core_styles'], 5);
         add_action('enqueue_block_editor_assets', [$this, 'core_block_editor_scripts']);
-        add_action('wp_enqueue_scripts', [$this, 'core_non_latin_languages']);
     }
 
     /**
@@ -59,24 +60,15 @@ class Enqueue
      */
     public function core_scripts(): void
     {
-        /**
-         * Loading priorities for styles
-         * 
-         * Core - 5
-         * Plugin - 7
-         * Theme - 10
-         * Potential overrides 15
-         */
-
-
+        // ensures the browser expands/collapses nested replies properly.
         if (is_singular() && comments_open() && get_option('thread_comments')) {
             wp_enqueue_script('comment-reply');
         }
 
-        if (has_nav_menu('main')) {
+        if (has_nav_menu('primary')) {
             wp_enqueue_script(
-                "{$this->prefix_core}-menu-main-script",
-                get_template_directory_uri() . '/vendor/luma/core/assets/js/menu-main.js',
+                "{$this->prefix_core}-menu-primary",
+                get_template_directory_uri() . '/vendor/luma/core/assets/js/menu-primary.js',
                 [],
                 Config::get_theme_version(),
                 array(
@@ -108,6 +100,15 @@ class Enqueue
      */
     public function core_styles(): void
     {
+        /**
+         * Loading priorities for styles
+         * 
+         * Core - 5
+         * Plugin - 7
+         * Theme - 10
+         * Potential overrides 15
+         */
+
         // main core stylesheet
         wp_enqueue_style(
             "{$this->prefix_core}-main",
@@ -142,29 +143,10 @@ class Enqueue
     {
         wp_enqueue_script(
             "{$this->prefix_core}-editor",
-            get_theme_file_uri('/vendor/luma/core/assets/js/editor.js'),
+            get_template_directory_uri() . '/vendor/luma/core/assets/js/editor.js',
             array('wp-blocks', 'wp-dom'),
             Config::get_theme_version(),
             array('in_footer' => true)
         );
-    }
-
-    /**
-     * Adds non-latin language CSS inline for the front-end.
-     *
-     * Pulls CSS from TemplateFunctions::get_non_latin_css and appends it
-     * to the main theme style.
-     *
-     * @since Luma-Core 1.0
-     *
-     * @return void
-     */
-    public function core_non_latin_languages(): void
-    {
-        $custom_css = TemplateFunctions::get_non_latin_css('front-end');
-
-        if ($custom_css) {
-            wp_add_inline_style("{$this->prefix_core}-non-latin-css", $custom_css);
-        }
     }
 }

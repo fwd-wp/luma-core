@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const menu = document.querySelector('#menu-main');
+    const menu = document.querySelector('#primary-menu-list');
     const menuButton = document.getElementById('btn-menu-toggle');
     const desktopBreakpoint = 1024;
     let desktopHoverListeners = [];

@@ -49,8 +49,18 @@ class TemplateFilters
 	public function filter_body_class(array $classes): array
 	{
 		// Core logic
-		if (is_archive() || is_home() || is_search() || is_post_type_archive()) {
-			$classes[] = TemplateFunctions::is_excerpt() ? 'is-excerpt' : 'is-full';
+		if (is_archive() || is_home() || is_post_type_archive()) {
+			if (TemplateFunctions::is_excerpt()) {
+				$classes[] = 'is-excerpt';
+				$classes[] = ThemeSettingsSchema::get_theme_mod('display_archive_excerpt_format') === 'masonry' ? 'is-masonry' : '';
+				$classes[] = ThemeSettingsSchema::get_theme_mod('display_archive_excerpt_format') === 'grid' ? 'is-grid' : '';
+			} else {
+				$classes[] = 'is-full';
+			}
+		}
+
+		if (is_search()) {
+			$classes[] = 'is-archive';
 		}
 
 		if (is_page()) {
@@ -204,7 +214,10 @@ class TemplateFilters
 	 */
 	public function filter_wp_link_pages_args(array $args): array
 	{
-		$args['before'] = '<p class="post-nav-links">' . esc_html__('Page', $this->domain) . ' ';
+		$args['before']   = '<nav class="page-links" aria-label="' . esc_attr__('Page', $this->domain) . '">';
+		$args['after']    = '</nav>';
+		/* translators: %: Page number. */
+		$args['pagelink'] = esc_html__('Page %', $this->domain);
 
 		return $args;
 	}

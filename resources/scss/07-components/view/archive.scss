@@ -19,27 +19,10 @@
 				border-radius: var(--wp--custom--radius--small);
 				box-shadow: var(--wp--preset--shadow--natural);
 				overflow: hidden;
-			}
-
-			// exclude these styles from .is-full
-
-			.post.is-excerpt {
-
-				// these properties must be before nested rules  below to avoid
-				// triggering deprecation error
-				transform: scale(1);
-				transition: transform 1s cubic-bezier(0.23, 1, 0.32, 1),
-					box-shadow 1s cubic-bezier(0.23, 1, 0.32, 1);
 
 				& * {
 					// reset wp width settings
 					max-width: 100% !important;
-				}
-
-
-				&:hover {
-					transform: scale(1.01);
-					box-shadow: var(--wp--preset--shadow--natural-hover);
 				}
 
 				.entry-body {
@@ -87,48 +70,55 @@
 					font-weight: 600;
 				}
 			}
+		}
+		// this is the default list style, however it's not easy to 
+		// override when grid or masonry is being used
+		// so exclude these styles from grid or masonry (and full)
+		&:not(.is-grid):not(.is-masonry) {
+			.post {
+				@include mixin.bp-up(md) {
+					display: grid;
+					grid-template-columns: repeat(2, 1fr);
 
-			// exclude from grid or masonry (and full)
-			&:not(.archive-grid--grid):not(.archive-grid--masonry) {
-				.post.is-excerpt {
-					@include mixin.bp-up(md) {
-						display: grid;
-						grid-template-columns: repeat(2, 1fr);
-
-						.entry-body {
-							padding-block: var(--wp--preset--spacing--medium);
-						}
-
-						.entry-header {
-							margin-top: 0;
-						}
-
-						.post-thumbnail {
-							overflow: hidden;
-
-							.wp-post-image {
-								width: 100% !important;
-								height: 100% !important;
-								object-fit: cover;
-								display: block;
-							}
-						}
+					.entry-body {
+						padding-block: var(--wp--preset--spacing--medium);
 					}
 
-					@include mixin.bp-up(lg) {
+					.entry-header {
+						margin-top: 0;
+					}
 
-						--custom--half-breakpoint: calc(calc(var(--wp--custom--breakpoint--lg)/2) - var(--wp--custom--spacing--gutter));
-						grid-template-columns: minmax(0, var(--custom--half-breakpoint)) 1fr;
-						// grid-template-columns: minmax(0, 500px) 1fr;
+					.post-thumbnail {
+						overflow: hidden;
+
+						.wp-post-image {
+							width: 100% !important;
+							height: 100% !important;
+							object-fit: cover;
+							display: block;
+						}
 					}
 				}
-			}
 
+				@include mixin.bp-up(lg) {
+
+					--custom--half-breakpoint: calc(calc(var(--wp--custom--breakpoint--lg)/2) - var(--wp--custom--spacing--gutter));
+					grid-template-columns: minmax(0, var(--custom--half-breakpoint)) 1fr;
+					// grid-template-columns: minmax(0, 500px) 1fr;
+				}
+			}
 		}
 	}
 
-	// Full post view styling (in addiiton to single view)
+
+}
+
+// Exclude grid and masonry styles from search results and full display
+.archive,
+.blog {
 	&.is-full {
+
+		// Full post view styling (in addiiton to single view)
 		.post {
 			padding-block: 3rem;
 
@@ -138,55 +128,49 @@
 			}
 		}
 	}
-}
 
-// Exclude grid and masonry styles from search results and full display
-.archive,
-.blog {
 	&.is-excerpt {
-		.archive-grid {
-			&--grid {
-				@include mixin.bp-up(md) {
-					grid-template-columns: repeat(2, 1fr);
-				}
 
-				@include mixin.bp-up(lg) {
-					grid-template-columns: repeat(3, 1fr);
+		&.is-grid {
+			@include mixin.bp-up(md) {
+				grid-template-columns: repeat(2, 1fr);
+			}
+
+			@include mixin.bp-up(lg) {
+				grid-template-columns: repeat(3, 1fr);
+			}
+		}
+
+		&.is-masonry {
+
+			display: block;
+			--wp--custom--spacing--gutter: calc(var(--custom--original-gutter) - var(--wp--style--block-gap)/2);
+			--wp--style--global--wide-size: calc(var(--custom--original-wide) - var(--wp--style--block-gap)/2);
+
+			.post {
+				float: left;
+				width: calc(100% - var(--wp--style--block-gap)); // 1 column
+				box-sizing: border-box;
+				margin: calc(var(--wp--style--block-gap)/2); // emulate "gap"
+			}
+
+			// Optional: fix container overflow
+			&::after {
+				content: "";
+				display: table;
+				clear: both;
+			}
+
+			@include mixin.bp-up(md) {
+				.post {
+					width: calc(calc(100% / 2) - var(--wp--style--block-gap)); // 2 columns
 				}
 			}
 
-			&--masonry {
-
-				display: block;
-				--wp--custom--spacing--gutter: calc(var(--custom--original-gutter) - var(--wp--style--block-gap)/2);
-				--wp--style--global--wide-size: calc(var(--custom--original-wide) - var(--wp--style--block-gap)/2);
-
+			@include mixin.bp-up(lg) {
 				.post {
-					float: left;
-					width: calc(100% - var(--wp--style--block-gap)); // 1 column
-					box-sizing: border-box;
-					margin: calc(var(--wp--style--block-gap)/2); // emulate "gap"
+					width: calc(calc(100% / 3) - var(--wp--style--block-gap)); // 3 columns
 				}
-
-				// Optional: fix container overflow
-				&::after {
-					content: "";
-					display: table;
-					clear: both;
-				}
-
-				@include mixin.bp-up(md) {
-					.post {
-						width: calc(calc(100% / 2) - var(--wp--style--block-gap)); // 2 columns
-					}
-				}
-
-				@include mixin.bp-up(lg) {
-					.post {
-						width: calc(calc(100% / 3) - var(--wp--style--block-gap)); // 3 columns
-					}
-				}
-
 			}
 		}
 	}

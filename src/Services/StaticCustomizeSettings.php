@@ -130,13 +130,6 @@ class StaticCustomizeSettings
                             },
                         ]
                     ],
-                    'page_comments' => [
-                        'default'   => false,
-                        'label'     =>  'On pages, show comments',
-                        'description' => '(if enabled)',
-                        'type'      => 'checkbox',
-                        'priority'  => 30,
-                    ],
                 ],
             ],
         ];

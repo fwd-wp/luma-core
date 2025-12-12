@@ -163,7 +163,7 @@ class ThemeSetup
     public function register_nav_menus(): void
     {
         register_nav_menus([
-            'main'   => esc_html__('Main menu', Config::get_domain()),
+            'primary'   => esc_html__('Primary menu', Config::get_domain()),
             'footer' => esc_html__('Footer menu', Config::get_domain()),
         ]);
     }

@@ -544,9 +544,13 @@ class TemplateTags extends TemplateTagsBase
 	 */
 	public static function maybe_comments_template(bool $echo = true): ?string
 	{
+		// exit early if not a single page
+		if ( ! is_single()) {
+			return null;
+		}
 
 		if (!comments_open() && !get_comments_number()) {
-			return $echo ? '' : null;
+			return null;
 		}
 
 		ob_start();

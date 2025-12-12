@@ -5,7 +5,6 @@
 
 .site-footer-container {
 	background-color: var(--wp--preset--color--footer-background);
-	@include mixin.align(full);
 }
 
 // Footer
@@ -13,7 +12,6 @@
 	//TODO: temp color
 
 	padding: var(--wp--preset--spacing--small) var(--wp--preset--spacing--small) var(--wp--preset--spacing--large);
-	@include mixin.align(wide);
 	font-size: var(--wp--custom--font--size--footer);
 	color: var(--wp--preset--color--footer-text);
 	// // Increase the top vertical spacing when there is no widget area.

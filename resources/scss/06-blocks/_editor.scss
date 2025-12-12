@@ -3,7 +3,7 @@
 // - In the future, these could be compiled into individual CSS files and conditionally loaded
 
 // load the front end styles 
-@use 'styles';
+@use 'main';
 
 
 @use "legacy/editor" as legacyEditor; // Legacy WP blocks, e.g., galleries, .button
