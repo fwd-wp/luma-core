@@ -40,7 +40,7 @@ class AccessibleNavWalker extends \Walker_Nav_Menu
      */
     public function start_el(&$output, $item, $depth = 0, $args = null, $id = 0)
     {
-        $classes = empty($item->classes) ? array() : (array) $item->classes;
+        $classes = empty($item->classes) ? [] : (array) $item->classes;
         $classes[] = 'menu-item-' . $item->ID;
 
         $class_names = implode(' ', array_map('sanitize_html_class', $classes));
@@ -86,7 +86,7 @@ class AccessibleNavWalker extends \Walker_Nav_Menu
      * @param int      $depth  Depth of menu item. Not used.
      * @param array    $args   Additional arguments.
      */
-    public function end_el(&$output, $item, $depth = 0, $args = array())
+    public function end_el(&$output, $item, $depth = 0, $args = [])
     {
         $indent = str_repeat("\t", $depth);
         $output .= $indent . "</li>\n";
@@ -99,7 +99,7 @@ class AccessibleNavWalker extends \Walker_Nav_Menu
      * @param int    $depth  Depth of menu item. Used for padding.
      * @param array  $args   Additional arguments.
      */
-    public function end_lvl(&$output, $depth = 0, $args = array())
+    public function end_lvl(&$output, $depth = 0, $args = [])
     {
         $indent = str_repeat("\t", $depth);
         $output .= $indent . "</ul>\n";

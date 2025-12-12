@@ -76,8 +76,8 @@ class Enqueue
         if (has_nav_menu('main')) {
             wp_enqueue_script(
                 "{$this->prefix_core}-menu-main-script",
-                get_template_directory_uri() . '/assets/js/menu-main.js',
-                array(),
+                get_template_directory_uri() . '/vendor/luma/core/assets/js/menu-main.js',
+                [],
                 Config::get_theme_version(),
                 array(
                     'in_footer' => true,
@@ -89,7 +89,7 @@ class Enqueue
         if (ThemeSettingsSchema::get_theme_mod('display_archive_excerpt_format') === 'masonry') {
             wp_enqueue_script(
                 "{$this->prefix_core}-archive-masonry",
-                get_template_directory_uri() . '/assets/js/archive-masonry.js',
+                get_template_directory_uri() . '/vendor/luma/core/assets/js/archive-masonry.js',
                 ['masonry'],
                 Config::get_theme_version(),
                 true
@@ -111,8 +111,8 @@ class Enqueue
         // main core stylesheet
         wp_enqueue_style(
             "{$this->prefix_core}-main",
-            get_template_directory_uri() . '/build/css/main.css',
-            array(),
+            get_template_directory_uri() . '/vendor/luma/core/build/css/main.css',
+            [],
             wp_get_theme()->get('Version')
         );
 
@@ -122,8 +122,8 @@ class Enqueue
         // loads twentytwentyone print stylesheet
         wp_enqueue_style(
             "{$this->prefix_core}-print",
-            get_template_directory_uri() . '/build/css/print.css',
-            array(),
+            get_template_directory_uri() . '/vendor/luma/core/build/css/print.css',
+            [],
             wp_get_theme()->get('Version'),
             'print'
         );
@@ -142,7 +142,7 @@ class Enqueue
     {
         wp_enqueue_script(
             "{$this->prefix_core}-editor",
-            get_theme_file_uri('/assets/js/editor.js'),
+            get_theme_file_uri('/vendor/luma/core/assets/js/editor.js'),
             array('wp-blocks', 'wp-dom'),
             Config::get_theme_version(),
             array('in_footer' => true)

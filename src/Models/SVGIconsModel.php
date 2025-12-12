@@ -22,7 +22,8 @@ namespace Luma\Core\Models;
  *
  * @since Luma-Core 1.0
  */
-class SVGIconsModel {
+class SVGIconsModel
+{
 
 	/**
 	 * User Interface icons – svg sources.
@@ -166,14 +167,13 @@ class SVGIconsModel {
 	 * @param int    $size  The icon-size in pixels.
 	 * @return string
 	 */
-	public static function get_svg( $group, $icon, $size ) {
-
-		if ( 'ui' === $group ) {
+	public static function get_svg($group, $icon, $size)
+	{
+		$arr = [];
+		if ('ui' === $group) {
 			$arr = self::$icons;
-		} elseif ( 'social' === $group ) {
+		} elseif ('social' === $group) {
 			$arr = self::$social_icons;
-		} else {
-			$arr = array();
 		}
 
 		/**
@@ -186,13 +186,13 @@ class SVGIconsModel {
 		 *
 		 * @param array $arr Array of icons.
 		 */
-		$arr = apply_filters( "SVGIconsModel_{$group}", $arr );
+		$arr = apply_filters("SVGIconsModel_{$group}", $arr);
 
 		$svg = '';
-		if ( array_key_exists( $icon, $arr ) ) {
-			$repl = sprintf( '<svg class="svg-icon" width="%d" height="%d" aria-hidden="true" role="img" focusable="false" ', $size, $size );
+		if (array_key_exists($icon, $arr)) {
+			$repl = sprintf('<svg class="svg-icon" width="%d" height="%d" aria-hidden="true" role="img" focusable="false" ', $size, $size);
 
-			$svg = preg_replace( '/^<svg /', $repl, trim( $arr[ $icon ] ) ); // Add extra attributes to SVG code.
+			$svg = preg_replace('/^<svg /', $repl, trim($arr[$icon])); // Add extra attributes to SVG code.
 		}
 
 		// @phpstan-ignore-next-line.
@@ -210,11 +210,12 @@ class SVGIconsModel {
 	 * @param int    $size The icon-size in pixels.
 	 * @return string|null
 	 */
-	public static function get_social_link_svg( $uri, $size ) {
+	public static function get_social_link_svg($uri, $size)
+	{
 		static $regex_map; // Only compute regex map once, for performance.
 
-		if ( ! isset( $regex_map ) ) {
-			$regex_map = array();
+		if (! isset($regex_map)) {
+			$regex_map = [];
 
 			/**
 			 * Filters Luma-Cores's array of domain mappings for social icons.
@@ -226,7 +227,7 @@ class SVGIconsModel {
 			 *
 			 * @param array $social_icons_map Array of default social icons.
 			 */
-			$map = apply_filters( 'luma_core_social_icons_map', self::$social_icons_map );
+			$map = apply_filters('luma_core_social_icons_map', self::$social_icons_map);
 
 			/**
 			 * Filters Luma-Core's array of social icons.
@@ -235,19 +236,19 @@ class SVGIconsModel {
 			 *
 			 * @param array $social_icons Array of default social icons.
 			 */
-			$social_icons = apply_filters( 'SVGIconsModel_social', self::$social_icons );
+			$social_icons = apply_filters('SVGIconsModel_social', self::$social_icons);
 
-			foreach ( array_keys( $social_icons ) as $icon ) {
-				$domains            = array_key_exists( $icon, $map ) ? $map[ $icon ] : array( sprintf( '%s.com', $icon ) );
-				$domains            = array_map( 'trim', $domains ); // Remove leading/trailing spaces, to prevent regex from failing to match.
-				$domains            = array_map( 'preg_quote', $domains );
-				$regex_map[ $icon ] = sprintf( '/(%s)/i', implode( '|', $domains ) );
+			foreach (array_keys($social_icons) as $icon) {
+				$domains            = array_key_exists($icon, $map) ? $map[$icon] : array(sprintf('%s.com', $icon));
+				$domains            = array_map('trim', $domains); // Remove leading/trailing spaces, to prevent regex from failing to match.
+				$domains            = array_map('preg_quote', $domains);
+				$regex_map[$icon] = sprintf('/(%s)/i', implode('|', $domains));
 			}
 		}
-		foreach ( $regex_map as $icon => $regex ) {
-			if ( preg_match( $regex, $uri ) ) {
+		foreach ($regex_map as $icon => $regex) {
+			if (preg_match($regex, $uri)) {
 
-				return self::get_svg( 'social', $icon, $size ) . '<span class="screen-reader-text">';
+				return self::get_svg('social', $icon, $size) . '<span class="screen-reader-text">';
 			}
 		}
 		return null;

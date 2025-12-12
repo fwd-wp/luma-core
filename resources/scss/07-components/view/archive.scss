@@ -10,14 +10,6 @@
 .search,
 .blog {
 	&.is-excerpt {
-
-		.page-header,
-		.archive-description,
-		.navigation,
-		.archive-grid {
-			@include mixin.align(wide);
-		}
-
 		.archive-grid {
 			display: grid;
 			gap: var(--wp--style--block-gap); // optional spacing between items

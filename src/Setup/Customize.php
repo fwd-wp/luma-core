@@ -216,7 +216,7 @@ class Customize extends CustomizeBase
         wp_enqueue_style(
             'luma-core-customize-controls',
             get_template_directory_uri() . '/assets/css/customize-controls.css',
-            array(),
+            [],
             wp_get_theme()->get('Version')
         );
 
