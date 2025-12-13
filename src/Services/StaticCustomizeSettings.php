@@ -104,24 +104,37 @@ class StaticCustomizeSettings
                             },
                         ]
                     ],
+                    'archive_excerpt_length' => [
+                        'default'   => 25,
+                        'label'     => 'Post summary length',
+                        'description' => 'On Archive Pages, with summary view, number of words displayed',
+                        'type'      => 'number',
+                        'priority'  => 20,
+                        'input_attrs' => [
+                            'min'  => 10,
+                            'max'  => 50,
+                            'step' => 1,
+                        ],
+                    ],
                     'archive_excerpt_format' => [
                         'default'   => 'list',
                         'label'     => 'On Archive Pages, display posts excerpts in:',
                         'description' => 'Grid and Masonry require Summary view above.',
                         'type'      => 'radio',
-                        'priority'  => 20,
+                        'priority'  => 25,
                         'choices'   =>  [
                             'list' => 'List',
                             'grid'    => 'Grid',
                             'masonry'    => 'Masonry',
                         ],
                     ],
+
                     'post_author_bio' => [
                         'default'   => true,
                         'label'     =>  'On single post pages, show author bio in the footer',
                         'description' => '(if set up)',
                         'type'      => 'checkbox',
-                        'priority'  => 25,
+                        'priority'  => 30,
                         'partial' => [
                             'selector'        => '.author-bio',
                             'container_inclusive' => true,

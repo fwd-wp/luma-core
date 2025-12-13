@@ -15,11 +15,17 @@ use Luma\Core\Services\ThemeSettingsSchema;
 class CustomizeBase
 {
     protected string $prefix;
+    protected string $core_kebab_prefix;
+    protected string $core_camel_prefix;
+    protected string $version;
     public ThemeJsonService $theme_json;
 
     public function __construct()
     {
         $this->prefix = Config::get_prefix();
+        $this->core_kebab_prefix = Config::get_prefix_kebab_core();
+        $this->core_camel_prefix = Config::get_prefix_camel_core();
+        $this->version = Config::get_theme_version();
         $this->theme_json = new ThemeJsonService();
     }
 
@@ -96,7 +102,7 @@ class CustomizeBase
             }
         }
         $input_attrs = [];
-        if ( isset($item['input_attrs']) && is_array($item['input_attrs']) ) {
+        if (isset($item['input_attrs']) && is_array($item['input_attrs'])) {
             $input_attrs['min'] = $item['input_attrs']['min'] ?? null;
             $input_attrs['max'] = $item['input_attrs']['max'] ?? null;
             $input_attrs['step'] = $item['input_attrs']['step'] ?? null;
@@ -135,65 +141,65 @@ class CustomizeBase
         ];
     }
 
-private function get_sanitizer(array $item)
-{
-    switch ($item['type']) {
+    private function get_sanitizer(array $item)
+    {
+        switch ($item['type']) {
 
-        // Boolean checkbox
-        case 'checkbox':
-            return 'rest_sanitize_boolean';
+            // Boolean checkbox
+            case 'checkbox':
+                return 'rest_sanitize_boolean';
 
-        // Single-choice inputs
-        case 'radio':
-        case 'select':
-            $valid_keys = array_keys($item['choices'] ?? []);
-            return static function ($val) use ($valid_keys) {
-                return in_array($val, $valid_keys, true) ? $val : ($valid_keys[0] ?? '');
-            };
+                // Single-choice inputs
+            case 'radio':
+            case 'select':
+                $valid_keys = array_keys($item['choices'] ?? []);
+                return static function ($val) use ($valid_keys) {
+                    return in_array($val, $valid_keys, true) ? $val : ($valid_keys[0] ?? '');
+                };
 
-        // Color input
-        case 'color':
-            return 'sanitize_hex_color';
+                // Color input
+            case 'color':
+                return 'sanitize_hex_color';
 
-        // Numeric input
-        case 'number':
-        case 'range':
-            $min = $item['min'] ?? null;
-            $max = $item['max'] ?? null;
-            return static function ($val) use ($min, $max) {
-                $val = absint($val);
-                if ($min !== null) $val = max($val, $min);
-                if ($max !== null) $val = min($val, $max);
-                return $val;
-            };
+                // Numeric input
+            case 'number':
+            case 'range':
+                $min = $item['min'] ?? null;
+                $max = $item['max'] ?? null;
+                return static function ($val) use ($min, $max) {
+                    $val = absint($val);
+                    if ($min !== null) $val = max($val, $min);
+                    if ($max !== null) $val = min($val, $max);
+                    return $val;
+                };
 
-        // URL
-        case 'url':
-            return 'esc_url_raw';
+                // URL
+            case 'url':
+                return 'esc_url_raw';
 
-        // Email
-        case 'email':
-            return 'sanitize_email';
+                // Email
+            case 'email':
+                return 'sanitize_email';
 
-        // Textarea
-        case 'textarea':
-            return 'sanitize_textarea_field';
+                // Textarea
+            case 'textarea':
+                return 'sanitize_textarea_field';
 
-        // Media / image uploads
-        case 'image':
-        case 'media':
-        case 'upload':
-        case 'cropped_image':
-            return static function ($val) {
-                $val = absint($val);
-                return ($val && wp_attachment_is_image($val)) ? $val : 0;
-            };
+                // Media / image uploads
+            case 'image':
+            case 'media':
+            case 'upload':
+            case 'cropped_image':
+                return static function ($val) {
+                    $val = absint($val);
+                    return ($val && wp_attachment_is_image($val)) ? $val : 0;
+                };
 
-        // Default: generic text input
-        default:
-            return 'sanitize_text_field';
+                // Default: generic text input
+            default:
+                return 'sanitize_text_field';
+        }
     }
-}
 
 
     public static function get_default(mixed $default = null, string $type = '', array $choices = [])

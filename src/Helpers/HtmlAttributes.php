@@ -35,11 +35,11 @@ class HtmlAttributes
             $css_class = preg_split('/\s+/', $css_class);
         }
 
+        // Apply filter
+        $classes = apply_filters('luma_core_html_class', $css_class, $echo);
+
         // remove empty string array items
         $css_class = array_filter($css_class);
-
-        // Apply filter
-        $classes = apply_filters('luma_core_html_class', $css_class);
 
         // Build class attribute string
         $attr = empty($classes) ? '' : 'class="' . esc_attr(implode(' ', $classes)) . '"';
@@ -57,108 +57,87 @@ class HtmlAttributes
      *
      * @since Luma-Core 1.0
      *
-     * @param string|array $css_class Optional additional classes.
-     * @param bool $echo Whether to echo the attribute or return as string.
-     * @return string|null The class attribute string or null if echoed.
+     * @param bool         $echo Whether to echo the attribute or return it.
+     * @param string|array $extra_classes Optional additional classes.
+     * @return string|null
      */
-    public static function header_class(bool $echo = true, string|array $css_class = ''): ?string
+    public static function header_class(bool $echo = true, string|array $extra_classes = ''): ?string
     {
-        // Normalize extra classes
-        if (is_string($css_class)) {
-            $css_class = preg_split('/\s+/', $css_class);
-        }
-        $css_class = array_filter($css_class);
-
-        // Default classes
-        $default = ['site-header'];
-        if (ThemeSettingsSchema::get_theme_mod('header_navbar_full_width')) {
-            $default[] = 'is-full';
-        }
-        if (ThemeSettingsSchema::get_theme_mod('header_sticky')) {
-            $default[] = 'is-sticky';
-        }
-        if (ThemeSettingsSchema::get_theme_mod('header_navbar_transparent')) {
-            $default[] = 'is-transparent';
-        }
-        if (ThemeSettingsSchema::get_theme_mod('wp-core_display_title_and_tagline')) {
-            if (get_bloginfo('name')) {
-                $default[] = 'has-title';
-            }
-            if (get_bloginfo('description')) {
-                $default[] = 'has-description';
-            }
-        }
-        if (has_custom_logo()) {
-            $default[] = 'has-logo';
-        }
-        if (has_nav_menu('main')) {
-            $default[] = 'has-menu';
-        }
-
-        // Merge default and extra
-        $classes = array_merge($default, $css_class);
+        // Step 1: Derive header "state"
+        // This is semantic intent, not CSS.
+        $state = [
+            'has_logo'        => has_custom_logo(),
+            'has_menu'        => has_nav_menu('main'),
+            'has_title'       => (
+                ThemeSettingsSchema::get_theme_mod('wp-core_display_title_and_tagline')
+                && get_bloginfo('name') !== ''
+            ),
+            'has_description' => (
+                ThemeSettingsSchema::get_theme_mod('wp-core_display_title_and_tagline')
+                && get_bloginfo('description') !== ''
+            ),
+            'is_full'         => ThemeSettingsSchema::get_theme_mod('header_navbar_full_width'),
+            'is_sticky'       => ThemeSettingsSchema::get_theme_mod('header_sticky'),
+            'is_shrink'       => ThemeSettingsSchema::get_theme_mod('header_navbar_shrink'),
+            'is_transparent'  => ThemeSettingsSchema::get_theme_mod('header_navbar_transparent'),
+        ];
 
         /**
-         * Filter the CSS classes applied to the site header container.
+         * Allow themes or plugins to modify header state before
+         * class mapping occurs.
          *
          * @since Luma-Core 1.0
-         *
-         * @param array $classes Array of CSS classes.
-         * @param bool  $echo Whether the final output will be echoed.
          */
-        $classes = apply_filters('luma_core_header_class', $classes, $echo);
+        $state = apply_filters('luma_core_header_state', $state);
 
-        // Build class attribute string
-        $attr = empty($classes) ? '' : 'class="' . esc_attr(implode(' ', $classes)) . '"';
+        // Step 2: Map state → default CSS classes
+        $classes = ['site-header'];
 
-        if ($echo) {
-            echo $attr;
-            return null;
+        if ($state['has_logo']) {
+            $classes[] = 'has-logo';
+        }
+        if ($state['has_menu']) {
+            $classes[] = 'has-menu';
+        }
+        if ($state['has_title']) {
+            $classes[] = 'has-title';
+        }
+        if ($state['has_description']) {
+            $classes[] = 'has-description';
+        }
+        if ($state['is_full']) {
+            $classes[] = 'is-full';
+        }
+        if ($state['is_sticky']) {
+            $classes[] = 'is-sticky';
+        }
+        if ($state['is_shrink']) {
+            $classes[] = 'is-shrink-enabled';
+        }
+        if ($state['is_transparent']) {
+            $classes[] = 'is-transparent';
         }
 
-        return $attr;
-    }
-
-    /**
-     * Calculates classes for the main site navigation container.
-     *
-     * @since Luma-Core 1.0
-     *
-     * @param string|array $css_class Optional additional classes.
-     * @param bool $echo Whether to echo the attribute or return as string.
-     * @return string|null The class attribute string or null if echoed.
-     */
-    public static function nav_class(bool $echo = true, string|array $css_class = ''): ?string
-    {
-        // Normalize extra classes
-        if (is_string($css_class)) {
-            $css_class = preg_split('/\s+/', $css_class);
-        }
-        $css_class = array_filter($css_class);
-
-        // Default classes
-        $default = ['site-navigation'];
-
-        if (ThemeSettingsSchema::get_theme_mod('header_navbar_shrink')) {
-            $default[] = 'is-sticky';
-            $default[] = 'is-shrink-enabled';
+        // Step 3: Merge extra classes + final filter
+        if (is_string($extra_classes)) {
+            $extra_classes = preg_split('/\s+/', $extra_classes);
         }
 
-        // Merge default and extra
-        $classes = array_merge($default, $css_class);
+        $extra_classes = array_filter((array) $extra_classes);
+
+        $classes = array_merge($classes, $extra_classes);
 
         /**
-         * Filter the CSS classes applied to the site navigation container.
+         * Final escape hatch to alter CSS classes directly.
          *
          * @since Luma-Core 1.0
-         *
-         * @param array $classes Array of CSS classes.
-         * @param bool  $echo Whether the final output will be echoed.
          */
-        $classes = apply_filters('luma_core_nav_class', $classes, $echo);
+        $classes = apply_filters('luma_core_header_classes', $classes, $state);
 
-        // Build class attribute string
-        $attr = empty($classes) ? '' : 'class="' . esc_attr(implode(' ', $classes)) . '"';
+        // Step 4: Build attribute
+        $attr = empty($classes)
+            ? ''
+            : 'class="' . esc_attr(implode(' ', $classes)) . '"';
 
         if ($echo) {
             echo $attr;

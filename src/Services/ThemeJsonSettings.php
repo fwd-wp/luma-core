@@ -22,19 +22,19 @@ class ThemeJsonSettings
                 'priority' => 35,
                 'settings' => [
                     'typography_heading' => [
-                        'label'     => 'Typography',
+                        'label'     => 'Semantic Colors',
                         'type'      => 'subheading',
                         'priority'  => 3,
                     ],
                     'system_heading' => [
-                        'label'     => 'Color System',
+                        'label'     => 'Neutral Scale',
                         'type'      => 'subheading',
                         'priority'  => 33,
                     ],
-                    'background_heading' => [
-                        'label'     => 'Background',
+                    'component_heading' => [
+                        'label'     => 'Component Specific',
                         'type'      => 'subheading',
-                        'priority'  => 73,
+                        'priority'  => 67,
                     ],
                 ],
             ],
@@ -45,17 +45,33 @@ class ThemeJsonSettings
             ],
         ];
 
-        // Colors
+        // Colors - from palette
         $colors = $this->theme_json->get(['settings', 'color', 'palette'])->raw();
         $priority = 5;
         foreach ($colors as $color) {
             $settings['color']['settings'][$color['slug']] = [
                 'default'  => $color['color'],
-                'label'    => $color['name'] . ' Color',
+                'label'    => $color['name'],
                 'type'     => 'color',
                 'priority' => $priority,
             ];
             $priority += 5;
+        }
+
+        // Colors - custom
+        $custom_colors = $this->theme_json->get(['settings', 'custom', 'color'])->raw();
+        //print('<pre>' . print_r($custom_colors, true) . '</pre>');
+        foreach ($custom_colors as $prefix => $colors) {
+            foreach ($colors as $slug => $value) {
+                $key = "{$prefix}_{$slug}";
+                $settings['color']['settings'][$key] = [
+                    'default'  => $value,
+                    'label'    => Functions::snake_to_title($key),
+                    'type'     => 'color',
+                    'priority' => $priority,
+                ];
+                $priority += 5;
+            }
         }
 
         // Fonts

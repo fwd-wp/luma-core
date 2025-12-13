@@ -30,6 +30,7 @@ class ThemeSetup
     public function __invoke(): void
     {
         add_action('after_setup_theme', [$this, 'theme_support']);
+        add_action('after_setup_theme', [$this, 'hybrid_theme_support']);
         add_action('after_setup_theme', [$this, 'core_editor_styles']);
         add_action('after_setup_theme', [$this, 'woo_commerce']);
         add_action('after_setup_theme', [$this, 'register_nav_menus']);
@@ -106,11 +107,32 @@ class ThemeSetup
         ]);
 
         add_theme_support('wp-block-styles');
-        add_theme_support('responsive-embeds');
-        add_theme_support('align-wide');
+
         add_theme_support('customize-selective-refresh-widgets');
 
         add_filter('rss_widget_feed_link', '__return_empty_string');
+    }
+
+    public function hybrid_theme_support()
+    {
+        add_theme_support('responsive-embeds');
+        add_theme_support('align-wide');
+
+        // may not be needed for patterns?
+        add_theme_support('block-patterns');
+
+        add_theme_support('block-template-parts');
+        // block_template_part('footer');
+
+        // no used?
+        add_theme_support('block-templates');
+
+        register_block_pattern_category(
+            'footers',
+            [
+                'label' => __('Footer', Config::get_domain()),
+            ]
+        );
     }
 
     /**

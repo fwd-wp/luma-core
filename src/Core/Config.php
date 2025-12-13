@@ -9,9 +9,10 @@ class Config
 
     example config structure:
     Config::init([
-        'prefix_snake'       => 'luma_core',
-        'prefix_kebab'       => 'luma-core',
-        'text_domain'        => 'luma-core',
+        'prefix_snake'       => 'luma_sagewood',
+        'prefix_kebab'       => 'luma-sagewood',
+        'prefix_camel'       => 'lumaSagewood',
+        'text_domain'        => 'luma-sagewood',
         'minimum_wp_version' => '6.8',
         'minimum_php_version' => '7.4',
     ]);
@@ -22,6 +23,8 @@ class Config
         'prefix_snake_core'  => 'luma_core',
         'prefix_kebab'       => 'luma-core',
         'prefix_kebab_core'  => 'luma-core',
+        'prefix_camel'       => 'lumaCore',
+        'prefix_camel_core'  => 'lumaCore',
         'text_domain'        => 'luma-core',
         'text_domain_core'   => 'luma-core',
         'minimum_wp_version' => '6.8',
@@ -37,42 +40,6 @@ class Config
     {
         self::$config = wp_parse_args($config, self::$config);
     }
-
-    // /**
-    //  * Generic setter for a single config key.
-    //  *
-    //  * @param string $key
-    //  * @param mixed  $value
-    //  */
-    // public static function set(string $key, mixed $value): void
-    // {
-    //     if (array_key_exists($key, self::$config)) {
-    //         self::$config[$key] = $value;
-    //     } else {
-    //         \Luma\Core\Helpers\Functions::error_log(sprintf(
-    //             'Config key "%s" does not exist. Cannot set value.',
-    //             $key
-    //         ));
-    //     }
-    // }
-
-    // /**
-    //  * Generic getter for a single config key.
-    //  *
-    //  * @param string $key
-    //  * @return mixed|null
-    //  */
-    // public static function get(string $key): mixed
-    // {
-    //     if (!array_key_exists($key, self::$config)) {
-    //         \Luma\Core\Helpers\Functions::error_log(sprintf(
-    //             'Config key "%s" does not exist. Returning null.',
-    //             $key
-    //         ));
-    //     }
-
-    //     return self::$config[$key] ?? null;
-    // }
 
     // --- Specific getters for convenience and backward compatibility ---
 
@@ -94,6 +61,15 @@ class Config
     public static function get_prefix_kebab_core(): string
     {
         return self::$config['prefix_kebab_core'];
+    }
+    public static function get_prefix_camel(): string
+    {
+        return self::$config['prefix_camel'];
+    }
+
+    public static function get_prefix_camel_core(): string
+    {
+        return self::$config['prefix_camel_core'];
     }
 
     public static function get_domain(): string

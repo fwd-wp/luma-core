@@ -3,6 +3,7 @@
 namespace Luma\Core\Setup;
 
 use Luma\core\Core\Config;
+use Luma\Core\Helpers\Functions;
 use Luma\Core\Helpers\TemplateFunctions;
 use Luma\Core\Services\ThemeSettingsSchema;
 
@@ -31,6 +32,10 @@ class TemplateFilters
 		add_filter('the_password_form', array($this, 'filter_password_form'), 10, 2);
 		add_filter('wp_link_pages_args', [$this, 'filter_wp_link_pages_args']);
 		add_filter('edit_post_link', [$this, 'filter_edit_post_link'], 10, 3);
+
+		// Custom logo handling
+		add_filter('wp_generate_attachment_metadata', [$this, 'filter_attachment_metadata'], 10, 2);
+		add_filter('get_custom_logo', [$this, 'filter_custom_logo']);
 	}
 
 	public function __construct()
@@ -126,8 +131,8 @@ class TemplateFilters
 	 * @since Luma-Core 1.0
 	 */
 	public function filter_excerpt_length(int $length): int
-	{
-		return 25;
+	{	
+		return ThemeSettingsSchema::get_theme_mod('display_archive_excerpt_length');
 	}
 
 	/**
@@ -250,5 +255,154 @@ class TemplateFilters
 		$new_text = sprintf(__('Edit this %s'), $singular);
 
 		return str_replace(esc_html($text), esc_html($new_text), $link);
+	}
+
+	/**
+	 * Generate custom logo sizes for desktop and mobile 1x/2x.
+	 *
+	 * @param array $metadata
+	 * @param int   $attachment_id
+	 * @return array
+	 */
+	public function filter_attachment_metadata($metadata, $attachment_id): array
+	{
+		$theme = wp_get_theme();
+		$theme_mods = get_option("theme_mods_{$theme->get('TextDomain')}", []);
+		$custom_logo_id = $theme_mods['custom_logo'] ?? 0;
+
+		// Only generate sizes for the logo attachment
+		if ($custom_logo_id && $attachment_id !== $custom_logo_id) {
+			return $metadata;
+		}
+
+		$file = get_attached_file($attachment_id);
+		$editor = wp_get_image_editor($file);
+
+		if (is_wp_error($editor)) {
+			Functions::error_log("Cannot load image editor for attachment ID {$attachment_id}");
+			return $metadata;
+		}
+
+		$orig_size   = $editor->get_size();
+		$orig_height = $orig_size['height'] ?? 0;
+
+		$heights = [
+			'desktop_1x' => 65,
+			'desktop_2x' => 130,
+			'mobile_1x'  => 45,
+			'mobile_2x'  => 90,
+		];
+
+		foreach ($heights as $key => $height) {
+			$resize_height = min($height, $orig_height);
+
+			$resized = wp_get_image_editor($file);
+			if (is_wp_error($resized)) {
+				Functions::error_log("Failed to instantiate editor for {$key}");
+				continue;
+			}
+
+			$resized->resize(null, $resize_height);
+			$dest  = $resized->generate_filename($key);
+			$saved = $resized->save($dest);
+
+			if (is_wp_error($saved)) {
+				Functions::error_log("Failed to save resized image for {$key}");
+				continue;
+			}
+
+			$metadata['sizes'][$key] = [
+				'file'      => wp_basename($saved['path']),
+				'width'     => $saved['width'],
+				'height'    => $saved['height'],
+				'mime-type' => $saved['mime-type'],
+			];
+		}
+
+		return $metadata;
+	}
+
+	/**
+	 * Output a responsive <picture> logo with desktop/mobile 1x/2x.
+	 *
+	 * @param string $html
+	 * @param int    $blog_id
+	 * @return string
+	 */
+	public function filter_custom_logo($html): string
+	{
+		$logo_id = get_theme_mod('custom_logo');
+
+		if (! $logo_id) {
+			// no error log, as not required to set a custom logo
+			return $html;
+		}
+
+		$meta = wp_get_attachment_metadata($logo_id);
+		if (!$meta) {
+			Functions::error_log("Missing metadata for logo ID {$logo_id}");
+			return $html;
+		}
+
+		$fallback = wp_get_attachment_image_url($logo_id, 'full');
+		$full_width  = $meta['width'] ?? '';
+		$full_height = $meta['height'] ?? '';
+		$breakpoint_setting = wp_get_global_settings(['custom', 'breakpoint', 'navbar']);
+		$breakpoint = is_array($breakpoint_setting) ? '800px' : $breakpoint_setting;
+		$bp_int = (int) $breakpoint;
+		$bp_max = ($bp_int - 1) . 'px';
+		// category slug => breakpoint media query
+		$categories = [
+			'mobile'  => "(max-width: {$bp_max})",
+			'desktop' => "(min-width: {$breakpoint})",
+		];
+
+		$retina_factors = ['1x', '2x'];
+		$sources = [];
+
+		foreach ($categories as $cat => $media_query) {
+			$srcset_parts = [];
+
+			foreach ($retina_factors as $factor) {
+				$size_key = "{$cat}_{$factor}";
+				if (!empty($meta['sizes'][$size_key])) {
+					$size_data = $meta['sizes'][$size_key];
+					$url = wp_get_attachment_image_url($logo_id, $size_key);
+					if ($url) {
+						$srcset_parts[] = $url . ' ' . $size_data['width'] . 'w';
+					}
+				}
+			}
+
+			if ($srcset_parts) {
+				$display_width = $meta['sizes']["{$cat}_1x"]['width'] ?? 100;
+				$sources[] = [
+					'media'  => $media_query,
+					'srcset' => implode(', ', $srcset_parts),
+					'sizes'  => $display_width . 'px',
+				];
+			}
+		}
+
+		ob_start(); ?>
+		<picture class="site-logo">
+			<?php foreach ($sources as $source): ?>
+				<source
+					<?php if ($source['media']): ?>
+					media="<?php echo esc_attr($source['media']); ?>"
+					<?php endif; ?>
+					srcset="<?php echo esc_attr($source['srcset']); ?>"
+					sizes="<?php echo esc_attr($source['sizes']); ?>">
+			<?php endforeach; ?>
+
+			<img
+				src="<?php echo esc_url($fallback); ?>"
+				width="<?php echo esc_attr($full_width); ?>"
+				height="<?php echo esc_attr($full_height); ?>"
+				alt="<?php echo esc_attr(get_bloginfo('name')); ?>"
+				class="custom-logo">
+		</picture>
+<?php
+		return ob_get_clean();
 	}
 }
