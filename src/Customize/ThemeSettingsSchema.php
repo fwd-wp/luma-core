@@ -1,14 +1,25 @@
 <?php
 
-namespace Luma\Core\Services;
+namespace Luma\Core\Customize;
 
 use Luma\Core\Core\Config;
 use Luma\Core\Helpers\Functions;
-use Luma\Core\Setup\CustomizeBase;
+use Luma\Core\Customize\CustomizeBase;
 
 class ThemeSettingsSchema
 {
     private static array $cache = [];
+
+    // stores theme variant prefix, self::set_prefix() needs to be run first if prefix is needed in a method
+    private static string $prefix = 'luma_core';
+
+    private static function set_prefix(): void
+    {
+        if (self::$prefix === '') {
+            // uses theme variant prefix for settings as they are stored to DB
+            self::$prefix = Config::get_prefix() ?? self::$prefix;
+        }
+    }
 
     /**
      * Get a list of all settings with their default and current value.
@@ -23,8 +34,9 @@ class ThemeSettingsSchema
             return []; // nothing to process
         }
 
+        self::set_prefix();
+
         $list = [];
-        $theme_prefix = Config::get_prefix();
 
         foreach ($schema as $group => $values) {
             // Ensure 'settings' exists and is an array
@@ -44,7 +56,7 @@ class ThemeSettingsSchema
                 }
 
                 // Build key
-                $key = ($prefix ? $theme_prefix : '') . "{$group}_{$id}";
+                $key = ($prefix ? self::$prefix : '') . "{$group}_{$id}";
 
                 $list[$key] =  self::get_theme_mod_default_and_value("{$group}_{$id}");
             }
@@ -57,6 +69,7 @@ class ThemeSettingsSchema
     {
         if (empty(self::$cache)) {
             Functions::error_log("ThemeSettingsSchema cache not set. Returning empty array.");
+            return [];
         }
         return self::$cache;
     }
@@ -82,6 +95,8 @@ class ThemeSettingsSchema
      */
     public static function get_theme_mod(string $key): mixed
     {
+        self::set_prefix();
+
         // Extract group and key
         $parts = explode('_', $key, 2); // split into 2 parts only
         if (count($parts) < 2) {
@@ -91,12 +106,14 @@ class ThemeSettingsSchema
 
         [$group_name, $sub_key] = $parts;
 
-        $theme_prefix = Config::get_prefix();
 
         if ($group_name === 'wp-core') {
             $full_key = $sub_key;
         }
-        $full_key = "{$theme_prefix}_{$key}";
+
+        $prefix = self::$prefix;
+
+        $full_key = "{$prefix}_{$key}";
 
         $default = self::get_theme_mod_default($key);
         if ($default) {

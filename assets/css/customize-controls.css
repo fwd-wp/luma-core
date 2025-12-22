@@ -1,15 +1,11 @@
-/* Reset default */
-.customize-control .customize_control_category {
-    font-size: 18px;
+/* subheading */
+.customize-control .customize-control-luma-core-customize-subheading {
+  font-size: 18px;
     font-weight: 700;
     margin: 0;
 }
 
 /* Add top margin if there's a previous li with the same class inside */
-.customize-control + .customize-control .customize_control_category {
+.customize-control + .customize-control .customize-control-luma-core-customize-subheading {
     margin-top: 1rem;
 }
-
-/* li .customize-control-description {
-    margin-bottom: 0;
-} */

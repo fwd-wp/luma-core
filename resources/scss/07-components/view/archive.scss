@@ -27,7 +27,8 @@
 
 				.entry-body {
 					padding: var(--wp--preset--spacing--large);
-					font-size: var(--wp--preset--font-size--small);
+					// could take the body size and grow it if needed
+					// font-size: var(--wp--preset--font-size--small);
 				}
 
 				.entry-footer {
@@ -71,6 +72,7 @@
 				}
 			}
 		}
+
 		// this is the default list style, however it's not easy to 
 		// override when grid or masonry is being used
 		// so exclude these styles from grid or masonry (and full)
@@ -132,46 +134,52 @@
 	&.is-excerpt {
 
 		&.is-grid {
-			@include mixin.bp-up(md) {
-				grid-template-columns: repeat(2, 1fr);
+			.archive-grid {
+				@include mixin.bp-up(md) {
+					grid-template-columns: repeat(2, 1fr);
+				}
+
+				@include mixin.bp-up(lg) {
+					grid-template-columns: repeat(3, 1fr);
+				}
 			}
 
-			@include mixin.bp-up(lg) {
-				grid-template-columns: repeat(3, 1fr);
-			}
 		}
 
 		&.is-masonry {
+			.archive-grid {
+				display: block;
+				--wp--custom--spacing--gutter: calc(var(--custom--original-gutter) - var(--wp--style--block-gap)/2);
+				--wp--style--global--wide-size: calc(var(--custom--original-wide) - var(--wp--style--block-gap)/2);
 
-			display: block;
-			--wp--custom--spacing--gutter: calc(var(--custom--original-gutter) - var(--wp--style--block-gap)/2);
-			--wp--style--global--wide-size: calc(var(--custom--original-wide) - var(--wp--style--block-gap)/2);
-
-			.post {
-				float: left;
-				width: calc(100% - var(--wp--style--block-gap)); // 1 column
-				box-sizing: border-box;
-				margin: calc(var(--wp--style--block-gap)/2); // emulate "gap"
-			}
-
-			// Optional: fix container overflow
-			&::after {
-				content: "";
-				display: table;
-				clear: both;
-			}
-
-			@include mixin.bp-up(md) {
 				.post {
-					width: calc(calc(100% / 2) - var(--wp--style--block-gap)); // 2 columns
+					float: left;
+					width: calc(100% - var(--wp--style--block-gap)); // 1 column
+					box-sizing: border-box;
+					margin: calc(var(--wp--style--block-gap)/2); // emulate "gap"
+				}
+
+				// Optional: fix container overflow
+				&::after {
+					content: "";
+					display: table;
+					clear: both;
+				}
+
+				@include mixin.bp-up(md) {
+					.post {
+						width: calc(calc(100% / 2) - var(--wp--style--block-gap)); // 2 columns
+					}
+				}
+
+				@include mixin.bp-up(lg) {
+					.post {
+						width: calc(calc(100% / 3) - var(--wp--style--block-gap)); // 3 columns
+					}
 				}
 			}
 
-			@include mixin.bp-up(lg) {
-				.post {
-					width: calc(calc(100% / 3) - var(--wp--style--block-gap)); // 3 columns
-				}
-			}
+
 		}
 	}
 }

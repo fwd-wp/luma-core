@@ -1,18 +1,17 @@
 TODO:
+customizer - set up variable for custom image opacity - not needed in theme.json???
+Customizer - auto update on post excerpt length - also setting not working
 
-if video support is enabled get_header_image in template and font categories need to be updated maybe make a custom function
-test image fall back check for core css and add css for both. potentially use core markup for image with heading overlay added
-add option to turn off header text on custom image header
+
 fix masonry preview
 
                 - need to create js for reset buttons in typography
                 - customize full list view and single view (same html)
+                       - consider moving /content to /content-single, with conditional author bio
                 - look into custom search result format (modify list archive view)
                 - add categories to archive views, also is_sticky (featured post);
-                - consider moving /content to /content-single, with conditional author bio
-                - try to make code dryer customize.php - esp font functions clean up themeJSON
+        
                 - look into navbar breakpoint, should this be a customizer setting?
-                - add header styles - full or wide width? transparent? should it shrink on scroll? an option?
 - check comments for button - styling inconsitent with block button
   
 

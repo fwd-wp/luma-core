@@ -2,7 +2,7 @@
 
 namespace Luma\Core\Helpers;
 
-use Luma\Core\Services\ThemeSettingsSchema;
+use Luma\Core\Customize\ThemeSettingsSchema;
 
 /**
  * Custom template tags for this theme.
@@ -453,14 +453,13 @@ class TemplateTags extends TemplateTagsBase
 		return $output;
 	}
 
-
-
 	/**
 	 * Outputs or returns the site title.
 	 *
 	 * Wraps the site title in an <h1> element. On non-front pages, the title
 	 * is linked to the home page. Supports CSS class customization and
 	 * respects the theme setting for displaying title and tagline.
+	 * 
 	 *
 	 * @param bool  $echo   Whether to echo the output. Default true.
 	 * @param array $args {
@@ -492,41 +491,141 @@ class TemplateTags extends TemplateTagsBase
 		$args = apply_filters('luma_core_site_title_args', $args, $echo);
 
 		$name = get_bloginfo('name');
-		$show = ThemeSettingsSchema::get_theme_mod('wp-core_display_title_and_tagline');
+		$show = ThemeSettingsSchema::get_theme_mod('header_navbar_display_title');
 		$class = $show ? $args['class'] : 'screen-reader-text';
 
 		if (!$name) {
 			return null;
 		}
 
+
 		$title = is_front_page()
 			? esc_html($name)
 			: '<a href="' . esc_url(home_url('/')) . '" rel="home">' . esc_html($name) . '</a>';
 
-		$output = '<h1 class="' . esc_attr($class) . '">' . $title . '</h1>';
+		if (TemplateFunctions::is_list_view()) {
+			// if page title is shown, h1 is used in the page title, not for site title
+			$html = '<div class="' . esc_attr($class) . '">' . $title . '</div>';
+		} else {
+			$html = '<h1 class="' . esc_attr($class) . '">' . $title . '</h1>';
+		}
+
 
 		/**
 		 * Filter the output of the site title HTML.
 		 *
 		 * @since Luma-Core 1.0
 		 *
-		 * @param string $output The HTML output of the site title.
+		 * @param string $html The HTML output of the site title.
 		 * @param string $class  CSS class for the <h1> wrapper.
 		 * @param string $title  The site title text or link.
+		 * @param array  $args      Parsed parameters array.
 		 * @param bool   $echo   Whether the output will be echoed.
 		 */
-		$output = apply_filters('luma_core_site_title', $output, $class, $title, $echo);
+		$html = apply_filters('luma_core_site_title', $html, $class, $title, $args, $echo);
 
-		$output = wp_kses_post($output);
+		$html = wp_kses_post($html);
 
 		if ($echo) {
-			echo $output;
+			echo $html;
 			return null;
 		}
 
-		return $output;
+		return $html;
 	}
 
+
+
+	/**
+	 * Outputs or returns the archive/blog page header.
+	 *
+	 * Includes title and optional description with core classes.
+	 *
+	 * @param bool  $echo Whether to echo the output. Default true.
+	 * @param array $args Optional arguments to customize classes:
+	 *                    [
+	 *                        'header_class'      => 'page-header',
+	 *                        'title_class'       => 'page-title',
+	 *                        'description_class' => 'archive-description',
+	 *                    ]
+	 * @return string|null The formatted page header HTML, or null if no title.
+	 */
+	public static function page_header(bool $echo = true, array $args = []): ?string
+	{
+
+		// Only show on archives or blog index (not front page)
+		if (! TemplateFunctions::is_list_view()) {
+			return null;
+		}
+
+		// Default classes
+		$defaults = [
+			'header_class'      => 'page-header',
+			'title_class'       => 'page-title',
+			'description_class' => 'archive-description',
+		];
+		$args = wp_parse_args($args, $defaults);
+
+		// Get page title
+		$title = '';
+		if (is_archive()) {
+			$title = wp_strip_all_tags(get_the_archive_title());
+		} elseif (is_home() && ! is_front_page()) {
+			$page_for_posts = get_option('page_for_posts');
+			if ($page_for_posts) {
+				$title = get_the_title($page_for_posts);
+			}
+		}
+
+		if (! $title) {
+			return null;
+		}
+
+		// Get page description
+		$description = '';
+		if (is_archive()) {
+			$description = get_the_archive_description();
+		}
+
+		// Set aria-labelledby only with existing elements
+		$aria_ids = ['page-header-title'];
+		if ($description) {
+			$aria_ids[] = 'page-header-description';
+		}
+		$header_attrs = sprintf(' aria-labelledby="%s"', implode(' ', $aria_ids));
+
+		// Build header HTML
+		$html  = sprintf(
+			'<header class="%s"%s>',
+			esc_attr($args['header_class']),
+			$header_attrs
+		);
+		$html .= sprintf(
+			'<h1 id="page-header-title" class="%s">%s</h1>',
+			esc_attr($args['title_class']),
+			esc_html($title)
+		);
+
+		if ($description) {
+			$html .= sprintf(
+				'<p id="page-header-description" class="%s">%s</p>',
+				esc_attr($args['description_class']),
+				wp_kses_post($description)
+			);
+		}
+
+		$html .= '</header>';
+
+		// Apply filter for customization
+		$html = apply_filters('luma_core_page_header', $html, $title, $description, $args, $echo);
+
+		if ($echo) {
+			echo $html;
+			return null;
+		}
+
+		return $html;
+	}
 
 	/**
 	 * Outputs or returns the comments template for the current post.
@@ -545,7 +644,7 @@ class TemplateTags extends TemplateTagsBase
 	public static function maybe_comments_template(bool $echo = true): ?string
 	{
 		// exit early if not a single page
-		if ( ! is_single()) {
+		if (! is_single()) {
 			return null;
 		}
 

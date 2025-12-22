@@ -9,7 +9,7 @@
 	font-family: var(--wp--preset--font-family--heading);
 	line-height: var(--wp--custom--font--line-height--heading);
 	font-weight: var(--wp--custom--font--weight--heading);
-	color: var(--wp--preset--color--heading);
+	color: var(--wp--preset--color--headings);
 
 	@if 1==$level {
 		font-size: var(--wp--preset--font-size--xxx-large);

@@ -1,6 +1,6 @@
 <?php
 
-namespace Luma\Core\Services;
+namespace Luma\Core\Customize;
 
 use Luma\Core\Helpers\Functions;
 use \WP_Theme_JSON_Resolver;
@@ -11,6 +11,24 @@ if (! defined('ABSPATH')) {
 
 /**
  * Class for accessing data from theme.json
+ * 
+ * must start with get()
+ * 
+ * optional:
+ * get_by_slug()
+ * 
+ * helpers:
+ * snake_case()
+ * choices()
+ * normalised()
+ * css_var() - on string or array
+ * slug_from_css_var() - on string
+ * 
+ * final:
+ * raw()
+ * raw_array()
+ * raw_string()
+ * with_css_vars()
  * 
  */
 class ThemeJsonService
@@ -36,10 +54,7 @@ class ThemeJsonService
         self::$cache = [];
     }
 
-    public static function alter_css_generation(): void
-    {
-        
-    }
+    public static function alter_css_generation(): void {}
 
     /**
      * Explicitly load and get data (lazy load)
@@ -108,6 +123,38 @@ class ThemeJsonService
     public function raw_string(): string
     {
         return is_string($this->data) ? $this->data : '';
+    }
+
+    /**
+     * Return data with CSS variable names injected.
+     * Chainable like raw().
+     *
+     * @return array|string
+     */
+    public function with_css_vars(): array|string
+    {
+        $data = $this->raw();
+
+        if (!is_array($data)) {
+            return $data;
+        }
+
+        $enhanced = [];
+
+        foreach ($data as $key => $item) {
+            if (!is_array($item)) {
+                $enhanced[$key] = $item;
+                continue;
+            }
+
+            $enhanced[$key] = $item;
+
+            if (isset($item['slug'])) {
+                $enhanced[$key]['css_var'] = $this->generate_css_var($item['slug']);
+            }
+        }
+
+        return $enhanced;
     }
 
     /** Helpers */

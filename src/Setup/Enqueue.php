@@ -4,7 +4,7 @@ namespace Luma\Core\Setup;
 
 use Luma\Core\Core\Config;
 use Luma\Core\Helpers\TemplateFunctions;
-use Luma\Core\Services\ThemeSettingsSchema;
+use Luma\Core\Customize\ThemeSettingsSchema;
 
 /**
  * Handles the enqueueing of theme scripts and styles.
@@ -19,8 +19,10 @@ use Luma\Core\Services\ThemeSettingsSchema;
  */
 class Enqueue
 {
-    protected string $prefix;
-    protected string $prefix_core;
+    // $prefix used for theme variant extensions of this class
+    protected string $prefix = 'luma-core';
+    // $prefix_core used for core asset handles
+    protected string $prefix_core = 'luma-core';
 
     public function __construct()
     {

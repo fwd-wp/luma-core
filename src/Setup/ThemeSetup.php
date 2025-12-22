@@ -3,66 +3,55 @@
 namespace Luma\Core\Setup;
 
 use Luma\Core\Core\Config;
+use Luma\Core\Customize\ThemeSettingsSchema;
 
 /**
  * Class ThemeSetup
  *
- * Bootstraps theme functionality and integration with WordPress core.
- * Registers theme supports, navigation menus, widget areas, and editor styles.
+ * Registers all theme supports, editor integration,
+ * navigation menus, widget areas, and plugin compatibility.
  *
- * This class is invoked as a callable and attaches all setup-related
- * actions to the appropriate WordPress hooks.
+ * Hooked via __invoke() during theme bootstrap.
+ *
+ * @package Luma-Core
+ * @since 1.0.0
  */
 class ThemeSetup
 {
+
+    protected string $domain = 'luma-core';
+
+    public function __construct()
+    {
+        $this->domain = $this->domain ?? $this->domain;
+    }
     /**
-     * Magic invoke method.
-     *
-     * Attaches all theme initialization routines to WordPress hooks:
-     * - after_setup_theme → theme_support()
-     * - after_setup_theme → core_editor_styles()
-     * - after_setup_theme → woo_commerce()
-     * - after_setup_theme → register_nav_menus()
-     * - widgets_init      → register_sidebars()
+     * Register all setup hooks.
      *
      * @return void
      */
     public function __invoke(): void
     {
-        add_action('after_setup_theme', [$this, 'theme_support']);
-        add_action('after_setup_theme', [$this, 'hybrid_theme_support']);
-        add_action('after_setup_theme', [$this, 'core_editor_styles']);
-        add_action('after_setup_theme', [$this, 'woo_commerce']);
-        add_action('after_setup_theme', [$this, 'register_nav_menus']);
+        add_action('after_setup_theme', [$this, 'core_theme_support']);
+        add_action('after_setup_theme', [$this, 'branding_support']);
+        add_action('after_setup_theme', [$this, 'block_support']);
+        add_action('after_setup_theme', [$this, 'editor_support']);
+        add_action('after_setup_theme', [$this, 'woocommerce_support']);
+
+        add_action('after_setup_theme', [$this, 'register_menus']);
         add_action('widgets_init',      [$this, 'register_sidebars']);
     }
 
     /**
-     * Registers core WordPress theme supports.
-     *
-     * Enables:
-     * - automatic-feed-links
-     * - title-tag
-     * - post formats
-     * - post thumbnails
-     * - HTML5 markup support
-     * - custom logo
-     * - custom header
-     * - block styles
-     * - responsive embeds
-     * - wide alignment support
-     * - selective refresh for widgets
-     *
-     * Also removes the feed icon from the legacy RSS widget.
-     *
-     * Hook: after_setup_theme
+     * Core WordPress theme supports.
      *
      * @return void
      */
-    public function theme_support(): void
+    public function core_theme_support(): void
     {
         add_theme_support('automatic-feed-links');
         add_theme_support('title-tag');
+        add_theme_support('post-thumbnails');
 
         add_theme_support('post-formats', [
             'link',
@@ -76,8 +65,6 @@ class ThemeSetup
             'chat',
         ]);
 
-        add_theme_support('post-thumbnails');
-
         add_theme_support('html5', [
             'comment-form',
             'comment-list',
@@ -89,6 +76,17 @@ class ThemeSetup
             'navigation-widgets',
         ]);
 
+        add_theme_support('customize-selective-refresh-widgets');
+    }
+
+    /**
+     * Branding and identity supports.
+     *
+     * @return void
+     */
+    public function branding_support(): void
+    {
+        // height setting flows to logo image srcset generation
         add_theme_support('custom-logo', [
             'height'               => 130,
             'width'                => 300,
@@ -97,73 +95,61 @@ class ThemeSetup
             'unlink-homepage-logo' => true,
         ]);
 
+
+        $header_enabled = ThemeSettingsSchema::get_theme_mod('header_custom_header_enabled') ?? false;
+        if ($header_enabled) {
+        }
         add_theme_support('custom-header', [
             'width'       => 1600,
             'height'      => 400,
-            'flex-height' => true,
             'flex-width'  => true,
+            'flex-height' => true,
             'header-text' => true,
             'video'       => true,
         ]);
-
-        add_theme_support('wp-block-styles');
-
-        add_theme_support('customize-selective-refresh-widgets');
-
-        add_filter('rss_widget_feed_link', '__return_empty_string');
     }
 
-    public function hybrid_theme_support()
+    /**
+     * Block editor and hybrid theme support.
+     *
+     * Conservative defaults suitable for ThemeForest.
+     *
+     * @return void
+     */
+    public function block_support(): void
     {
         add_theme_support('responsive-embeds');
         add_theme_support('align-wide');
-
-        // may not be needed for patterns?
+        add_theme_support('wp-block-styles');
         add_theme_support('block-patterns');
 
-        add_theme_support('block-template-parts');
-        // block_template_part('footer');
-
-        // no used?
-        add_theme_support('block-templates');
-
         register_block_pattern_category(
-            'footers',
+            'luma-footers',
             [
-                'label' => __('Footer', Config::get_domain()),
+                'label' => __('Footer', $this->domain),
             ]
         );
     }
 
     /**
-     * Registers editor styles for the block editor.
-     *
-     * Enables editor-styles support and loads the compiled editor stylesheet.
-     *
-     * Hook: after_setup_theme
+     * Editor styles integration.
      *
      * @return void
      */
-    public function core_editor_styles(): void
+    public function editor_support(): void
     {
         add_theme_support('editor-styles');
         add_editor_style('vendor/luma/core/build/css/editor.css');
     }
 
     /**
-     * Enables WooCommerce theme support features.
+     * WooCommerce compatibility.
      *
-     * Adds support for:
-     * - WooCommerce core features
-     * - product gallery zoom
-     * - product gallery lightbox
-     * - product gallery slider
-     *
-     * Hook: after_setup_theme
+     * Safe to include even if WooCommerce is inactive.
      *
      * @return void
      */
-    public function woo_commerce(): void
+    public function woocommerce_support(): void
     {
         add_theme_support('woocommerce');
         add_theme_support('wc-product-gallery-zoom');
@@ -172,34 +158,20 @@ class ThemeSetup
     }
 
     /**
-     * Registers navigation menu locations.
-     *
-     * Provides:
-     * - "main"   → primary site navigation
-     * - "footer" → footer navigation menu
-     *
-     * Hook: after_setup_theme
+     * Register navigation menu locations.
      *
      * @return void
      */
-    public function register_nav_menus(): void
+    public function register_menus(): void
     {
         register_nav_menus([
-            'primary'   => esc_html__('Primary menu', Config::get_domain()),
-            'footer' => esc_html__('Footer menu', Config::get_domain()),
+            'primary' => esc_html__('Primary Menu', $this->domain),
+            'footer'  => esc_html__('Footer Menu', $this->domain),
         ]);
     }
 
     /**
-     * Registers theme widget areas (sidebars).
-     *
-     * Registers four footer widget regions:
-     * - Footer 1
-     * - Footer 2
-     * - Footer 3
-     * - Footer 4
-     *
-     * Hook: widgets_init
+     * Register widget areas.
      *
      * @return void
      */
@@ -207,8 +179,8 @@ class ThemeSetup
     {
         for ($i = 1; $i <= 4; $i++) {
             register_sidebar([
-                'name'          => sprintf(__('Footer %d', Config::get_domain()), $i),
-                'id'            => 'footer-' . $i,
+                'name'          => sprintf(__('Footer %d', $this->domain), $i),
+                'id'            => "footer-{$i}",
                 'before_widget' => '<section id="%1$s" class="widget %2$s">',
                 'after_widget'  => '</section>',
                 'before_title'  => '<h2 class="widget-title">',

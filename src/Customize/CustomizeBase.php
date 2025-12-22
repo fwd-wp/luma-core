@@ -1,57 +1,68 @@
 <?php
 
-namespace Luma\Core\Setup;
+namespace Luma\Core\Customize;
 
-// use Luma\Core\Controllers\CustomizerButtonControl;
-
-use Luma\Core\Controllers\CustomizerButtonControl;
-use Luma\Core\Controllers\CustomizerSubheadingControl;
 use Luma\Core\Core\Config;
+use Luma\Core\Customize\Controls\ButtonControl;
+use Luma\Core\Customize\Controls\SubheadingControl;
 use Luma\Core\Helpers\Functions;
-use Luma\Core\Services\ThemeJsonService;
-use Luma\Core\Services\ThemeSettingsSchema;
-
 
 class CustomizeBase
 {
-    protected string $prefix;
-    protected string $core_kebab_prefix;
-    protected string $core_camel_prefix;
-    protected string $version;
-    public ThemeJsonService $theme_json;
+    // settings use theme variant prefix as they are stored to DB
+    protected string $prefix = 'luma_core';
+    // core kebab prefix used for core asset handles
+    protected string $core_kebab_prefix = 'luma-core';
+    // not used
+    // protected string $core_camel_prefix;
+    protected string $version = '1.0.0';
+    protected ThemeJsonService $theme_json;
+    protected array $theme_settings;
 
     public function __construct()
     {
-        $this->prefix = Config::get_prefix();
-        $this->core_kebab_prefix = Config::get_prefix_kebab_core();
-        $this->core_camel_prefix = Config::get_prefix_camel_core();
-        $this->version = Config::get_theme_version();
+        $this->prefix = Config::get_prefix() ?? $this->prefix;
+        $this->core_kebab_prefix = Config::get_prefix_kebab_core() ?? $this->core_kebab_prefix;
+        // $this->core_camel_prefix = Config::get_prefix_camel_core();
+        $this->version = Config::get_theme_version() ?? $this->version;
         $this->theme_json = new ThemeJsonService();
     }
 
-    protected function register_settings(\WP_Customize_Manager $wp_customize, string $group, ?string $section_id = null)
+    protected function register_all_settings(\WP_Customize_Manager $wp_customize): void
     {
-        // $section_id needs to be passed in for built in sections as they are not namespaced or prefixed
-        // e.g. 'title_tagline' vs 'luma_sagewood_display_page_width'
-        if (!$section_id) {
-            $section_id = $this->namespaced("{$group}_section");
+        foreach (StaticCustomizeSettings::get() as $group => $data) {
+            $this->register_group($wp_customize, $group, $data);
         }
+    }
 
-        $schema = ThemeSettingsSchema::get();
-
-        if (!isset($schema[$group])) {
-            Functions::error_log("ThemeSettingsSchema group '{$group}' not found.");
+    private function register_group(\WP_Customize_Manager $wp_customize, string $group, array $data): void
+    {   
+        if ($data['default_only'] ?? false) {
+            // skip registering settings that are default only
             return;
-        }
-        $data = $schema[$group];
+        }   
 
-        if (isset($data['title'])) {
-            $this->add_section(
-                $wp_customize,
-                $section_id,
-                $data['title'],
-                $data['priority'] ?? null,
-            );
+        if (isset($data['section'])) {
+            // section is provided for built in core 
+
+            // check if exists else skip
+            if($wp_customize->get_section($data['section']) === null) {
+                return;
+            }
+            // they will not  be namespaced, and section will not be created
+            $section_id = $data['section'];
+        } else {
+            // if section is not specified, its built from the data structure and namespaced
+            $section_id = $this->namespaced("{$group}_section");
+
+            if (isset($data['title'])) {
+                $this->add_section(
+                    $wp_customize,
+                    $section_id,
+                    $data['title'],
+                    $data['priority'] ?? null,
+                );
+            }
         }
 
         foreach ($data['settings'] as $key => $config) {
@@ -69,10 +80,19 @@ class CustomizeBase
     {
         $normalized = $this->normalize_config($config, $section_id);
 
+        // add setting
         $wp_customize->add_setting($setting_id, $normalized['setting']);
 
-        $control_class = $this->get_control_class($config['type']);
+        // --- Attach default for JS ---
+        // $setting = $wp_customize->get_setting($setting_id);
+        // if ($setting) {
+        //     // ensure the JS sees the default
+        //     $setting->params['default'] = $setting->default;
+        // }
 
+        $control_class = $this->get_control_class($config['type'] ?? '');
+
+        // add control
         if ($control_class) {
             // special control type (color, image, media, etc.)
             $wp_customize->add_control(new $control_class(
@@ -85,7 +105,8 @@ class CustomizeBase
             $wp_customize->add_control($setting_id, $normalized['control']);
         }
 
-        if (isset($normalized['partial'])) {
+        // add selective refresh partial if defined
+        if (!empty($normalized['partial'])) {
             $wp_customize->selective_refresh->add_partial(
                 $setting_id,
                 $normalized['partial']
@@ -112,6 +133,7 @@ class CustomizeBase
             'default' => $this::get_default($item['default'] ?? null, $item['type'] ?? '', $item['choices'] ?? []),
             'sanitize_callback' => $this->get_sanitizer($item),
             'transport' => $item['transport'] ?? 'postMessage',
+
         ];
 
         $control = [
@@ -128,7 +150,7 @@ class CustomizeBase
             $partial = [
                 'selector' => $item['partial']['selector'] ?? '',
                 'render_callback' => $item['partial']['render_callback'] ?? '',
-                'container_inclusive' => $item['partial']['container_inclusive'] ?? '',
+                'container_inclusive' => $item['partial']['container_inclusive'] ?? false,
             ];
         } else
             $partial = [];
@@ -142,8 +164,8 @@ class CustomizeBase
     }
 
     private function get_sanitizer(array $item)
-    {
-        switch ($item['type']) {
+    {   
+        switch ($item['type'] ?? '') {
 
             // Boolean checkbox
             case 'checkbox':
@@ -249,8 +271,8 @@ class CustomizeBase
             'image'  => \WP_Customize_Image_Control::class,
             'media'  => \WP_Customize_Media_Control::class,
             // custom
-            'subheading' => CustomizerSubheadingControl::class,
-            'button'     => CustomizerButtonControl::class,
+            'subheading' => SubheadingControl::class,
+            'button'     => ButtonControl::class,
         ][$type] ?? null;
     }
 

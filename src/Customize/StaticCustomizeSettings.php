@@ -1,6 +1,6 @@
 <?php
 
-namespace Luma\Core\Services;
+namespace Luma\Core\Customize;
 
 class StaticCustomizeSettings
 {
@@ -23,6 +23,12 @@ class StaticCustomizeSettings
                         'label'     => 'Navbar',
                         'type'      => 'subheading',
                         'priority'  => 5,
+                    ],
+                    'navbar_display_title' => [
+                        'default'   => true,
+                        'label'     => 'Display Site Title in Navbar',
+                        'type'      => 'checkbox',
+                        'priority'  => 10,
                     ],
                     'navbar_sticky' => [
                         'default'   => false,
@@ -53,11 +59,35 @@ class StaticCustomizeSettings
                         'type'      => 'subheading',
                         'priority'  => 40,
                     ],
-                    'custom_header_enable_subheading' => [
+                    'custom_header_enabled' => [
                         'default'   => false,
-                        'label'     => 'Enable Custom Image Header Heading',
+                        'label'     => 'Enable Custom Image Header',
+                        'description' => 'Displayed under navbar. Settings contained within header media section.',
                         'type'      => 'checkbox',
                         'priority'  => 45,
+                        'partial' =>   [
+                            'selector'        => '.custom-header',
+                            'render_callback' => function () {
+                                get_template_part('template-parts/header/site-custom-header-image.php');
+                            },
+                        ]
+                    ],
+                ],
+            ],
+            'header_image' => [
+                'section'     => 'header_image',
+                'settings' => [
+                    'overlay_opacity' => [
+                        'default'     => 0.25,
+                        'type'        => 'range',
+                        'label'       => 'Header Image Overlay Opacity',
+                        'description' => 'Adjust the opacity of the overlay on the header image to improve text visibility.',
+                        'priority'    => 8,
+                        'input_attrs' => [
+                            'min'   => 0,
+                            'max'   => 0.9,
+                            'step'  => 0.05,
+                        ],
                     ],
                 ],
             ],
@@ -90,7 +120,7 @@ class StaticCustomizeSettings
                     'archive_view' => [ // was post_archive_display
                         'default'   => 'excerpt',
                         'label'     => 'On Archive Pages, posts show:',
-                        // 'description' => 'Full requires list view below',
+                        'description' => 'Full requires list view below',
                         'type'      => 'radio',
                         'priority'  => 15,
                         'choices'   =>  [
@@ -100,21 +130,9 @@ class StaticCustomizeSettings
                         'partial' =>   [
                             'selector'        => '.archive-loop',
                             'render_callback' => function () {
-                                get_template_part('src/views/content/content-archive');
+                                get_template_part('template-parts/content/content-archive');
                             },
                         ]
-                    ],
-                    'archive_excerpt_length' => [
-                        'default'   => 25,
-                        'label'     => 'Post summary length',
-                        'description' => 'On Archive Pages, with summary view, number of words displayed',
-                        'type'      => 'number',
-                        'priority'  => 20,
-                        'input_attrs' => [
-                            'min'  => 10,
-                            'max'  => 50,
-                            'step' => 1,
-                        ],
                     ],
                     'archive_excerpt_format' => [
                         'default'   => 'list',
@@ -128,7 +146,24 @@ class StaticCustomizeSettings
                             'masonry'    => 'Masonry',
                         ],
                     ],
-
+                    'archive_excerpt_length' => [
+                        'default'   => 25,
+                        'label'     => 'Post summary length',
+                        'description' => 'On Archive Pages, with summary view, number of words displayed',
+                        'type'      => 'number',
+                        'priority'  => 20,
+                        'input_attrs' => [
+                            'min'  => 10,
+                            'max'  => 50,
+                            'step' => 1,
+                        ],
+                        'partial' =>   [
+                            'selector'        => '.archive-loop',
+                            'render_callback' => function () {
+                                get_template_part('template-parts/content/content-archive');
+                            },
+                        ]
+                    ],
                     'post_author_bio' => [
                         'default'   => true,
                         'label'     =>  'On single post pages, show author bio in the footer',
@@ -139,7 +174,7 @@ class StaticCustomizeSettings
                             'selector'        => '.author-bio',
                             'container_inclusive' => true,
                             'render_callback' => function () {
-                                get_template_part('src/views/post/author-bio');
+                                get_template_part('template-parts/post/author-bio');
                             },
                         ]
                     ],
@@ -160,29 +195,30 @@ class StaticCustomizeSettings
     {
         $categories = [
             'body' => [
-                'label'       => 'Body',
-                'family'      => ['label' => 'Font Family', 'choices' => 'fontFamilies'],
-                'weight'      => ['label' => 'Font Weight', 'min' => 300, 'max' => 600,],
-                'line-height' => ['label' => 'Line Height', 'min' => 1.2, 'max' => 2.0,],
-                'size'        => ['label' => 'Font Size',   'choices' => 'fontSizes'],
+                'subheading'  => ['label' => 'Body',        'type' => 'subheading',],
+                'family'      => ['label' => 'Font Family', 'type' => 'select', 'choices' => 'fontFamilies',],
+                'weight'      => ['label' => 'Font Weight', 'type' => 'number', 'min' => 300, 'max' => 600,],
+                'line-height' => ['label' => 'Line Height', 'type' => 'number', 'min' => 1.2, 'max' => 2.0,],
+                'size'        => ['label' => 'Font Size',   'type' => 'select', 'choices' => 'fontSizes',],
+                'reset'       => ['label' => 'Reset',       'type' => 'button',],
             ],
             'heading' => [
-                'label'       => 'Heading',
-                'family'      => ['label' => 'Font Family', 'choices' => 'fontFamilies'],
-                'weight'      => ['label' => 'Font Weight', 'min' => 400, 'max' => 900, 'step' => 100,],
-                'line-height' => ['label' => 'Line Height', 'min' => 1.0, 'max' => 1.5, 'step' => 0.1,],
-                'size'        => false,
+                'subheading'  => ['label'  => 'Heading',    'type' => 'subheading',],
+                'family'      => ['label' => 'Font Family', 'type' => 'select', 'choices' => 'fontFamilies',],
+                'weight'      => ['label' => 'Font Weight', 'type' => 'number', 'min' => 400, 'max' => 900,],
+                'line-height' => ['label' => 'Line Height', 'type' => 'number', 'min' => 1.0, 'max' => 1.5,],
+                'reset'       => ['label' => 'Reset',       'type' => 'button',],
+
             ],
         ];
 
         // Optionally add custom header if supported and enabled
         if (current_theme_supports('custom-header') && get_header_image()) {
             $categories['custom-header'] = [
-                'label'       => 'Image Header',
-                'family'      => false,
-                'weight'      => ['label' => 'Font Weight', 'min' => 400, 'max' => 700,],
-                'line-height' => ['label' => 'Line Height', 'min' => 1.0, 'max' => 1.5,],
-                'size'        => false,
+                'subheading'  => ['label' => 'Image Header', 'type' => 'subheading'],
+                'family'      => ['label' => 'Font Family', 'type' => 'select', 'choices' => 'fontFamilies',],
+                'weight'      => ['label' => 'Font Weight', 'type' => 'number', 'min' => 400, 'max' => 700,],
+                'line-height' => ['label' => 'Line Height', 'type' => 'number', 'min' => 1.0, 'max' => 1.5,],
             ];
         }
 

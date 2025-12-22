@@ -4,12 +4,12 @@ namespace Luma\Core\Helpers;
 
 use Luma\Core\Core\Config;
 use Luma\Core\Models\SVGIconsModel;
-use Luma\Core\Services\ThemeSettingsSchema;
+use Luma\Core\Customize\ThemeSettingsSchema;
 
 /**
  * Functions which enhance the theme by hooking into WordPress
  * 
- *  Class must be initialised with TemplateFunctions::init($config) before use to set prefix and domain.
+ *  Class must be initialised with TemplateFunctions::init($config) before use to set domain.
  *
  * @package Luma-Core
  *  
@@ -21,6 +21,7 @@ class TemplateFunctions
 
 	public static function init(): void
 	{
+		// uses theme variant prefix for translations
 		self::$domain = Config::get_domain() ?? self::$domain;
 	}
 
@@ -310,5 +311,18 @@ class TemplateFunctions
 		return $type === 'singular'
 			? ($post_type_object->labels->singular_name ?? '')
 			: ($post_type_object->labels->name ?? '');
+	}
+
+	public static function is_list_view(): bool
+	{
+		if ((is_archive() || (is_home() && ! is_front_page()))) {
+			return true;
+		}
+		return false;
+	}
+
+	public static function can_display_post_author_bio(): bool
+	{
+		return ThemeSettingsSchema::get_theme_mod('display_post_author_bio');
 	}
 }

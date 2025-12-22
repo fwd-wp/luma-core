@@ -4,12 +4,23 @@ namespace Luma\Core\Helpers;
 
 use Luma\Core\Core\Config;
 
+/**
+ * Base class for template tag helpers.
+ * 
+ * need to run ::init() in functions.php after Config is initialized
+ * so that domain is set correctly for translations
+ * 
+ * @package Luma-Core
+ * @since Luma-Core 1.0
+ */
+
 class TemplateTagsBase
 {
     protected static string $domain = 'luma-core';
 
     public static function init(): void
     {
+        // uses theme variant prefix for translations
         self::$domain = Config::get_domain() ?? self::$domain;
     }
 

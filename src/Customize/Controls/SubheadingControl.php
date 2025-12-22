@@ -1,7 +1,8 @@
 <?php
 
-namespace Luma\Core\Controllers;
-use WP_Customize_Control;
+namespace Luma\Core\Customize\Controls;
+
+use WP_Customize_Manager;
 
 if (! defined('ABSPATH')) {
     exit;
@@ -15,18 +16,18 @@ if (! defined('ABSPATH')) {
  * @package Luma-Core
  * @since Luma-Core 1.0
  */
-final class CustomizerSubheadingControl extends WP_Customize_Control
+final class SubheadingControl extends BaseControl
 {
-    /**
-     * Control type.
-     *
-     * This identifies the control type as "customize_category" so the Customizer
-     * can handle it appropriately.
-     *
-     * @since Luma-Core 1.0
-     * @var string
-     */
-    public $type = 'customize_category';
+
+    public function __construct(
+        WP_Customize_Manager $manager,
+        string $id,
+        array $args = []
+    ) {
+        parent::__construct($manager, $id, $args);
+
+        $this->type = $this->prefixed_type('subheading');
+    }
 
     /**
      * Render the control content in the Customizer.
@@ -39,7 +40,10 @@ final class CustomizerSubheadingControl extends WP_Customize_Control
     public function render_content()
     {
 ?>
-        <h4 class="customize_control_title customize_control_category">
+        <h4
+            class="customize-control customize-control-<?php echo esc_attr($this->type); ?>"
+            data-type="<?php echo esc_attr($this->type); ?>"
+            id="<?php echo esc_attr($this->id); ?>">
             <?php echo esc_html($this->label); ?>
         </h4>
 <?php

@@ -5,7 +5,7 @@ namespace Luma\Core\Setup;
 use Luma\core\Core\Config;
 use Luma\Core\Helpers\Functions;
 use Luma\Core\Helpers\TemplateFunctions;
-use Luma\Core\Services\ThemeSettingsSchema;
+use Luma\Core\Customize\ThemeSettingsSchema;
 
 /**
  * Filter WP core Functions which enhance the theme by hooking into WordPress 
@@ -32,10 +32,12 @@ class TemplateFilters
 		add_filter('the_password_form', array($this, 'filter_password_form'), 10, 2);
 		add_filter('wp_link_pages_args', [$this, 'filter_wp_link_pages_args']);
 		add_filter('edit_post_link', [$this, 'filter_edit_post_link'], 10, 3);
+		add_filter('get_header_image_tag', [$this, 'filter_header_image_tag'], 10, 3);
+
 
 		// Custom logo handling
 		add_filter('wp_generate_attachment_metadata', [$this, 'filter_attachment_metadata'], 10, 2);
-		add_filter('get_custom_logo', [$this, 'filter_custom_logo']);
+		add_filter('get_custom_logo', [$this, 'filter_custom_logo'], 10, 2);
 	}
 
 	public function __construct()
@@ -131,7 +133,7 @@ class TemplateFilters
 	 * @since Luma-Core 1.0
 	 */
 	public function filter_excerpt_length(int $length): int
-	{	
+	{
 		return ThemeSettingsSchema::get_theme_mod('display_archive_excerpt_length');
 	}
 
@@ -257,6 +259,57 @@ class TemplateFilters
 		return str_replace(esc_html($text), esc_html($new_text), $link);
 	}
 
+
+	public function filter_header_image_tag($html, $header, $attr)
+	{
+		$site_name    = get_bloginfo('name');
+		$description  = get_bloginfo('description', 'display');
+
+		$text_color = get_header_textcolor();
+		$text_style = '';
+		if (!empty($text_color) && $text_color !== 'blank') {
+			$text_style = ' style="color:' . esc_attr( '#' . $text_color) . '"';
+		}
+
+		// Only add if user wants to display title/tagline
+		if (get_theme_mod('display_title_and_tagline', true) || is_customize_preview()) {
+
+			// Build IDs for aria-labelledby
+			$aria_ids = [];
+			$aria_ids[] = 'wp-custom-header-title';
+			if ($description) {
+				$aria_ids[] = 'wp-custom-header-description';
+			}
+
+			// Add wrapper with aria-labelledby
+			$html .= sprintf(
+				'<div class="wp-custom-header-inner" aria-labelledby="%s">',
+				esc_attr(implode(' ', $aria_ids))
+			);
+
+			// Site title
+			$html .= sprintf(
+				'<div id="wp-custom-header-title" class="wp-custom-header-title"%s>%s</div>',
+				$text_style,
+				esc_html($site_name)
+			);
+
+			// Site description (tagline)
+			if ($description || is_customize_preview()) {
+				$html .= sprintf(
+					'<div id="wp-custom-header-description" class="wp-custom-header-description"%s>%s</div>',
+					$text_style,
+					esc_html($description)
+				);
+			}
+
+			$html .= '</div>'; // close wp-custom-header-inner
+		}
+
+		return $html;
+	}
+
+
 	/**
 	 * Generate custom logo sizes for desktop and mobile 1x/2x.
 	 *
@@ -286,9 +339,18 @@ class TemplateFilters
 		$orig_size   = $editor->get_size();
 		$orig_height = $orig_size['height'] ?? 0;
 
+		$custom_logo_args = get_theme_support('custom-logo');
+
+		if ($custom_logo_args) {
+			$args = $custom_logo_args[0]; // WordPress wraps it in a nested array
+			$logo_height = (int) $args['height'] ?? 130;
+		}
+
 		$heights = [
-			'desktop_1x' => 65,
-			'desktop_2x' => 130,
+			// get desktop heights from the theme support args
+			'desktop_1x' => (int) ($logo_height / 2),
+			'desktop_2x' => $logo_height,
+			// mobile is fixed
 			'mobile_1x'  => 45,
 			'mobile_2x'  => 90,
 		];
@@ -323,35 +385,50 @@ class TemplateFilters
 	}
 
 	/**
-	 * Output a responsive <picture> logo with desktop/mobile 1x/2x.
+	 * Replace the <img> in the original custom logo HTML with a responsive <picture>.
 	 *
 	 * @param string $html
 	 * @param int    $blog_id
 	 * @return string
 	 */
-	public function filter_custom_logo($html): string
+	public static function filter_custom_logo(string $html, int $blog_id = 0): string
 	{
-		$logo_id = get_theme_mod('custom_logo');
+		$logo_id = get_theme_mod('custom_logo', false, $blog_id);
 
 		if (! $logo_id) {
-			// no error log, as not required to set a custom logo
-			return $html;
+			return $html; // no logo, keep original HTML
 		}
 
 		$meta = wp_get_attachment_metadata($logo_id);
 		if (!$meta) {
-			Functions::error_log("Missing metadata for logo ID {$logo_id}");
-			return $html;
+			return $html; // metadata missing
 		}
 
+		$picture = self::generate_picture_tag($logo_id, $meta);
+
+		// replace first <img> with <picture>
+		$html = preg_replace('#<img.*?>#i', $picture, $html, 1);
+
+		return $html;
+	}
+
+	/**
+	 * Generate a responsive <picture> tag with retina sources.
+	 *
+	 * @param int   $logo_id
+	 * @param array $meta Attachment metadata
+	 * @return string
+	 */
+	public static function generate_picture_tag(int $logo_id, array $meta): string
+	{
 		$fallback = wp_get_attachment_image_url($logo_id, 'full');
-		$full_width  = $meta['width'] ?? '';
-		$full_height = $meta['height'] ?? '';
-		$breakpoint_setting = wp_get_global_settings(['custom', 'breakpoint', 'navbar']);
-		$breakpoint = is_array($breakpoint_setting) ? '800px' : $breakpoint_setting;
-		$bp_int = (int) $breakpoint;
-		$bp_max = ($bp_int - 1) . 'px';
-		// category slug => breakpoint media query
+		$full_width  = (int) ($meta['width'] ?? 0);
+		$full_height = (int) ($meta['height'] ?? 0);
+
+		$breakpoint = wp_get_global_settings(['custom', 'breakpoint', 'navbar']) ?? '800px';
+		$bp_int     = (int) $breakpoint;
+		$bp_max     = ($bp_int - 1) . 'px';
+
 		$categories = [
 			'mobile'  => "(max-width: {$bp_max})",
 			'desktop' => "(min-width: {$breakpoint})",
@@ -375,7 +452,7 @@ class TemplateFilters
 			}
 
 			if ($srcset_parts) {
-				$display_width = $meta['sizes']["{$cat}_1x"]['width'] ?? 100;
+				$display_width = (int) ($meta['sizes']["{$cat}_1x"]['width'] ?? 100);
 				$sources[] = [
 					'media'  => $media_query,
 					'srcset' => implode(', ', $srcset_parts),
@@ -385,10 +462,10 @@ class TemplateFilters
 		}
 
 		ob_start(); ?>
-		<picture class="site-logo">
+		<picture class="custom-logo-picture">
 			<?php foreach ($sources as $source): ?>
 				<source
-					<?php if ($source['media']): ?>
+					<?php if (!empty($source['media'])): ?>
 					media="<?php echo esc_attr($source['media']); ?>"
 					<?php endif; ?>
 					srcset="<?php echo esc_attr($source['srcset']); ?>"

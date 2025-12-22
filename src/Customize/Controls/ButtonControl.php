@@ -1,8 +1,8 @@
 <?php
 
-namespace Luma\Core\Controllers;
+namespace Luma\Core\Customize\Controls;
 
-use \WP_Customize_Control;
+use WP_Customize_Manager;
 
 if (! defined('ABSPATH')) {
     exit;
@@ -11,23 +11,21 @@ if (! defined('ABSPATH')) {
 /**
  * Custom category control for the WordPress Customizer.
  *
- * Adds a simple heading label for grouping sections or controls in the Customizer.
- *
  * @package Luma-Core
  * @since Luma-Core 1.0
  */
-final class CustomizerButtonControl extends WP_Customize_Control
+final class ButtonControl extends BaseControl
 {
-    /**
-     * Control type.
-     *
-     * This identifies the control type as "customize_category" so the Customizer
-     * can handle it appropriately.
-     *
-     * @since Luma-Core 1.0
-     * @var string
-     */
-    public $type = 'font_reset_button';
+    public function __construct(
+        WP_Customize_Manager $manager,
+        string $id,
+        array $args = []
+    ) {
+        parent::__construct($manager, $id, $args);
+
+        $this->type = $this->prefixed_type('font-reset-button');
+    }
+
 
     /**
      * Render the control content in the Customizer.
@@ -42,9 +40,9 @@ final class CustomizerButtonControl extends WP_Customize_Control
 ?>
         <button
             type="button"
-            class="button button-secondary font-reset-button"
+            class="button button-secondary customize-control customize-control-<?php echo esc_attr($this->type); ?>"
             id="<?php echo esc_attr($this->id); ?>"
-            data-category="<?php echo esc_attr($this->id); ?>"
+            data-type="<?php echo esc_attr($this->type); ?>"
             aria-label="<?php echo esc_attr($this->label); ?>">
             <?php echo esc_html($this->label); ?>
         </button>
