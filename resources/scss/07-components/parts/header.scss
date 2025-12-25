@@ -157,8 +157,8 @@
 		content: "";
 		position: absolute;
 		inset: 0; // shorthand for top:0; right:0; bottom:0; left:0;
-		// todo: add overlay strength a setting
-		background: rgba(0, 0, 0, 0.25); // adjust as needed
+		/* default to 0.25 if not set */
+		background: rgba(0, 0, 0, var(--wp--custom--custom-header--overlay-opacity, 0.25));
 		z-index: -1;
 	}
 

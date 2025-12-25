@@ -283,7 +283,7 @@ class TemplateFilters
 
 			// Add wrapper with aria-labelledby
 			$html .= sprintf(
-				'<div class="wp-custom-header-inner" aria-labelledby="%s">',
+				'<div class="wp-custom-header-text-overlay" aria-labelledby="%s">',
 				esc_attr(implode(' ', $aria_ids))
 			);
 

@@ -140,7 +140,7 @@ class ThemeSettingsSchema
             $default = $item['default'] ?? null;
             $type = $item['type'] ?? '';
             $choices = $item['choices'] ?? [];
-            $default_fallback = CustomizeBase::get_default($default, $type, $choices) ?? null;
+            $default_fallback = CustomizeBase::get_default($type, $choices) ?? null;
 
             $default = $default ?? $default_fallback;
             return $default;

@@ -1,6 +1,7 @@
 TODO:
-customizer - set up variable for custom image opacity - not needed in theme.json???
+customizer - FIX overlay opacity - not saving properly, also not retrieving default
 Customizer - auto update on post excerpt length - also setting not working
+theme.json check core and custom radius settings, merge to core and update styles in theme.json and scss
 
 
 fix masonry preview

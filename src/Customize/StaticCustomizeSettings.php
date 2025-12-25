@@ -74,23 +74,6 @@ class StaticCustomizeSettings
                     ],
                 ],
             ],
-            'header_image' => [
-                'section'     => 'header_image',
-                'settings' => [
-                    'overlay_opacity' => [
-                        'default'     => 0.25,
-                        'type'        => 'range',
-                        'label'       => 'Header Image Overlay Opacity',
-                        'description' => 'Adjust the opacity of the overlay on the header image to improve text visibility.',
-                        'priority'    => 8,
-                        'input_attrs' => [
-                            'min'   => 0,
-                            'max'   => 0.9,
-                            'step'  => 0.05,
-                        ],
-                    ],
-                ],
-            ],
             'display' => [
                 'title' => 'Post and Page Display',
                 'priority' => 35,

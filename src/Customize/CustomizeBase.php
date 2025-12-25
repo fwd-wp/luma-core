@@ -28,9 +28,9 @@ class CustomizeBase
         $this->theme_json = new ThemeJsonService();
     }
 
-    protected function register_all_settings(\WP_Customize_Manager $wp_customize): void
+    protected function register_all_settings(\WP_Customize_Manager $wp_customize, array $theme_settings): void
     {
-        foreach (StaticCustomizeSettings::get() as $group => $data) {
+        foreach ($theme_settings as $group => $data) {
             $this->register_group($wp_customize, $group, $data);
         }
     }
@@ -39,6 +39,8 @@ class CustomizeBase
     {   
         if ($data['default_only'] ?? false) {
             // skip registering settings that are default only
+            // only used so that core setting, along with default value if needed can be retrieved in templates
+            // default is retrieved from the themeSettingsShema, not registered in cusotmizer
             return;
         }   
 
@@ -46,6 +48,8 @@ class CustomizeBase
             // section is provided for built in core 
 
             // check if exists else skip
+            // if its a daynamic core section, and its turned off it will be skipped
+            // core section will not be created
             if($wp_customize->get_section($data['section']) === null) {
                 return;
             }
@@ -130,7 +134,7 @@ class CustomizeBase
         }
 
         $setting = [
-            'default' => $this::get_default($item['default'] ?? null, $item['type'] ?? '', $item['choices'] ?? []),
+            'default' => $item['default'] ?? $this::get_default($item['type'] ?? '', $item['choices'] ?? []),
             'sanitize_callback' => $this->get_sanitizer($item),
             'transport' => $item['transport'] ?? 'postMessage',
 
@@ -189,7 +193,7 @@ class CustomizeBase
                 $min = $item['min'] ?? null;
                 $max = $item['max'] ?? null;
                 return static function ($val) use ($min, $max) {
-                    $val = absint($val);
+                    $val = (float) $val;
                     if ($min !== null) $val = max($val, $min);
                     if ($max !== null) $val = min($val, $max);
                     return $val;
@@ -224,13 +228,8 @@ class CustomizeBase
     }
 
 
-    public static function get_default(mixed $default = null, string $type = '', array $choices = [])
+    public static function get_default(string $type = '', array $choices = [])
     {
-        // explicit default always wins
-        if ($default) {
-            return $default;
-        }
-
         switch ($type) {
             case 'checkbox':
                 // WP default is ''

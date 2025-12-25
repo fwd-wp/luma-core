@@ -95,6 +95,7 @@ class Customize extends CustomizeBase
     }
 
     // gets settings and registers them in ThemeSettingsSchema
+    // can then be retrieved via ThemeSettingsSchema::get() elsehwere at template runtime
     public function generate_settings(): void
     {
         // Get and set static settings from file
@@ -116,7 +117,8 @@ class Customize extends CustomizeBase
      */
     public function register_customize_settings(WP_Customize_Manager $wp_customize): void
     {
-        $this->register_all_settings($wp_customize);
+        $theme_settings = ThemeSettingsSchema::get();
+        $this->register_all_settings($wp_customize, $theme_settings);
     }
 
     public function modify_theme_json_user(WP_Theme_JSON_Data $wp_theme_json_data): WP_Theme_JSON_Data
@@ -171,6 +173,20 @@ class Customize extends CustomizeBase
                 $user_json['custom']['font'][$setting['property']][$setting['category']] = "var(--wp--preset--font--{$value})";
             }
         }
+
+        // CUSTOM HEADER OVERLAY OPACITY
+        $setting = $theme_settings['header_image']['settings']['overlay-opacity'] ?? null;
+        // print('<pre>' . print_r($setting, true) . '</pre>');
+
+        $theme_mod_value = ThemeSettingsSchema::get_theme_mod($setting['setting_id'] ?? null);
+        // print('<pre>');
+        // print_r(ThemeSettingsSchema::get_settings_list());
+        // print('</pre>');
+        // print('<pre>default:' . var_dump($theme_mod_value) . '</pre>'); 
+
+        // if ($theme_mod_value || $setting['default'] || $theme_mod_value !== $setting['default']) {
+        //     $user_json['custom']['customHeader']['overlayOpacity'] = $theme_mod_value;
+        // }
 
         // Update theme JSON (user) with merged palette
         $new_data = [

@@ -48,6 +48,10 @@ class ThemeJsonSettings
                 'priority' => 50,
                 'settings' => [],
             ],
+            'header_image' => [
+                'section'     => 'header_image',
+                'settings' => [],
+            ],
         ];
 
         // For both color types, css_var and setting added for lookup in customizer preview js script
@@ -168,6 +172,33 @@ class ThemeJsonSettings
                 $priority += 5;
             }
         }
+
+        // custom header overlay opacity (1 off setting)
+        // added to a core section (as set at top of this method)
+        $default = $this->theme_json->get(['settings', 'custom', 'customHeader', 'overlayOpacity'])->raw();
+        //print('<pre>' . print_r($default, true) . '</pre>');
+        // 0.25
+    //print('<pre>' . print_r(ThemeSettingsSchema::get(), true) . '</pre>');
+
+
+        $dynamic_settings['header_image']['settings']["overlay-opacity"] = [
+            'default'     => $default,
+            'priority'    => 10,
+            'type'        => 'range',
+            'label'       => 'Header Image Overlay Opacity',
+            'description' => 'Adjust the opacity of the overlay on the header image to improve text visibility.',
+            'priority'    => 8,
+            'input_attrs' => [
+                'min'   => 0,
+                'max'   => 0.9,
+                'step'  => 0.05,
+            ],
+            'css_var'  => '--wp--custom--custom-header--overlay-opacity',
+            'setting_id'  => 'header_image_overlay-opacity',
+            'setting_id_prefixed'  => "{$this->prefix}_header_image_overlay-opacity",
+
+        ];
+
 
         return $dynamic_settings;
     }

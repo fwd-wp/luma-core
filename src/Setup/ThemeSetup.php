@@ -96,8 +96,9 @@ class ThemeSetup
         ]);
 
 
-        $header_enabled = ThemeSettingsSchema::get_theme_mod('header_custom_header_enabled') ?? false;
-        if ($header_enabled) {
+        $custom_header_enabled = ThemeSettingsSchema::get_theme_mod('header_custom_header_enabled') ?? false;
+        if ($custom_header_enabled) {
+            // TODO: MOVE SETTING UP, CURRENTLY RETURNING FALSE EVEN WHEN SETTING IS ENABLED/TRUE
         }
         add_theme_support('custom-header', [
             'width'       => 1600,
