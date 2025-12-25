@@ -1,0 +1,9 @@
+onlyBuiltDependencies:
+  - '@parcel/watcher'
+  - '@wp-blocks/make-pot'
+  - core-js
+  - core-js-pure
+  - tree-sitter
+  - tree-sitter-javascript
+  - tree-sitter-php
+  - tree-sitter-typescript
