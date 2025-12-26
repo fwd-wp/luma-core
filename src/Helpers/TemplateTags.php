@@ -9,7 +9,7 @@ use Luma\Core\Customize\ThemeSettingsSchema;
  *
  * All functions output escaped (safe) HTML.
  * 
- * Class must be initialised with TemplateTags::init($config) before use to set translation domain.
+ * If method uses text domain, it must be checked and potentially initialised with self::set_domain()
  *
  * @package Luma-Core
  * @since Luma-Core 1.0
@@ -43,6 +43,8 @@ class TemplateTags extends TemplateTagsBase
 		if (!is_sticky()) {
 			return null;
 		}
+
+		self::set_domain();
 
 		$defaults = [
 			'before'        => __('Featured', self::$domain),
@@ -239,6 +241,8 @@ class TemplateTags extends TemplateTagsBase
 			return null;
 		}
 
+		self::set_domain();
+
 		$defaults = [
 			'class'  => 'byline',
 			'before' => __('Created by', self::$domain),
@@ -324,6 +328,8 @@ class TemplateTags extends TemplateTagsBase
 	 */
 	public static function the_posts_navigation(bool $echo = true, array $args = []): ?string
 	{
+		self::set_domain();
+
 		// Get post type plural label for defaults
 		$plural = TemplateFunctions::get_post_type_label('plural') ?? __('posts', self::$domain);
 
@@ -398,6 +404,8 @@ class TemplateTags extends TemplateTagsBase
 	 */
 	public static function single_post_navigation(bool $echo = true, array $args = []): ?string
 	{
+		self::set_domain();
+
 		// Get current post type singular label
 		$singular_label = TemplateFunctions::get_post_type_label('singular') ?? esc_html__('Post', self::$domain);
 
@@ -499,9 +507,9 @@ class TemplateTags extends TemplateTagsBase
 		}
 
 
-		$title = is_front_page()
-			? esc_html($name)
-			: '<a href="' . esc_url(home_url('/')) . '" rel="home">' . esc_html($name) . '</a>';
+		$title = ! is_front_page() && $show
+			? '<a href="' . esc_url(home_url('/')) . '" rel="home">' . esc_html($name) . '</a>'
+			: esc_html($name);
 
 		if (TemplateFunctions::is_list_view()) {
 			// if page title is shown, h1 is used in the page title, not for site title
@@ -705,6 +713,8 @@ class TemplateTags extends TemplateTagsBase
 		bool $echo = true,
 		array $args = []
 	): ?string {
+
+		self::set_domain();
 
 		$defaults = [
 			'class'               => 'read-more',
@@ -1004,6 +1014,8 @@ class TemplateTags extends TemplateTagsBase
 			return $echo ? null : '';
 		}
 
+		self::set_domain();
+
 		$defaults = [
 			'class'  => 'posted-on',
 			'before' => __('Published in', self::$domain),
@@ -1081,6 +1093,8 @@ class TemplateTags extends TemplateTagsBase
 			return $echo ? null : '';
 		}
 
+		self::set_domain();
+
 		$defaults = [
 			'class' => 'meta-nav posted-in',
 			'text'  => __('Published in', self::$domain),
@@ -1146,6 +1160,8 @@ class TemplateTags extends TemplateTagsBase
 	 */
 	public static function attachment_full_size_link(bool $echo = true, array $args = []): ?string
 	{
+		self::set_domain();
+
 		$defaults = [
 			'class'  => 'full-size-image-link',
 			'before' => __('View full size image', self::$domain),

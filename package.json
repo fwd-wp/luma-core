@@ -26,12 +26,11 @@
 		"path": "^0.12.7"
 	},
 	"scripts": {
-		"start": "wp-scripts start",
+		"start": "pnpm exec wp-scripts start",
 		"build": "cross-env NODE_ENV=production webpack --config webpack.config.js",
 		"lint:scss": "wp-scripts lint-style resources/scss/**/*.scss",
 		"lint:js": "wp-scripts lint-js 'resources/js/*.js' 'resources/blocks/**/*.js'",
 		"format": "wp-scripts format",
-		"clean": "gulp clean",
 		"bump:patch": "npm version patch",
 		"bump:minor": "npm version minor",
 		"bump:major": "npm version major",

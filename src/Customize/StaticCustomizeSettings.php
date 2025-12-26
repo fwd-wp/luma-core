@@ -8,7 +8,6 @@ class StaticCustomizeSettings
     {
         $settings = [
             'wp-core' => [
-                'defaults_only' => true,
                 'settings' => [
                     'display_title_and_tagline' => [
                         'default'   => true,

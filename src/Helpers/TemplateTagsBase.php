@@ -16,15 +16,16 @@ use Luma\Core\Core\Config;
 
 class TemplateTagsBase
 {
-    protected static string $domain = 'luma-core';
+    // stores theme variant domain, self::set_domain() needs to be run first if domain is needed in a method
+    private static string $domain;
 
-    public static function init(): void
+    protected static function set_domain(): void
     {
-        // uses theme variant prefix for translations
-        self::$domain = Config::get_domain() ?? self::$domain;
+        if (!isset(self::$domain)) {
+            // checks and sets the prefix
+            self::$domain = Config::get_domain() ?? 'luma-core';
+        }
     }
-
-
 
     /**
      * Internal helper Wraps an array of label parts in a <span> with a given CSS class.

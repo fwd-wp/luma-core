@@ -17,12 +17,15 @@ use Luma\Core\Customize\ThemeSettingsSchema;
  */
 class TemplateFunctions
 {
-	protected static string $domain = 'luma-core';
+	// stores theme variant domain, self::set_domain() needs to be run first if domain is needed in a method
+	private static string $domain;
 
-	public static function init(): void
+	private static function set_domain(): void
 	{
-		// uses theme variant prefix for translations
-		self::$domain = Config::get_domain() ?? self::$domain;
+		if (!isset(self::$domain)) {
+			// checks and sets the prefix
+			self::$domain = Config::get_domain() ?? 'luma-core';
+		}
 	}
 
 	/**
@@ -197,6 +200,8 @@ class TemplateFunctions
 	 */
 	public static function continue_reading_text($echo = true, array $args = []): ?string
 	{
+		self::set_domain();
+
 		$defaults = [
 			'label' => __('Continue reading', self::$domain),
 		];

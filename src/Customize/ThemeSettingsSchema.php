@@ -11,23 +11,23 @@ class ThemeSettingsSchema
     private static array $cache = [];
 
     // stores theme variant prefix, self::set_prefix() needs to be run first if prefix is needed in a method
-    private static string $prefix = 'luma_core';
+    private static string $prefix;
 
     private static function set_prefix(): void
     {
-        if (self::$prefix === '') {
-            // uses theme variant prefix for settings as they are stored to DB
-            self::$prefix = Config::get_prefix() ?? self::$prefix;
+        if(!isset(self::$prefix)) {
+        // uses theme variant prefix for settings as they are stored to DB
+        self::$prefix = Config::get_prefix() ?? 'luma_core';
         }
     }
 
     /**
      * Get a list of all settings with their default and current value.
-     * @param bool $prefix Whether to prefix the keys with the theme prefix. Only used to see whats available to custoize.
+     * @param bool $show_prefix Whether to prefix the keys with the theme prefix. Only used to see whats available to custoize.
      * @return array An associative array of settings keys to their default and current value.
      * 
      */
-    public static function get_settings_list($prefix = false): array
+    public static function get_settings_list($show_prefix = false): array
     {
         $schema = self::get();
         if (!is_array($schema)) {
@@ -54,11 +54,14 @@ class ThemeSettingsSchema
                 if (isset($items['type']) && in_array($items['type'], ['subheading', 'button'], true)) {
                     continue;
                 }
-
-                // Build key
-                $key = ($prefix ? self::$prefix : '') . "{$group}_{$id}";
-
-                $list[$key] =  self::get_theme_mod_default_and_value("{$group}_{$id}");
+                $key = "{$group}_{$id}";
+                // Build key for non core settings
+                if ($group == 'wp-core') {
+                    $list[$key] =  self::get_theme_mod_default_and_value($key, true);
+                } else {
+                    $setting = ($show_prefix ? self::$prefix . '_' : '') . $key;
+                    $list[$setting] =  self::get_theme_mod_default_and_value($key);
+                }
             }
         }
 
@@ -93,59 +96,51 @@ class ThemeSettingsSchema
      * safe to use in templates
      * 
      */
-    public static function get_theme_mod(string $key): mixed
+    public static function get_theme_mod(string $key, bool $core = false): mixed
     {
-        self::set_prefix();
-
-        // Extract group and key
-        $parts = explode('_', $key, 2); // split into 2 parts only
-        if (count($parts) < 2) {
-            // fallback if key format is invalid
-            return get_theme_mod($key);
+        if ($core === false) {
+            self::set_prefix();
+            $prefix = self::$prefix;
+            $default = self::get_theme_mod_default($key);
+            // need to prefix with theme variant prefix for get_theme_mod()
+            $key = "{$prefix}_{$key}";
+            //print('<pre>' . print_r($key, true) . '</pre> ');
+        } else {
+            $default = self::get_theme_mod_default($key, true);
+            // no prefixing of key for get_theme_mod
         }
 
-        [$group_name, $sub_key] = $parts;
-
-
-        if ($group_name === 'wp-core') {
-            $full_key = $sub_key;
-        }
-
-        $prefix = self::$prefix;
-
-        $full_key = "{$prefix}_{$key}";
-
-        $default = self::get_theme_mod_default($key);
-        if ($default) {
-            return get_theme_mod($full_key, $default);
-        }
-
-        return get_theme_mod($full_key);
+        return get_theme_mod($key, $default);
     }
 
-    public static function get_theme_mod_default(string $key): mixed
+    public static function get_theme_mod_default(string $key, bool $core = false): mixed
     {
-        // Extract group and key
-        $parts = explode('_', $key, 2); // split into 2 parts only
-        if (count($parts) < 2) {
-            // fallback if key format is invalid
-            return get_theme_mod($key);
+        if ($core === false) {
+            // Extract group and key
+            $parts = explode('_', $key, 2); // split into 2 parts only
+            if (count($parts) < 2) {
+                // fallback if key format is invalid
+                return get_theme_mod($key);
+            }
+
+            [$group_name, $sub_key] = $parts;
+
+            // utlize default from settings list, if it exists
+            $item = self::$cache[$group_name]['settings'][$sub_key] ?? null;
+        } else {
+            $item = self::$cache['wp-core']['settings'][$key] ?? null;
         }
 
-        [$group_name, $sub_key] = $parts;
-
-        // utlize default from settings list, if it exists
-        $item = self::$cache[$group_name]['settings'][$sub_key] ?? null;
-        if (isset($item)) {
-            $default = $item['default'] ?? null;
-            $type = $item['type'] ?? '';
-            $choices = $item['choices'] ?? [];
-            $default_fallback = CustomizeBase::get_default($type, $choices) ?? null;
-
-            $default = $default ?? $default_fallback;
-            return $default;
+        if (!isset($item)) {
+            return null;
         }
-        return '';
+
+        $default = $item['default'] ?? null;
+        $type = $item['type'] ?? '';
+        $choices = $item['choices'] ?? [];
+        $default_fallback = CustomizeBase::get_default($type, $choices) ?? null;
+        $default = $default ?? $default_fallback;
+        return $default;
     }
 
     public static function get_theme_mod_default_and_value(string $key): array

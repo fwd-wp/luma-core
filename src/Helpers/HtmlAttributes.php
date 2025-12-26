@@ -135,11 +135,11 @@ class HtmlAttributes
             'has_logo'        => has_custom_logo(),
             'has_menu'        => has_nav_menu('main'),
             'has_title'       => (
-                ThemeSettingsSchema::get_theme_mod('wp-core_display_title_and_tagline')
+                ThemeSettingsSchema::get_theme_mod('navbar_display_title')
                 && get_bloginfo('name') !== ''
             ),
             'has_description' => (
-                ThemeSettingsSchema::get_theme_mod('wp-core_display_title_and_tagline')
+                ThemeSettingsSchema::get_theme_mod('navbar_display_title')
                 && get_bloginfo('description') !== ''
             ),
             'is_full'         => ThemeSettingsSchema::get_theme_mod('header_navbar_full_width'),
