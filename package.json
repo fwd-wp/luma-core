@@ -1,6 +1,6 @@
 {
 	"name": "luma-core",
-	"version": "0.0.1",
+	"version": "1.0.0",
 	"description": "Core files for Luma Wordpress Themes",
 	"author": "Sean Emerson <emerson.sean.dev@gmail.com>",
 	"license": "GPL-2.0-or-later",
@@ -11,9 +11,9 @@
 	},
 	"keywords": [],
 	"bugs": {
-		"url": ""
+		"url": "https://github.com/fwd-wp/luma-core/issues"
 	},
-	"homepage": "https://unset.com",
+	"homepage": "https://github.com/fwd-wp/luma-core",
 	"engines": {
 		"node": ">=20.10.0",
 		"npm": ">=10.2.3"

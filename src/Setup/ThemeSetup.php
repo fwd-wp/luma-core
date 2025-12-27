@@ -2,7 +2,6 @@
 
 namespace Luma\Core\Setup;
 
-use Luma\Core\Core\Config;
 use Luma\Core\Customize\ThemeSettingsSchema;
 
 /**

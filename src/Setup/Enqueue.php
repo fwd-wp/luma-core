@@ -3,7 +3,6 @@
 namespace Luma\Core\Setup;
 
 use Luma\Core\Core\Config;
-use Luma\Core\Helpers\TemplateFunctions;
 use Luma\Core\Customize\ThemeSettingsSchema;
 
 /**
