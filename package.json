@@ -34,6 +34,6 @@
 		"bump:patch": "npm version patch",
 		"bump:minor": "npm version minor",
 		"bump:major": "npm version major",
-		"tag": "git push origin master --follow-tags"
+		"tag": "git push origin main --follow-tags"
 	}
 }
