@@ -110,27 +110,9 @@
 }
 
 
-.site-search {
-	display: none;
-	position: relative;
-
-	.search-toggle {
-		background: none;
-		border: none;
-		cursor: pointer;
-	}
-
-	form {
-		display: none; // hidden initially
-		position: absolute;
-		top: 100%;
-		right: 0;
-	}
-
-	&.active form {
-		display: block;
-	}
-}
+// .site-search {
+// 	display: none;
+// }
 
 
 

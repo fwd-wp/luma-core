@@ -16,7 +16,7 @@
 			grid-template-columns: 1fr;
 
 			.post {
-				border-radius: var(--wp--custom--radius--small);
+				border-radius: var(--wp--preset--border-radius--small);
 				box-shadow: var(--wp--preset--shadow--natural);
 				overflow: hidden;
 
@@ -26,7 +26,7 @@
 				}
 
 				.entry-body {
-					padding: var(--wp--preset--spacing--large);
+					padding: var(--wp--preset--spacing--50);
 					// could take the body size and grow it if needed
 					// font-size: var(--wp--preset--font-size--small);
 				}
@@ -83,7 +83,7 @@
 					grid-template-columns: repeat(2, 1fr);
 
 					.entry-body {
-						padding-block: var(--wp--preset--spacing--medium);
+						padding-block: var(--wp--preset--spacing--40);
 					}
 
 					.entry-header {
@@ -207,7 +207,7 @@
 	.format-video {
 
 		.entry-content {
-			margin-top: calc(2 * var(--wp--preset--spacing--medium));
+			margin-top: calc(2 * var(--wp--preset--spacing--40));
 		}
 	}
 

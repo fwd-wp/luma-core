@@ -43,6 +43,7 @@ class Enqueue
     {
         add_action('wp_enqueue_scripts', [$this, 'core_scripts']);
         add_action('wp_enqueue_scripts', [$this, 'core_styles'], 5);
+        add_action('wp_enqueue_scripts', [$this, 'core_woo_styles'], 15);
         add_action('enqueue_block_editor_assets', [$this, 'core_block_editor_scripts']);
     }
 
@@ -66,6 +67,7 @@ class Enqueue
             wp_enqueue_script('comment-reply');
         }
 
+        // primary nav menu script for mobile menu and accessibility
         if (has_nav_menu('primary')) {
             wp_enqueue_script(
                 "{$this->prefix_core}-menu-primary",
@@ -79,11 +81,40 @@ class Enqueue
             );
         }
 
+        // masonry.js only loads if turned on
         if (ThemeSettingsSchema::get_theme_mod('display_archive_excerpt_format') === 'masonry') {
             wp_enqueue_script(
                 "{$this->prefix_core}-archive-masonry",
                 get_template_directory_uri() . '/vendor/luma/core/assets/js/archive-masonry.js',
                 ['masonry'],
+                Config::get_theme_version(),
+                true
+            );
+        }
+
+        // ajax live search script
+        wp_enqueue_script(
+            "{$this->prefix_core}-live-search",
+            get_theme_file_uri('/vendor/luma/core/assets/js/live-search.js'),
+            ['wp-util'],
+            Config::get_theme_version(),
+            true
+        );
+        wp_localize_script(
+            "{$this->prefix_core}-live-search",
+            'themeSearch',
+            [
+                'ajaxUrl' => admin_url('admin-ajax.php'),
+                'nonce'   => wp_create_nonce('live-search'),
+            ]
+        );
+
+        // search page ajax script
+        if (is_search()) {
+            wp_enqueue_script(
+                "{$this->prefix_core}-search-results",
+                get_theme_file_uri('/vendor/luma/core/assets/js/search-results.js'),
+                [],
                 Config::get_theme_version(),
                 true
             );
@@ -129,6 +160,27 @@ class Enqueue
             wp_get_theme()->get('Version'),
             'print'
         );
+    }
+
+    /**
+     * Enqueues WooCommerce styles for the frontend.
+     *
+     * Includes WooCommerce compatibility styles if WooCommerce is active.
+     *
+     * @since Luma-Core 1.0
+     *
+     * @return void
+     */
+    public function core_woo_styles(): void
+    {
+        if (class_exists('WooCommerce')) {
+            wp_enqueue_style(
+                'theme-woocommerce',
+                get_template_directory_uri() . '/vendor/luma/core/build/css/woocommerce.css',
+                ['woocommerce-general', 'woocommerce-layout'],
+                wp_get_theme()->get('Version')
+            );
+        }
     }
 
     /**

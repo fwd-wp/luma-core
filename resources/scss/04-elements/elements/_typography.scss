@@ -59,11 +59,11 @@ p {
 ul,
 ol {
     margin: 0 0 var(--wp--custom--spacing--vertical) 0;
-    padding-left: var(--wp--preset--spacing--medium);
+    padding-left: var(--wp--preset--spacing--40);
 }
 
 li {
-    margin-bottom: calc(0.5 * var(--wp--preset--spacing--small));
+    margin-bottom: calc(0.5 * var(--wp--preset--spacing--30));
 }
 
 /* ========================================================================
@@ -116,7 +116,7 @@ mark {
     background-color: var(--wp--preset--color--luminous-vivid-amber);
     color: var(--wp--preset--color--black);
     padding: 0.125em 0.25em;
-    border-radius: var(--wp--custom--radius--small);
+    border-radius: var(--wp--preset--border-radius--small);
 }
 
 /* ========================================================================
@@ -138,11 +138,11 @@ dl {
 
 dt {
     font-weight: var(--wp--custom--font--weight--heading);
-    margin-bottom: calc(0.25 * var(--wp--preset--spacing--small));
+    margin-bottom: calc(0.25 * var(--wp--preset--spacing--30));
 }
 
 dd {
-    margin: 0 0 var(--wp--preset--spacing--small) var(--wp--preset--spacing--medium);
+    margin: 0 0 var(--wp--preset--spacing--30) var(--wp--preset--spacing--40);
 }
 
 /* ========================================================================

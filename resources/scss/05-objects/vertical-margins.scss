@@ -17,18 +17,18 @@
 // .site-main,
 // .widget-area,
 // .site-footer {
-// 	padding-top: var(--wp--preset--spacing--medium);
-// 	padding-bottom: var(--wp--preset--spacing--medium);
+// 	padding-top: var(--wp--preset--spacing--40);
+// 	padding-bottom: var(--wp--preset--spacing--40);
 // 	margin-left: auto;
 // 	margin-right: auto;
 // }
 
 // .site-header {
-// 	padding-top: calc(0.75 * var(--wp--preset--spacing--medium));
-// 	padding-bottom: calc(2 * var(--wp--preset--spacing--medium));
+// 	padding-top: calc(0.75 * var(--wp--preset--spacing--40));
+// 	padding-bottom: calc(2 * var(--wp--preset--spacing--40));
 
 // 	@include media(mobile) {
-// 		padding-bottom: calc(3 * var(--wp--preset--spacing--medium));
+// 		padding-bottom: calc(3 * var(--wp--preset--spacing--40));
 // 	}
 // }
 
@@ -144,8 +144,8 @@
 .page-content>*,
 .comment-content>*,
 .widget>* {
-	margin-top: var(--wp--preset--spacing--small);
-	margin-bottom: var(--wp--preset--spacing--small);
+	margin-top: var(--wp--preset--spacing--30);
+	margin-bottom: var(--wp--preset--spacing--30);
 
 	&:first-child {
 		margin-top: 0;

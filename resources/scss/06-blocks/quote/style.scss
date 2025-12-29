@@ -1,8 +1,8 @@
 /* Targets both HTML blockquote and WP blockquote block */
 blockquote,
 .wp-block-quote {
-	margin: 0 0 var(--wp--preset--spacing--large) 0;
-	padding: var(--wp--preset--spacing--small) var(--wp--preset--spacing--medium);
+	margin: 0 0 var(--wp--preset--spacing--50) 0;
+	padding: var(--wp--preset--spacing--30) var(--wp--preset--spacing--40);
 	border-left: 4px solid;
 	border-color: var(--wp--preset--color--primary);
 	background-color: color-mix(in srgb, var(--wp--preset--color--primary) 5%, transparent);
@@ -17,8 +17,8 @@ blockquote,
 /* Direct child spacing for paragraphs */
 blockquote>*,
 .wp-block-quote>* {
-	margin-top: var(--wp--preset--spacing--small);
-	margin-bottom: var(--wp--preset--spacing--small);
+	margin-top: var(--wp--preset--spacing--30);
+	margin-bottom: var(--wp--preset--spacing--30);
 }
 
 blockquote>*:first-child,

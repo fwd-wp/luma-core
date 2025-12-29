@@ -4,7 +4,7 @@
 }
 
 .no-results.not-found > *:first-child {
-	margin-bottom: calc(3 * var(--wp--preset--spacing--medium));
+	margin-bottom: calc(3 * var(--wp--preset--spacing--40));
 }
 
 // Styling for wp_link_pages.
@@ -14,7 +14,7 @@
 
 	.post-page-numbers {
 		display: inline-block;
-		padding: calc(0.5 * var(--wp--preset--spacing--small));
+		padding: calc(0.5 * var(--wp--preset--spacing--30));
 		
 		// min-width: 2.8rem;
 		// min-height: 2.8rem;

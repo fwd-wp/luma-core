@@ -11,18 +11,18 @@
 .site-footer {
 	//TODO: temp color
 
-	padding: var(--wp--preset--spacing--small) var(--wp--preset--spacing--small) var(--wp--preset--spacing--large);
+	padding: var(--wp--preset--spacing--30) var(--wp--preset--spacing--30) var(--wp--preset--spacing--50);
 	font-size: var(--wp--custom--font--size--footer);
 	color: var(--wp--preset--color--footer-text);
 	// // Increase the top vertical spacing when there is no widget area.
 	// .no-widgets & {
-	// 	margin-top: calc(6 * var(--wp--preset--spacing--medium));
+	// 	margin-top: calc(6 * var(--wp--preset--spacing--40));
 	// }
 
 	// @include media(mobile-only) {
 
 	// 	.no-widgets & {
-	// 		margin-top: calc(3 * var(--wp--preset--spacing--medium));
+	// 		margin-top: calc(3 * var(--wp--preset--spacing--40));
 	// 	}
 	// }
 }
@@ -31,7 +31,7 @@
 
 // Footer Branding
 // .site-footer>.site-info {
-// 	padding-top: var(--wp--preset--spacing--medium);
+// 	padding-top: var(--wp--preset--spacing--40);
 // 	color: var(--wp--custom--footer--color-text);
 // 	font-family: var(--wp--preset--font-family--body);
 // 	font-size: var(--wp--custom--footer--font-size);
@@ -45,7 +45,7 @@
 
 // 	.privacy-policy,
 // 	.powered-by {
-// 		margin-top: calc(0.5 * var(--wp--preset--spacing--medium));
+// 		margin-top: calc(0.5 * var(--wp--preset--spacing--40));
 // 	}
 
 // 	@include media(desktop) {
@@ -53,7 +53,7 @@
 // 		align-items: center;
 
 // 		.site-name {
-// 			margin-right: calc(0.5 * var(--wp--preset--spacing--medium));
+// 			margin-right: calc(0.5 * var(--wp--preset--spacing--40));
 // 		}
 
 // 		.privacy-policy,
@@ -63,7 +63,7 @@
 // 		}
 
 // 		.privacy-policy+.powered-by {
-// 			margin-left: calc(0.5 * var(--wp--preset--spacing--medium));
+// 			margin-left: calc(0.5 * var(--wp--preset--spacing--40));
 // 		}
 // 	}
 

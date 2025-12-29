@@ -94,7 +94,7 @@ class Config
 
     public static function get_theme_version(): string
     {
-        if (defined('WP_LOCAL_DEV') && constant('WP_LOCAL_DEV')) {
+        if (defined('WP_ENVIRONMENT_TYPE') && (WP_ENVIRONMENT_TYPE === 'local' || WP_ENVIRONMENT_TYPE === 'development')) {
             return date('Ymd-His');
         }
 

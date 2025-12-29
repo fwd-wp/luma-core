@@ -134,7 +134,7 @@ class TemplateFilters
 	 */
 	public function filter_excerpt_length(int $length): int
 	{
-		return ThemeSettingsSchema::get_theme_mod('display_archive_excerpt_length');
+		return ThemeSettingsSchema::get_theme_mod('display_archive_excerpt_length') ?? $length;
 	}
 
 	/**

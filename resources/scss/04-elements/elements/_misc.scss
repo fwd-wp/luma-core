@@ -25,7 +25,7 @@
 // /* Better list spacing */
 // ul, ol {
 //     margin: 0 0 var(--wp--custom--spacing--vertical) 0;
-//     padding-left: var(--wp--preset--spacing--medium);
+//     padding-left: var(--wp--preset--spacing--40);
 // }
 
 // /* Nested lists */
@@ -35,7 +35,7 @@
 
 // /* List items */
 // li {
-//     margin-bottom: calc(0.25 * var(--wp--preset--spacing--small));
+//     margin-bottom: calc(0.25 * var(--wp--preset--spacing--30));
 //     line-height: var(--wp--custom--font--line-height--body);
 // }
 
@@ -47,8 +47,8 @@
 //     font-size: 0.875em; /* Slightly smaller */
 //     line-height: 1.4;
 //     background-color: var(--wp--preset--color--form-field);
-//     padding: var(--wp--preset--spacing--small);
-//     border-radius: var(--wp--custom--radius--small);
+//     padding: var(--wp--preset--spacing--30);
+//     border-radius: var(--wp--preset--border-radius--small);
 //     overflow-x: auto;
 //     margin: 0 0 var(--wp--custom--spacing--vertical) 0;
     
@@ -61,7 +61,7 @@
 //     font-size: 0.875em;
 //     background-color: var(--wp--preset--color--form-field);
 //     padding: 0.125em 0.375em; /* Slightly more padding */
-//     border-radius: var(--wp--custom--radius--small);
+//     border-radius: var(--wp--preset--border-radius--small);
 //     color: var(--wp--preset--color--vivid-red); /* Syntax highlighting color */
 // }
 

@@ -1,0 +1,477 @@
+@use '02-tools/mixins.scss' as mixin;
+
+/**
+ * WooCommerce CSS Variables
+ * connected to luma core color palette variables
+ * injected into Woo Commerce CSS overrides below, as originally they use SCSS variables
+ */
+
+$woocommerce: var(--wp--preset--color--primary);
+$woocommercedark: var(--wp--custom--color--primary--dark);
+$woocommercelight: var(--wp--custom--color--primary--light);
+
+$green: var(--wp--preset--color--success);
+$red: var(--wp--preset--color--danger);
+$orange: var(--wp--preset--color--warning);
+$blue: var(--wp--preset--color--info);
+
+$primary: var(--wp--preset--color--primary); // Primary color for buttons (alt)
+$primarytext: var(--wp--custom--color--primary--light); // Text on primary color background.
+$secondary: var(--wp--preset--color--secondary); // Secondary color for buttons, backgrounds, etc.
+$secondarytext: var(--wp--custom--color--secondary--light); // Text on secondary color background.
+
+$highlight: var(--wp--custom--color--warning--dark); // Prices, In stock labels, sales flash
+$highlightext: var(--wp--preset--color--warning); // Text on highlight color background.
+
+$contentbg: var(--wp--preset--color--background); // Content BG - Tabs (active state)
+$subtext: var(--wp--preset--color--muted); // small, breadcrumbs etc
+
+$formbordercolor: var(--wp--custom--form--border-color);
+$formborderradius: var(--wp--custom--form--border-radius);
+$formborderwidth: var(--wp--custom--form--border-width);
+
+// export vars as CSS vars
+:root {
+    --woocommerce: #{$woocommerce};
+    --woocommerce-dark: #{$woocommercedark};
+    --woocommerce-light: #{$woocommercelight};
+    --wc-green: #{$green};
+    --wc-red: #{$red};
+    --wc-orange: #{$orange};
+    --wc-blue: #{$blue};
+    --wc-primary: #{$primary};
+    --wc-primary-text: #{$primarytext};
+    --wc-secondary: #{$secondary};
+    --wc-secondary-text: #{$secondarytext};
+    --wc-highlight: #{$highlight};
+    --wc-highlight-text: #{$highlightext};
+    --wc-content-bg: #{$contentbg};
+    --wc-subtext: #{$subtext};
+    --wc-form-border-color: #{$formbordercolor};
+    --wc-form-border-radius: #{$formborderradius};
+    --wc-form-border-width: #{$formborderwidth};
+}
+
+// CONTAINER WIDTHS 
+// Integrate into luma-core
+.woocommerce {
+
+    // page-level containers
+    .woocommerce-breadcrumb,
+    .woocommerce-notices-wrapper,
+    .woocommerce-products-header,
+    .woocommerce-pagination {
+        @include mixin.align(wide);
+    }
+
+    // product archives
+    .products {
+        @include mixin.align(wide);
+    }
+
+    // single product root
+    .entry.product {
+        @include mixin.align(wide);
+    }
+
+}
+
+
+/**
+ * woocommerce.scss
+ * Governs the general look and feel of WooCommerce sections of stores using themes that do not
+ * integrate with WooCommerce specifically.
+ */
+
+
+/**
+ * Global styles
+ */
+p.demo_store,
+.woocommerce-store-notice {
+    background-color: var(--wc-primary);
+    color: var(--wc-primary-text);
+
+    a {
+        color: var(--wc-primary-text);
+    }
+}
+
+/**
+ * Main WooCommerce styles
+ */
+.woocommerce {
+    a.remove {
+        &:hover {
+            color: var(--wc-content-bg); // Required for default theme compatibility
+            background: var(--wc-red);
+        }
+    }
+
+    small.note {
+        color: var(--wc-subtext);
+    }
+
+
+    /**
+	 * Product Page
+	 */
+    div.product {
+
+        div.images {
+            .woocommerce-product-gallery__wrapper .zoomImg {
+                background-color: var(--wc-content-bg);
+            }
+        }
+
+        .woocommerce-tabs {
+            ul.tabs {
+                li {
+                    border: 1px solid var(--wc-secondary);
+                    background-color: var(--wc-secondary);
+                    color: var(--wc-secondary-text);
+
+                    a {
+                        color: var(--wc-secondary-text);
+
+                        &:hover {
+                            color: var(--wc-secondary-text);
+                        }
+                    }
+
+                    &.active {
+                        background: var(--wc-content-bg);
+                        color: var(--wc-secondary-text);
+                        border-bottom-color: var(--wc-content-bg);
+
+                        &::before {
+                            box-shadow: 2px 2px 0 var(--wc-content-bg);
+                        }
+
+                        &::after {
+                            box-shadow: -2px 2px 0 var(--wc-content-bg);
+                        }
+                    }
+
+                    &::before,
+                    &::after {
+                        border: 1px solid var(--wc-secondary);
+                    }
+
+                    &::before {
+                        box-shadow: 2px 2px 0 var(--wc-secondary);
+                    }
+
+                    &::after {
+                        box-shadow: -2px 2px 0 var(--wc-secondary);
+                    }
+                }
+
+                &::before {
+                    border-bottom: 1px solid var(--wc-secondary);
+                }
+            }
+        }
+    }
+
+
+    span.onsale {
+        background-color: var(--wc-highlight);
+        color: var(--wc-highlight-text);
+    }
+
+    #reviews {
+        h2 small {
+            color: var(--wc-subtext);
+
+            a {
+                color: var(--wc-subtext);
+            }
+        }
+
+        #comments {
+            ol.commentlist {
+                li {
+                    img.avatar {
+                        background: var(--wc-secondary);
+                        border: 1px solid var(--wc-secondary);
+                    }
+
+                    .comment-text {
+                        border: 1px solid var(--wc-secondary);
+                    }
+                }
+
+                #respond {
+                    border: 1px solid var(--wc-secondary);
+                }
+            }
+        }
+    }
+
+    /**
+	 * Star ratings
+	 */
+    .star-rating {
+        &::before {
+            color: var(--wc-secondary);
+        }
+    }
+
+    &.widget_shopping_cart,
+    .widget_shopping_cart {
+        .total {
+            border-top: 3px double var(--wc-secondary);
+        }
+    }
+
+    /**
+	 * Forms
+	 */
+    form.login,
+    form.checkout_coupon,
+    form.register {
+        border: 1px solid var(--wc-secondary);
+    }
+
+
+
+    /**
+	 * Order page
+	 */
+    ul.order_details {
+        li {
+            border-right: 1px dashed var(--wc-secondary);
+        }
+    }
+
+    /**
+	 * Price filter widget
+	 */
+    .widget_price_filter {
+        .ui-slider .ui-slider-handle {
+            // We use the old WooCommerce color on purpose. See https://github.com/woocommerce/woocommerce/issues/55165.
+            background-color: var(--woocommerce);
+        }
+
+        .ui-slider .ui-slider-range {
+            // We use the old WooCommerce color on purpose. See https://github.com/woocommerce/woocommerce/issues/55165.
+            background-color: var(--woocommerce);
+        }
+
+        .price_slider_wrapper .ui-widget-content {
+            // We use the old WooCommerce color as the base on purpose. See https://github.com/woocommerce/woocommerce/issues/55165.
+            background-color: var(--woocommerce--dark);
+        }
+    }
+}
+
+/**
+ * Buttons
+ */
+.woocommerce:where(body:not(.woocommerce-block-theme-has-button-styles)),
+:where(body:not(.woocommerce-block-theme-has-button-styles)):where(:not(.edit-post-visual-editor)) .woocommerce {
+
+    a.button,
+    button.button,
+    input.button,
+    #respond input#submit {
+
+        color: var(--wc-secondary-text);
+        background-color: var(--wc-secondary);
+
+
+        &:hover {
+            background-color: var(--wc-secondary);
+            color: var(--wc-secondary-text);
+        }
+
+        &.alt {
+            // We use the old WooCommerce colors on purpose. See https://github.com/woocommerce/woocommerce/issues/55165.
+            background-color: var(--woocommerce);
+            color: var(--woocommerce--light);
+
+            &:hover {
+                // We use the old WooCommerce colors on purpose. See https://github.com/woocommerce/woocommerce/issues/55165.
+                background-color: var(--woocommerce--dark);
+                color: var(--woocommerce--light);
+            }
+
+            &.disabled,
+            &:disabled,
+            &:disabled[disabled],
+            &.disabled:hover,
+            &:disabled:hover,
+            &:disabled[disabled]:hover {
+                // We use the old WooCommerce colors on purpose. See https://github.com/woocommerce/woocommerce/issues/55165.
+                background-color: var(--woocommerce);
+                color: var(--woocommerce--light);
+            }
+        }
+
+        &:disabled,
+        &.disabled,
+        &:disabled[disabled] {
+            &:hover {
+                background-color: var(--wc-secondary);
+            }
+        }
+    }
+}
+
+/**
+ * WooCommerce specific styles for legacy themes.
+ */
+.woocommerce:where(body:not(.woocommerce-uses-block-theme)) {
+    .woocommerce-breadcrumb {
+        color: var(--wc-subtext);
+
+        a {
+            color: var(--wc-subtext);
+        }
+    }
+
+    div.product {
+
+        span.price,
+        p.price {
+            color: var(--wc-highlight);
+        }
+
+        .stock {
+            color: var(--wc-highlight);
+        }
+
+    }
+
+    ul.products li.product .price {
+        color: var(--wc-highlight);
+    }
+
+    #reviews #comments ol.commentlist li .meta {
+        color: var(--wc-subtext);
+    }
+}
+
+.woocommerce-message,
+.woocommerce-error,
+.woocommerce-info {
+
+    background-color: var(--wc-secondary);
+    color: var(--wc-secondary-text);
+    border-top: 3px solid var(--wc-primary);
+}
+
+.woocommerce-message {
+    border-top-color: var(--wc-green);
+
+    &::before {
+        content: "\e015";
+        color: var(--wc-green);
+    }
+}
+
+.woocommerce-info {
+    border-top-color: var(--wc-blue);
+
+    &::before {
+        color: var(--wc-blue);
+    }
+}
+
+.woocommerce-error {
+    border-top-color: var(--wc-red);
+
+    &::before {
+        content: "\e016";
+        color: var(--wc-red);
+    }
+}
+
+
+
+/**
+ * Cart/checkout page
+ */
+.woocommerce-cart,
+.woocommerce-checkout,
+#add_payment_method {
+    table.cart {
+        td.actions .coupon .input-text {
+            border: 1px solid var(--wc-secondary);
+        }
+    }
+
+    .cart-collaterals {
+        .cart_totals {
+            p small {
+                color: var(--wc-subtext);
+            }
+
+            table {
+                small {
+                    color: var(--wc-subtext);
+                }
+            }
+
+            .discount td {
+                color: var(--wc-highlight);
+            }
+
+            tr td,
+            tr th {
+                border-top: 1px solid var(--wc-secondary);
+            }
+        }
+    }
+
+    .checkout {
+        .create-account small {
+            color: var(--wc-subtext);
+        }
+    }
+
+    #payment {
+        // We use the old WooCommerce color as the base on purpose. See https://github.com/woocommerce/woocommerce/issues/55165.
+        background: var(--woocommerce--light);
+
+        ul.payment_methods {
+            // We use the old WooCommerce color as the base on purpose. See https://github.com/woocommerce/woocommerce/issues/55165.
+            border-bottom: 1px solid var(--woocommerce);
+        }
+
+
+
+        div.payment_box {
+            background-color: var(--wc-secondary);
+            color: var(--wc-secondary-text);
+
+            input.input-text,
+            textarea {
+                border-color: var(--wc-secondary);
+                border-top-color: var(--wc-secondary);
+            }
+
+            ::-webkit-input-placeholder {
+                color: var(--wc-secondary);
+            }
+
+            :-moz-placeholder {
+                color: var(--wc-secondary);
+            }
+
+            :-ms-input-placeholder {
+                color: var(--wc-secondary);
+            }
+
+            span.help {
+                color: var(--wc-subtext);
+            }
+
+            &::before {
+                border: 1em solid var(--wc-secondary);
+                /* arrow size / color */
+            }
+        }
+    }
+}

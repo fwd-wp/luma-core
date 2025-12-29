@@ -14,13 +14,13 @@ pre {
 }
 
 pre {
-	border-radius: var(--wp--custom--radius--medium);
-	padding: var(--wp--preset--spacing--x-small) var(--wp--preset--spacing--small);
+	border-radius: var(--wp--preset--border-radius--medium);
+	padding: var(--wp--preset--spacing--x-small) var(--wp--preset--spacing--30);
 }
 
 /* Inline code */
 code, kbd {
-	border-radius: var(--wp--custom--radius--small);
+	border-radius: var(--wp--preset--border-radius--small);
 	padding: calc(var(--wp--preset--spacing--x-small) /2) var(--wp--preset--spacing--x-small);
 }
 
@@ -62,5 +62,5 @@ samp {
 	background-color: var(--wp--preset--color--form-field);
 	color: var(--wp--preset--color--contrast);
 	padding: 0.125em 0.375em;
-	border-radius: var(--wp--custom--radius--small);
+	border-radius: var(--wp--preset--border-radius--small);
 }

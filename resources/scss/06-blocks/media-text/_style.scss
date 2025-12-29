@@ -4,8 +4,8 @@
 	.wp-block-media-text__content {
 		// add some top and bottom padding. Definitely needed for stacked
 		//  TODO: lodge ticket not working out of the the box
-		padding-top: var(--wp--preset--spacing--medium);
-		padding-bottom: var(--wp--preset--spacing--medium);
+		padding-top: var(--wp--preset--spacing--40);
+		padding-bottom: var(--wp--preset--spacing--40);
 
 		// 	&:first-child {
 		// 		margin-top: 0;

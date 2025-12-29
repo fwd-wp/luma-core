@@ -38,7 +38,7 @@
 	// Overwrite iframe embeds that have inline styles.
 	>iframe[style] {
 
-		margin: var(--wp--preset--spacing--medium) 0 !important;
+		margin: var(--wp--preset--spacing--40) 0 !important;
 		max-width: 100% !important;
 	}
 
@@ -73,9 +73,9 @@
 
 // Extra specificity to override rules in _vertical-margins.scss
 .site-main>article>.entry-footer {
-	padding-top: var(--wp--preset--spacing--medium);
-	//padding-top: var(--wp--preset--spacing--small);
-	padding-bottom: var(--wp--preset--spacing--medium);
+	padding-top: var(--wp--preset--spacing--40);
+	//padding-top: var(--wp--preset--spacing--30);
+	padding-bottom: var(--wp--preset--spacing--40);
 	border-bottom: var(--wp--custom--separator--height) solid var(--wp--custom--separator--border-color);
 }
 
@@ -84,15 +84,15 @@ body:not(.single) .site-main>article:last-of-type .entry-footer {
 }
 
 .single .site-main>article>.entry-footer {
-	margin-top: calc(2 * var(--wp--preset--spacing--medium));
-	margin-bottom: calc(2 * var(--wp--preset--spacing--medium));
+	margin-top: calc(2 * var(--wp--preset--spacing--40));
+	margin-bottom: calc(2 * var(--wp--preset--spacing--40));
 	padding-bottom: 0;
-	padding-top: calc(0.8 * var(--wp--preset--spacing--medium));
+	padding-top: calc(0.8 * var(--wp--preset--spacing--40));
 	border-top: 3px solid var(--wp--custom--separator--border-color);
 	border-bottom: var(--wp--custom--separator--height) solid transparent;
 	display: block;
 	grid-template-columns: repeat(2, 1fr);
-	column-gap: calc(2 * var(--wp--preset--spacing--medium));
+	column-gap: calc(2 * var(--wp--preset--spacing--40));
 
 
 	.post-taxonomies {
@@ -125,7 +125,7 @@ body:not(.single) .site-main>article:last-of-type .entry-footer {
 		max-width: 100%;
 		margin-left: auto;
 		margin-right: auto;
-		margin-top: calc(2 * var(--wp--preset--spacing--medium));
+		margin-top: calc(2 * var(--wp--preset--spacing--40));
 	}
 }
 
@@ -137,12 +137,12 @@ body:not(.single) .site-main>article:last-of-type .entry-footer {
 	//position: relative;
 	display: flex;
 	align-items: flex-start;
-	gap: var(--wp--preset--spacing--small);
+	gap: var(--wp--preset--spacing--30);
 	font-size: var(--wp--preset--font-size--x-small);
 	// max-width: var(--wp--style--global--content-size);
 
 	.site-main>article>& {
-		margin-top: calc(2 * var(--wp--preset--spacing--medium));
+		margin-top: calc(2 * var(--wp--preset--spacing--40));
 	}
 
 	// Avatars are optional and can be turned off.
@@ -167,8 +167,8 @@ body:not(.single) .site-main>article:last-of-type .entry-footer {
 
 		.author-description {
 			font-size: var(--wp--preset--font-size--x-small);
-			margin-top: calc(0.5 * var(--wp--preset--spacing--medium));
-			margin-bottom: calc(0.5 * var(--wp--preset--spacing--medium));
+			margin-top: calc(0.5 * var(--wp--preset--spacing--40));
+			margin-bottom: calc(0.5 * var(--wp--preset--spacing--40));
 		}
 	}
 }

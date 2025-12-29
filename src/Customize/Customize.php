@@ -121,28 +121,44 @@ class Customize extends CustomizeBase
         $this->register_all_settings($wp_customize, $theme_settings);
     }
 
+
     public function modify_theme_json_user(WP_Theme_JSON_Data $wp_theme_json_data): WP_Theme_JSON_Data
     {
         $user_json = [];
         $theme_settings = ThemeSettingsSchema::get();
         $all_colors = $theme_settings['color']['settings'] ?? [];
 
+        $count = 1;
         foreach ($all_colors as $key => $setting) {
             $source = $setting['source'] ?? null;
-
-            // skip if value not changed
             $theme_mod_value = ThemeSettingsSchema::get_theme_mod($setting['setting_id'] ?? '');
-            if (!$theme_mod_value || !$setting['default'] || $theme_mod_value === $setting['default']) {
-                continue;
-            }
-
             if ($source === 'palette') {
+
+                // add light and dark variants
+                if ($count <= 6) {
+                    $variants = $this->generate_color_variants($theme_mod_value ?? $setting['default']);
+                    foreach ($variants as $variant => $value) {
+                        $user_json['custom']['color'][$key][$variant] = $value;
+                    }
+                    $count += 1;
+                }
+
+                // skip if value not changed
+                if (!$theme_mod_value || !$setting['default'] || $theme_mod_value === $setting['default']) {
+                    continue;
+                }
                 $user_json['color']['palette'][] = [
                     'slug' => $key,
                     'color' => $theme_mod_value,
                     'name' => $setting['label'],
                 ];
             } elseif ($source === 'custom') {
+                // skip if value not changed
+                $theme_mod_value = ThemeSettingsSchema::get_theme_mod($setting['setting_id'] ?? '');
+                if (!$theme_mod_value || !$setting['default'] || $theme_mod_value === $setting['default']) {
+                    continue;
+                }
+
                 $user_json['custom']['color'][$setting['group']][$setting['slug']] = $theme_mod_value;
             }
         }
@@ -176,8 +192,6 @@ class Customize extends CustomizeBase
 
         // CUSTOM HEADER OVERLAY OPACITY
         $setting = $theme_settings['header_image']['settings']['overlay-opacity'] ?? null;
-        // print('<pre>' . print_r($setting, true) . '</pre>');
-
         $theme_mod_value = ThemeSettingsSchema::get_theme_mod($setting['setting_id'] ?? null);
         // print('<pre>');
         // print_r(ThemeSettingsSchema::get_settings_list());

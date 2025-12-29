@@ -44,6 +44,9 @@
 	@include mixin.align(wide);
 }
 
+
+
+
 // make full width if set in customizer
 .site-header.is-full {
 	@include mixin.align(full);

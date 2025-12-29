@@ -3,8 +3,8 @@
 // added body to increase specificity and override plugin CSS
 body .wp-block-sgwd-plg-newsletter-block {
     background: var(--wp--preset--color--light);
-    border-radius: var(--wp--custom--radius--small);
-    padding: var(--wp--preset--spacing--small);
+    border-radius: var(--wp--preset--border-radius--small);
+    padding: var(--wp--preset--spacing--30);
 
     .input-group {
         gap: var(--wp--custom--form--gap);

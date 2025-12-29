@@ -8,6 +8,7 @@ module.exports = {
 		'css/editor': './resources/scss/editor.scss',
 		'css/main': './resources/scss/main.scss',
 		'css/print': './resources/scss/print.scss',
+		'css/woocommerce': './resources/scss/woocommerce.scss',
 		'js/main': './resources/js/main.js',
 	},
 

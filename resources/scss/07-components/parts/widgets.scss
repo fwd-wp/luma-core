@@ -2,9 +2,9 @@
 
 .widget-area {
 	//@extend %responsive-alignwide-width;
-	margin-top: calc(3 * var(--wp--preset--spacing--medium));
+	margin-top: calc(3 * var(--wp--preset--spacing--40));
 
-	padding-bottom: calc(var(--wp--preset--spacing--medium) / 3);
+	padding-bottom: calc(var(--wp--preset--spacing--40) / 3);
 	color: var(--wp--custom--footer--color-text);
 	font-size: var(--wp--custom--footer--font-size);
 	font-family: var(--wp--preset--font-family--body);
@@ -12,7 +12,7 @@
 	@include mixin.bp-up(md) {
 		display: grid;
 		grid-template-columns: repeat(2, 1fr);
-		column-gap: calc(2 * var(--wp--preset--spacing--medium));
+		column-gap: calc(2 * var(--wp--preset--spacing--40));
 	}
 
 	@include mixin.bp-up(lg) {
@@ -20,18 +20,18 @@
 	}
 
 	@include mixin.bp-up(xl) {
-		margin-top: calc(6 * var(--wp--preset--spacing--medium));
+		margin-top: calc(6 * var(--wp--preset--spacing--40));
 	}
 
 	.wp-block-social-links {
 
 		&.alignright {
-			margin-top: var(--wp--preset--spacing--medium);
+			margin-top: var(--wp--preset--spacing--40);
 			justify-content: flex-end;
 		}
 
 		&.alignleft {
-			margin-top: var(--wp--preset--spacing--medium);
+			margin-top: var(--wp--preset--spacing--40);
 		}
 	}
 
@@ -131,12 +131,12 @@
 	.search-field {
 		flex-grow: 1;
 		max-width: inherit;
-		margin-top: calc(var(--wp--preset--spacing--medium) / 3);
-		margin-right: calc(0.66 * var(--wp--preset--spacing--medium));
+		margin-top: calc(var(--wp--preset--spacing--40) / 3);
+		margin-right: calc(0.66 * var(--wp--preset--spacing--40));
 	}
 
 	.search-submit {
-		margin-top: calc(var(--wp--preset--spacing--medium) / 3);
+		margin-top: calc(var(--wp--preset--spacing--40) / 3);
 		margin-left: 10px;
 	}
 }
@@ -146,12 +146,12 @@
 	.search-field {
 		margin-right: calc(-1 * var(--button--border-width));
 		-webkit-appearance: none;
-		margin-bottom: calc(0.5 * var(--wp--preset--spacing--medium));
+		margin-bottom: calc(0.5 * var(--wp--preset--spacing--40));
 	}
 
 	.search-submit {
 		margin-left: 0;
-		margin-bottom: calc(0.5 * var(--wp--preset--spacing--medium));
+		margin-bottom: calc(0.5 * var(--wp--preset--spacing--40));
 	}
 }
 

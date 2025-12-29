@@ -36,13 +36,13 @@ class CustomizeBase
     }
 
     private function register_group(\WP_Customize_Manager $wp_customize, string $group, array $data): void
-    {   
+    {
         if ($data['default_only'] ?? false) {
             // skip registering settings that are default only
             // only used so that core setting, along with default value if needed can be retrieved in templates
             // default is retrieved from the themeSettingsShema, not registered in cusotmizer
             return;
-        }   
+        }
 
         if (isset($data['section'])) {
             // section is provided for built in core 
@@ -50,7 +50,7 @@ class CustomizeBase
             // check if exists else skip
             // if its a daynamic core section, and its turned off it will be skipped
             // core section will not be created
-            if($wp_customize->get_section($data['section']) === null) {
+            if ($wp_customize->get_section($data['section']) === null) {
                 return;
             }
             // they will not  be namespaced, and section will not be created
@@ -168,7 +168,7 @@ class CustomizeBase
     }
 
     private function get_sanitizer(array $item)
-    {   
+    {
         switch ($item['type'] ?? '') {
 
             // Boolean checkbox
@@ -296,5 +296,114 @@ class CustomizeBase
             'title'    => __($title, Config::get_domain()),
             'priority' => $priority,
         ]);
+    }
+
+    /**
+     * Convert hex color to HSL
+     * @param string $hex e.g. "#ffc107"
+     * @return array [$h, $s, $l] with H in 0–360, S and L in 0–100
+     */
+    protected function hexToHsl($hex)
+    {
+        $hex = ltrim($hex, '#');
+
+        if (strlen($hex) === 3) {
+            $hex = $hex[0] . $hex[0] . $hex[1] . $hex[1] . $hex[2] . $hex[2];
+        }
+
+        $r = hexdec(substr($hex, 0, 2)) / 255;
+        $g = hexdec(substr($hex, 2, 2)) / 255;
+        $b = hexdec(substr($hex, 4, 2)) / 255;
+
+        $max = max($r, $g, $b);
+        $min = min($r, $g, $b);
+        $l = ($max + $min) / 2;
+
+        if ($max === $min) {
+            $h = $s = 0; // achromatic
+        } else {
+            $d = $max - $min;
+            $s = $l > 0.5 ? $d / (2 - $max - $min) : $d / ($max + $min);
+
+            switch ($max) {
+                case $r:
+                    $h = ($g - $b) / $d + ($g < $b ? 6 : 0);
+                    break;
+                case $g:
+                    $h = ($b - $r) / $d + 2;
+                    break;
+                case $b:
+                    $h = ($r - $g) / $d + 4;
+                    break;
+            }
+            $h = $h * 60;
+        }
+
+        return [$h, $s * 100, $l * 100];
+    }
+
+    /**
+     * Convert HSL to hex color
+     * @param float $h Hue 0–360
+     * @param float $s Saturation 0–100
+     * @param float $l Lightness 0–100
+     * @return string Hex color e.g. "#ffc107"
+     */
+    protected function hslToHex($h, $s, $l)
+    {
+        $s /= 100;
+        $l /= 100;
+
+        $c = (1 - abs(2 * $l - 1)) * $s;
+        $x = $c * (1 - abs(fmod($h / 60, 2) - 1));
+        $m = $l - $c / 2;
+
+        if ($h < 60) {
+            $r = $c;
+            $g = $x;
+            $b = 0;
+        } elseif ($h < 120) {
+            $r = $x;
+            $g = $c;
+            $b = 0;
+        } elseif ($h < 180) {
+            $r = 0;
+            $g = $c;
+            $b = $x;
+        } elseif ($h < 240) {
+            $r = 0;
+            $g = $x;
+            $b = $c;
+        } elseif ($h < 300) {
+            $r = $x;
+            $g = 0;
+            $b = $c;
+        } else {
+            $r = $c;
+            $g = 0;
+            $b = $x;
+        }
+
+        $r = round(($r + $m) * 255);
+        $g = round(($g + $m) * 255);
+        $b = round(($b + $m) * 255);
+
+        return sprintf("#%02x%02x%02x", $r, $g, $b);
+    }
+
+    /**
+     * Generate light and dark CSS variables for a hex color
+     */
+    protected function generate_color_variants($hex, $diff = 15)
+    {
+        list($h, $s, $l) = $this->hexToHsl($hex);
+
+        $light = $this->hslToHex($h, $s, min(100, $l + $diff));
+        $dark  = $this->hslToHex($h, $s, max(0, $l - $diff));
+
+        return [
+            'light' => $light,
+            'dark' => $dark,
+        ];
     }
 }
