@@ -17,16 +17,16 @@ use Luma\Core\Customize\ThemeSettingsSchema;
  */
 class TemplateFunctions
 {
-	// stores theme variant domain, self::set_domain() needs to be run first if domain is needed in a method
-	private static string $domain;
+    // stores theme variant domain
+    protected static ?string $domain = null;
 
-	private static function set_domain(): void
-	{
-		if (!isset(self::$domain)) {
-			// checks and sets the prefix
-			self::$domain = Config::get_domain() ?? 'luma-core';
-		}
-	}
+    protected static function get_domain(): string
+    {
+        if (self::$domain === null) { // check the static property, not the method
+            self::$domain = Config::get_domain() ?? 'luma-core';
+        }
+        return self::$domain;
+    }
 
 	/**
 	 * Gets the SVG code for a given icon.
@@ -200,10 +200,10 @@ class TemplateFunctions
 	 */
 	public static function continue_reading_text($echo = true, array $args = []): ?string
 	{
-		self::set_domain();
+
 
 		$defaults = [
-			'label' => __('Continue reading', self::$domain),
+			'label' => __('Continue reading', self::get_domain()),
 		];
 
 		$args = wp_parse_args($args, $defaults);
@@ -220,7 +220,7 @@ class TemplateFunctions
 
 		$title = get_the_title();
 		if (empty($title)) {
-			$title = __('this post', self::$domain);
+			$title = __('this post', self::get_domain());
 		}
 
 		$screen_reader_title = '<span class="screen-reader-text">' . esc_html($title) . '</span>';

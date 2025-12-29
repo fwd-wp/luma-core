@@ -9,7 +9,6 @@ use Luma\Core\Customize\ThemeSettingsSchema;
  *
  * All functions output escaped (safe) HTML.
  * 
- * If method uses text domain, it must be checked and potentially initialised with self::set_domain()
  *
  * @package Luma-Core
  * @since Luma-Core 1.0
@@ -44,10 +43,8 @@ class TemplateTags extends TemplateTagsBase
 			return null;
 		}
 
-		self::set_domain();
-
 		$defaults = [
-			'before'        => __('Featured', self::$domain),
+			'before'        => __('Featured', self::get_domain()),
 			'after'         => '',
 			'singular_name' => TemplateFunctions::get_post_type_label('singular'),
 			'class'         => 'sticky-label',
@@ -241,11 +238,11 @@ class TemplateTags extends TemplateTagsBase
 			return null;
 		}
 
-		self::set_domain();
+	
 
 		$defaults = [
 			'class'  => 'byline',
-			'before' => __('Created by', self::$domain),
+			'before' => __('Created by', self::get_domain()),
 			'after'  => '',
 		];
 
@@ -328,15 +325,15 @@ class TemplateTags extends TemplateTagsBase
 	 */
 	public static function the_posts_navigation(bool $echo = true, array $args = []): ?string
 	{
-		self::set_domain();
+
 
 		// Get post type plural label for defaults
-		$plural = TemplateFunctions::get_post_type_label('plural') ?? __('posts', self::$domain);
+		$plural = TemplateFunctions::get_post_type_label('plural') ?? __('posts', self::get_domain());
 
 		$defaults = [
 			'class'      => '',
-			'newer_text' => sprintf(__('Newer %s', self::$domain), $plural),
-			'older_text' => sprintf(__('Older %s', self::$domain), $plural),
+			'newer_text' => sprintf(__('Newer %s', self::get_domain()), $plural),
+			'older_text' => sprintf(__('Older %s', self::get_domain()), $plural),
 		];
 
 		$args = wp_parse_args($args, $defaults);
@@ -404,18 +401,18 @@ class TemplateTags extends TemplateTagsBase
 	 */
 	public static function single_post_navigation(bool $echo = true, array $args = []): ?string
 	{
-		self::set_domain();
+
 
 		// Get current post type singular label
-		$singular_label = TemplateFunctions::get_post_type_label('singular') ?? esc_html__('Post', self::$domain);
+		$singular_label = TemplateFunctions::get_post_type_label('singular') ?? esc_html__('Post', self::get_domain());
 
 		$defaults = [
 			'class'       => 'meta-nav',
 			'title_class' => 'post-title',
 			'next_icon'   => is_rtl() ? TemplateFunctions::get_icon_svg('ui', 'arrow_left') : TemplateFunctions::get_icon_svg('ui', 'arrow_right'),
 			'prev_icon'   => is_rtl() ? TemplateFunctions::get_icon_svg('ui', 'arrow_right') : TemplateFunctions::get_icon_svg('ui', 'arrow_left'),
-			'next_label'  => sprintf(esc_html__('Next %s', self::$domain), $singular_label),
-			'prev_label'  => sprintf(esc_html__('Previous %s', self::$domain), $singular_label),
+			'next_label'  => sprintf(esc_html__('Next %s', self::get_domain()), $singular_label),
+			'prev_label'  => sprintf(esc_html__('Previous %s', self::get_domain()), $singular_label),
 		];
 
 		$args = wp_parse_args($args, $defaults);
@@ -714,12 +711,10 @@ class TemplateTags extends TemplateTagsBase
 		array $args = []
 	): ?string {
 
-		self::set_domain();
-
 		$defaults = [
 			'class'               => 'read-more',
-			'text'                => __('Continue reading', self::$domain),
-			'title'               => wp_strip_all_tags(get_the_title()) ?: __('this post', self::$domain),
+			'text'                => __('Continue reading', self::get_domain()),
+			'title'               => wp_strip_all_tags(get_the_title()) ?: __('this post', self::get_domain()),
 			'url'                 => get_permalink(),
 			'screen_reader_text'  => true,
 		];
@@ -1014,11 +1009,9 @@ class TemplateTags extends TemplateTagsBase
 			return $echo ? null : '';
 		}
 
-		self::set_domain();
-
 		$defaults = [
 			'class'  => 'posted-on',
-			'before' => __('Published in', self::$domain),
+			'before' => __('Published in', self::get_domain()),
 			'after'  => '',
 		];
 
@@ -1093,11 +1086,9 @@ class TemplateTags extends TemplateTagsBase
 			return $echo ? null : '';
 		}
 
-		self::set_domain();
-
 		$defaults = [
 			'class' => 'meta-nav posted-in',
-			'text'  => __('Published in', self::$domain),
+			'text'  => __('Published in', self::get_domain()),
 		];
 
 		$args = wp_parse_args($args, $defaults);
@@ -1160,11 +1151,10 @@ class TemplateTags extends TemplateTagsBase
 	 */
 	public static function attachment_full_size_link(bool $echo = true, array $args = []): ?string
 	{
-		self::set_domain();
 
 		$defaults = [
 			'class'  => 'full-size-image-link',
-			'before' => __('View full size image', self::$domain),
+			'before' => __('View full size image', self::get_domain()),
 			'after'  => '',
 		];
 

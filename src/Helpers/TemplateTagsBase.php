@@ -16,15 +16,15 @@ use Luma\Core\Core\Config;
 
 class TemplateTagsBase
 {
-    // stores theme variant domain, self::set_domain() needs to be run first if domain is needed in a method
-    private static string $domain;
+    // stores theme variant domain
+    protected static ?string $domain = null;
 
-    protected static function set_domain(): void
+    protected static function get_domain(): string
     {
-        if (!isset(self::$domain)) {
-            // checks and sets the prefix
+        if (self::$domain === null) { // check the static property, not the method
             self::$domain = Config::get_domain() ?? 'luma-core';
         }
+        return self::$domain;
     }
 
     /**
@@ -90,8 +90,8 @@ class TemplateTagsBase
         $defaults = [
             'class'      => ($type === 'published') ? 'posted-on' : 'updated-on',
             'time_class' => ($type === 'published') ? 'entry-date published' : 'updated',
-            'before'     => ($type === 'published') ? __('Published', self::$domain) : __('Updated', self::$domain),
-            'after'      => ($relative ? __('ago', self::$domain) : ''),
+            'before'     => ($type === 'published') ? __('Published', self::get_domain()) : __('Updated', self::get_domain()),
+            'after'      => ($relative ? __('ago', self::get_domain()) : ''),
             'max_days'   => 364,
         ];
         $args = wp_parse_args($args, $defaults);
