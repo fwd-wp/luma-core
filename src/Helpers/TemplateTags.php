@@ -698,10 +698,8 @@ class TemplateTags extends TemplateTagsBase
 	 *     Optional. Arguments to control the markup.
 	 *
 	 *     @type string $class               CSS class for the wrapper div. Default 'read-more'.
-	 *     @type string $text                Link text. Default 'Continue reading'.
 	 *     @type string $title               Post title used in screen-reader text. Defaults to current title.
 	 *     @type string $url                 The post URL. Default get_permalink().
-	 *     @type bool   $screen_reader_text  Whether to append screen-reader text. Default true.
 	 * }
 	 *
 	 * @return string|null Markup string if `$echo` is false, otherwise null.
@@ -713,10 +711,8 @@ class TemplateTags extends TemplateTagsBase
 
 		$defaults = [
 			'class'               => 'read-more',
-			'text'                => __('Continue reading', self::get_domain()),
 			'title'               => wp_strip_all_tags(get_the_title()) ?: __('this post', self::get_domain()),
 			'url'                 => get_permalink(),
-			'screen_reader_text'  => true,
 		];
 
 		$args = wp_parse_args($args, $defaults);
@@ -735,12 +731,7 @@ class TemplateTags extends TemplateTagsBase
 		// Build markup
 		$html  = '<div class="' . esc_attr($args['class']) . '">';
 		$html .= '<a href="' . esc_url($args['url']) . '">';
-		$html .= esc_html($args['text']);
-
-		if ($args['screen_reader_text']) {
-			$html .= '<span class="screen-reader-text"> ' . esc_html($args['title']) . '</span>';
-		}
-
+		$html .= TemplateFunctions::continue_reading_text(false);
 		$html .= '</a></div>';
 
 		/**

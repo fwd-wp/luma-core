@@ -17,16 +17,16 @@ use Luma\Core\Customize\ThemeSettingsSchema;
  */
 class TemplateFunctions
 {
-    // stores theme variant domain
-    protected static ?string $domain = null;
+	// stores theme variant domain
+	protected static ?string $domain = null;
 
-    protected static function get_domain(): string
-    {
-        if (self::$domain === null) { // check the static property, not the method
-            self::$domain = Config::get_domain() ?? 'luma-core';
-        }
-        return self::$domain;
-    }
+	protected static function get_domain(): string
+	{
+		if (self::$domain === null) { // check the static property, not the method
+			self::$domain = Config::get_domain() ?? 'luma-core';
+		}
+		return self::$domain;
+	}
 
 	/**
 	 * Gets the SVG code for a given icon.
@@ -193,7 +193,9 @@ class TemplateFunctions
 	 *     Optional. Arguments controlling the output.
 	 *
 	 *     @type string $label The visible text before the screen reader title.
-	 *                         Default 'Continue reading'.
+	 *    Default 'Continue reading'.
+	 *     @type string $product_label The visible text for a woo commerce product before the screen reader title.
+	 *    Default 'View Product'.                  
 	 * }
 	 *
 	 * @return string|null The formatted HTML when `$echo` is false, otherwise null.
@@ -204,6 +206,7 @@ class TemplateFunctions
 
 		$defaults = [
 			'label' => __('Continue reading', self::get_domain()),
+			'product_label' => __('View Product', self::get_domain()),
 		];
 
 		$args = wp_parse_args($args, $defaults);
@@ -224,8 +227,11 @@ class TemplateFunctions
 		}
 
 		$screen_reader_title = '<span class="screen-reader-text">' . esc_html($title) . '</span>';
-
-		$html = $args['label'] . $screen_reader_title;
+		if ('product' === get_post_type() && function_exists('wc_get_product')) {
+			$html = $args['product_label'] . $screen_reader_title;
+		} else {
+			$html = $args['label'] . $screen_reader_title;
+		}
 
 		/**
 		 * Filters the full HTML output of the continue reading text.
